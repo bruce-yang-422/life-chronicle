@@ -1,0 +1,12 @@
+{
+  "name": "plan-doc-tools",
+  "private": true,
+  "description": "企劃書 CommonMark 檢查與 HTML 產生工具",
+  "scripts": {
+    "check": "node check.js",
+    "build": "node check.js && node build.js"
+  },
+  "dependencies": {
+    "markdown-it": "14.1.0"
+  }
+}

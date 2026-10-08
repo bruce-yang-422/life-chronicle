@@ -1,0 +1,70 @@
+name: life_chronicle
+description: "人生編年史 Life Chronicle：本機優先、離線可用的個人生命史 APP"
+# 防止誤用 `flutter pub publish` 發布到 pub.dev（私人專案建議保留）
+publish_to: 'none'
+
+# 版本號格式：版本名稱+建置編號（例如 1.2.43+7）
+# - Android：版本名稱對應 versionName，建置編號對應 versionCode
+# - iOS：版本名稱對應 CFBundleShortVersionString，建置編號對應 CFBundleVersion
+# 建置時可用 --build-name 與 --build-number 覆寫
+# 每次上架 Google Play／App Store，建置編號都必須遞增
+version: 1.0.0+1
+
+environment:
+  # 對應目前安裝的 Flutter 3.38.5（Dart 3.10.4）
+  sdk: ^3.10.4
+
+# 套件版本注意事項：
+# - 目前 Flutter SDK 版本較舊，部分最新版套件不相容，版本已固定為相容組合
+# - 升級 Flutter（flutter upgrade）後，才可放寬版本並改用最新版套件
+# - 查看可更新的套件：flutter pub outdated
+dependencies:
+  flutter:
+    sdk: flutter
+  # 繁體中文介面與日期、數字在地化
+  flutter_localizations:
+    sdk: flutter
+
+  # iOS 風格圖示（CupertinoIcons）
+  cupertino_icons: ^1.0.8
+  # 狀態管理
+  flutter_riverpod: ^3.3.2
+  # 本機 SQLite（drift 與 drift_dev 版本必須一致）
+  drift: ">=2.31.0 <2.32.0"
+  drift_flutter: ^0.2.8
+  # 檔案路徑、SHA-256、ZIP 封存
+  path_provider: ^2.1.6
+  path: ^1.9.1
+  crypto: ^3.0.7
+  archive: ^4.3.0
+  # 附件匯入、備份分享
+  file_picker: ^13.1.0
+  share_plus: ^13.3.1
+  # 日期格式（版本由 flutter_localizations 決定，不可自行升級）
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # drift 程式碼產生（執行：dart run build_runner build）
+  build_runner: ^2.15.1
+  drift_dev: ">=2.31.0 <2.32.0"
+  # 程式碼風格檢查規則，設定於 analysis_options.yaml
+  flutter_lints: ^6.0.0
+
+# Flutter 專用設定
+flutter:
+  # 使用 Material Icons 圖示字型
+  uses-material-design: true
+
+  # 圖片等資源檔（需要時取消註解並列出路徑）
+  # assets:
+  #   - assets/images/
+
+  # 自訂字型（例如 Noto Sans TC，見企劃書 4.4）
+  # fonts:
+  #   - family: NotoSansTC
+  #     fonts:
+  #       - asset: assets/fonts/NotoSansTC-Regular.ttf
+  #       - asset: assets/fonts/NotoSansTC-Bold.ttf
+  #         weight: 700

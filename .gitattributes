@@ -1,0 +1,13 @@
+# 統一使用 LF 換行，避免 Windows 與 macOS（iOS 建置）之間整份檔案被標記為修改
+* text=auto eol=lf
+
+# Windows 批次檔維持 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二進位檔
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.jar binary
