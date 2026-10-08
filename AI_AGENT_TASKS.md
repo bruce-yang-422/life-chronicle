@@ -62,7 +62,7 @@
   ```
 
   第一行為「中文摘要 / English summary」；內文先列中文重點，空一行後列對應的英文重點。
-- **commit 訊息與 PR 說明禁止包含任何署名**：不得加入 `Co-Authored-By`、Contributors、「Generated with …」等字樣。
+- **Contributors 只能有使用者本人**：commit 作者與提交者一律為 `Bruce Yang <bruce89933036@hotmail.com>`（已設定於本專案 git config）；不得加入任何共同作者署名行或「Generated with …」等字樣，讓其他人或 AI 出現在 Contributors 中。
 - 一個任務一個（或少數幾個）commit，不混入無關修改；`build/`、`.dart_tool/`、`node_modules/` 等不得提交。
 - 未經使用者同意，不得 push、強制推送（force push）或改寫已推送的歷史。
 
