@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # 時間以 ISO 8601 文字保存，方便直接閱讀與除錯
+          store_date_time_values_as_text: true
+          # 資料表與欄位名稱使用 snake_case（與企劃書第 10 節一致）
+          case_from_dart_to_sql: snake_case
