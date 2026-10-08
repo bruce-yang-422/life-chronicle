@@ -23,7 +23,7 @@
 | 本機資料庫 | SQLite，透過 drift（`drift`、`drift_flutter`、`drift_dev`） |
 | 雜湊與封存 | `crypto`（SHA-256）、`archive`（ZIP／ZIP64） |
 | 檔案與分享 | `path_provider`、`file_picker`、`share_plus` |
-| 在地化 | `flutter_localizations`、`intl`（繁體中文） |
+| 多語系 | gen_l10n（`flutter_localizations`、`intl`）：第一階段繁體中文＋英文，第二階段加入簡體中文、日文、韓文 |
 
 ## 開發環境
 
@@ -82,7 +82,8 @@
 - **不用學就會用**：每個功能都要有看得見的入口，手勢只能當捷徑。
 - **時間不可假造**：不得把模糊時間補成某月某日。
 - **Markdown 規範**：專案文件採 CommonMark＋GFM 表格；APP 匯出的 `.md` 採嚴格 CommonMark 0.31.2。
-- 程式碼識別名稱用英文；註解、介面文字與文件用繁體中文。
+- **介面文字集中管理**：所有系統介面文字放在 `lib/l10n/` 的 ARB 檔，禁止在 Widget 中硬編碼。
+- 程式碼識別名稱用英文；註解與文件用繁體中文。
 
 ## 授權
 
