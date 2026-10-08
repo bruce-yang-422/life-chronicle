@@ -23,6 +23,10 @@ part 'app_database.g.dart';
     Attachments,
     Tags,
     EventTags,
+    Places,
+    People,
+    EventPeople,
+    EventLinks,
     ChangeHistory,
   ],
 )

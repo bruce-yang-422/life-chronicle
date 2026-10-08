@@ -23,13 +23,7 @@ void _expectTabs(List<String> labels) {
 }
 
 const _zhTabs = ['人生時間軸', '搜尋與視圖', '新增節點', '故事篇章', '資料與備份'];
-const _enTabs = [
-  'Timeline',
-  'Search',
-  'New Entry',
-  'Stories',
-  'Backup',
-];
+const _enTabs = ['Timeline', 'Search', 'New Entry', 'Stories', 'Backup'];
 
 void main() {
   group('語系跟隨系統（企劃書 4.7）', () {

@@ -98,6 +98,10 @@ void main() {
         'tags',
         'event_tags',
         'change_history',
+        'places',
+        'people',
+        'event_people',
+        'event_links',
         'search_index',
       ]),
     );
@@ -275,6 +279,205 @@ void main() {
       expect(
         () => db.into(db.events).insert(event('e1', layer: 'memorial')),
         throwsA(isA<SqliteException>()),
+      );
+    });
+  });
+
+  group('地點（企劃書 4.1）', () {
+    PlacesCompanion place(
+      String id, {
+      String? name,
+      String? key,
+      double? lat,
+      double? lng,
+      double? radius,
+    }) => PlacesCompanion.insert(
+      id: id,
+      name: Value(name),
+      nameKey: Value(key),
+      latitude: Value(lat),
+      longitude: Value(lng),
+      radiusM: Value(radius),
+      createdAt: _now,
+    );
+
+    test('可只有名稱、只有座標，或兩者皆有', () async {
+      await db.into(db.places).insert(place('p1', name: '臺北市', key: '台北市'));
+      await db
+          .into(db.places)
+          .insert(place('p2', lat: 25.17, lng: 121.56, radius: 500));
+      await db
+          .into(db.places)
+          .insert(
+            place('p3', name: '陽明山', key: '陽明山', lat: 25.16, lng: 121.55),
+          );
+      expect(await db.select(db.places).get(), hasLength(3));
+    });
+
+    test('名稱與座標都沒有時拒絕', () async {
+      expect(
+        () => db.into(db.places).insert(place('p1')),
+        throwsA(isA<SqliteException>()),
+      );
+    });
+
+    test('正規化名稱不可重複', () async {
+      await db.into(db.places).insert(place('p1', name: '臺北市', key: '台北市'));
+      expect(
+        () => db.into(db.places).insert(place('p2', name: '台北市', key: '台北市')),
+        throwsA(isA<SqliteException>()),
+      );
+    });
+
+    test('經緯度必須成對且在有效範圍；半徑必須為正數且搭配座標', () async {
+      for (final bad in [
+        place('a', name: 'x', key: 'x', lat: 25),
+        place('b', name: 'y', key: 'y', lat: 91, lng: 121),
+        place('c', name: 'z', key: 'z', lat: 25, lng: 181),
+        place('d', name: 'w', key: 'w', lat: 25, lng: 121, radius: 0),
+        place('e', name: 'v', key: 'v', radius: 100),
+      ]) {
+        expect(
+          () => db.into(db.places).insert(bad),
+          throwsA(isA<SqliteException>()),
+          reason: bad.id.value,
+        );
+      }
+    });
+
+    test('事件可指向地點', () async {
+      await db.into(db.places).insert(place('p1', name: '臺北市', key: '台北市'));
+      await db
+          .into(db.events)
+          .insert(event('e1').copyWith(placeId: const Value('p1')));
+      final row = await db.select(db.events).getSingle();
+      expect(row.placeId, 'p1');
+    });
+  });
+
+  group('參與人物與關聯事件', () {
+    test('人物正規化名稱不可重複；事件與人物多對多', () async {
+      await db
+          .into(db.people)
+          .insert(
+            PeopleCompanion.insert(
+              id: 'mom',
+              displayName: '媽媽',
+              nameKey: '媽媽',
+              createdAt: _now,
+            ),
+          );
+      expect(
+        () => db
+            .into(db.people)
+            .insert(
+              PeopleCompanion.insert(
+                id: 'mom2',
+                displayName: '媽媽',
+                nameKey: '媽媽',
+                createdAt: _now,
+              ),
+            ),
+        throwsA(isA<SqliteException>()),
+      );
+      await db.into(db.events).insert(event('e1'));
+      await db.into(db.events).insert(event('e2'));
+      for (final id in ['e1', 'e2']) {
+        await db
+            .into(db.eventPeople)
+            .insert(
+              EventPeopleCompanion.insert(
+                eventId: id,
+                personId: 'mom',
+                layer: Layer.original,
+                authorId: 'self',
+                createdAt: _now,
+              ),
+            );
+      }
+      expect(await db.select(db.eventPeople).get(), hasLength(2));
+    });
+
+    EventLinksCompanion link(String a, String b) => EventLinksCompanion.insert(
+      eventAId: a,
+      eventBId: b,
+      layer: Layer.original,
+      authorId: 'self',
+      createdAt: _now,
+    );
+
+    test('一個事件可關聯多個事件', () async {
+      for (final id in ['e1', 'e2', 'e3', 'e4']) {
+        await db.into(db.events).insert(event(id));
+      }
+      await db.into(db.eventLinks).insert(link('e1', 'e2'));
+      await db.into(db.eventLinks).insert(link('e1', 'e3'));
+      await db.into(db.eventLinks).insert(link('e1', 'e4'));
+      expect(await db.select(db.eventLinks).get(), hasLength(3));
+    });
+
+    test('每對只存一列：不可反向重複、不可自我關聯', () async {
+      await db.into(db.events).insert(event('e1'));
+      await db.into(db.events).insert(event('e2'));
+      expect(
+        () => db.into(db.eventLinks).insert(link('e2', 'e1')),
+        throwsA(isA<SqliteException>()),
+      );
+      expect(
+        () => db.into(db.eventLinks).insert(link('e1', 'e1')),
+        throwsA(isA<SqliteException>()),
+      );
+    });
+
+    test('關聯事件與人物對照同樣套用層級觸發器', () async {
+      await db.into(db.events).insert(event('e1'));
+      await db.into(db.events).insert(event('e2'));
+      await db.into(db.eventLinks).insert(link('e1', 'e2'));
+      expect(
+        () => db.customStatement("UPDATE event_links SET layer = 'original'"),
+        throwsSqlite('層級建立後不可變更'),
+      );
+    });
+  });
+
+  group('隱私與軟刪除', () {
+    test('隱私預設為一般，只接受 normal 與 private', () async {
+      await db.into(db.events).insert(event('e1'));
+      expect((await db.select(db.events).getSingle()).privacy, Privacy.normal);
+      expect(
+        () => db.customStatement("UPDATE events SET privacy = 'secret'"),
+        throwsA(isA<SqliteException>()),
+      );
+    });
+
+    test('軟刪除與復原只改 deleted_at，不受層級觸發器影響', () async {
+      await db.into(db.events).insert(event('e1'));
+      final byId = db.update(db.events)..where((e) => e.id.equals('e1'));
+      await byId.write(EventsCompanion(deletedAt: Value(_now)));
+      expect((await db.select(db.events).getSingle()).deletedAt, _now);
+      await byId.write(const EventsCompanion(deletedAt: Value(null)));
+      expect((await db.select(db.events).getSingle()).deletedAt, isNull);
+    });
+
+    test('未軟刪除的事件不可標記為永久刪除', () async {
+      await db.into(db.events).insert(event('e1'));
+      expect(
+        () => (db.update(db.events)..where((e) => e.id.equals('e1'))).write(
+          EventsCompanion(purgedAt: Value(_now)),
+        ),
+        throwsA(isA<SqliteException>()),
+      );
+    });
+
+    test('附件拍攝座標必須成對', () async {
+      final row = await db
+          .customSelect(
+            "SELECT sql FROM sqlite_master WHERE name = 'attachments'",
+          )
+          .getSingle();
+      expect(
+        row.read<String>('sql'),
+        contains('(captured_latitude IS NULL) = (captured_longitude IS NULL)'),
       );
     });
   });

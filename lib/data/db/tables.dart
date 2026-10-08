@@ -17,6 +17,12 @@ abstract final class ArchiveMode {
   static const lifeArchive = 'life_archive';
 }
 
+/// 事件隱私層級（企劃書 4.1）。
+abstract final class Privacy {
+  static const normal = 'normal';
+  static const private = 'private';
+}
+
 /// 層級與 archive_session_id 必須一致：
 /// 原始生命紀錄層不屬於任何典藏期間；後續追憶層必須指向建立時的典藏期間。
 const _layerCheck =
@@ -112,13 +118,31 @@ class Events extends Table with LayerColumns {
   TextColumn get sortEnd => text().nullable()();
 
   IntColumn get manualOrder => integer().withDefault(const Constant(0))();
+
+  /// 地點（企劃書 4.1）。
+  TextColumn get placeId => text().nullable().references(Places, #id)();
+
+  /// 隱私層級：一般或私密。
+  TextColumn get privacy =>
+      text().withDefault(const Constant(Privacy.normal))();
+
+  /// 軟刪除時間（企劃書 9.3）；所有查詢預設排除已刪除事件。
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  /// 永久刪除但因後續追憶附掛而保留標題的時間。
+  DateTimeColumn get purgedAt => dateTime().nullable()();
+
   DateTimeColumn get updatedAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};
 
   @override
-  List<String> get customConstraints => [_layerCheck];
+  List<String> get customConstraints => [
+    _layerCheck,
+    "CHECK (privacy IN ('${Privacy.normal}', '${Privacy.private}'))",
+    'CHECK (purged_at IS NULL OR deleted_at IS NOT NULL)',
+  ];
 }
 
 /// 記述段落：使用者自由組成（企劃書 4.2）。
@@ -223,6 +247,10 @@ class Attachments extends Table with LayerColumns {
 
   /// 拍攝或內容時間（可取得時）。
   DateTimeColumn get capturedAt => dateTime().nullable()();
+
+  /// 拍攝座標（取自 EXIF，可取得時），用於建議事件地點。
+  RealColumn get capturedLatitude => real().nullable()();
+  RealColumn get capturedLongitude => real().nullable()();
   DateTimeColumn get importedAt => dateTime()();
   TextColumn get storageMode => text()();
 
@@ -230,7 +258,86 @@ class Attachments extends Table with LayerColumns {
   Set<Column> get primaryKey => {id};
 
   @override
+  List<String> get customConstraints => [
+    _layerCheck,
+    'CHECK ((captured_latitude IS NULL) = (captured_longitude IS NULL))',
+    'CHECK (captured_latitude IS NULL OR captured_latitude BETWEEN -90 AND 90)',
+    'CHECK (captured_longitude IS NULL OR captured_longitude BETWEEN -180 AND 180)',
+  ];
+}
+
+/// 地點（企劃書 4.1）：同一地點只保存一次。名稱與座標至少擇一。
+class Places extends Table {
+  TextColumn get id => text()();
+
+  /// 顯示名稱（使用者第一次輸入的寫法）；純座標地點可為 null。
+  TextColumn get name => text().nullable()();
+
+  /// 比對用的正規化名稱（忽略台／臺、全形半形、空白），唯一。
+  TextColumn get nameKey => text().nullable().unique()();
+  RealColumn get latitude => real().nullable()();
+  RealColumn get longitude => real().nullable()();
+
+  /// 範圍半徑（公尺）：表示區域或定位精確度。
+  RealColumn get radiusM => real().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  @override
+  List<String> get customConstraints => [
+    'CHECK ((name IS NULL) = (name_key IS NULL))',
+    'CHECK ((latitude IS NULL) = (longitude IS NULL))',
+    'CHECK (name IS NOT NULL OR latitude IS NOT NULL)',
+    'CHECK (latitude IS NULL OR latitude BETWEEN -90 AND 90)',
+    'CHECK (longitude IS NULL OR longitude BETWEEN -180 AND 180)',
+    'CHECK (radius_m IS NULL OR (radius_m > 0 AND latitude IS NOT NULL))',
+  ];
+}
+
+/// 參與人物：與「作者」不同，是事件中出現的人。
+class People extends Table {
+  TextColumn get id => text()();
+  TextColumn get displayName => text()();
+
+  /// 比對用的正規化名稱，規則同地點，唯一。
+  TextColumn get nameKey => text().unique()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// 事件與參與人物的多對多對照。
+class EventPeople extends Table with LayerColumns {
+  TextColumn get eventId => text().references(Events, #id)();
+  TextColumn get personId => text().references(People, #id)();
+
+  @override
+  Set<Column> get primaryKey => {eventId, personId};
+
+  @override
   List<String> get customConstraints => [_layerCheck];
+}
+
+/// 關聯事件（無方向）：每對事件只存一列，event_a_id 小於 event_b_id。
+class EventLinks extends Table with LayerColumns {
+  @ReferenceName('linksAsA')
+  TextColumn get eventAId =>
+      text().named('event_a_id').references(Events, #id)();
+  @ReferenceName('linksAsB')
+  TextColumn get eventBId =>
+      text().named('event_b_id').references(Events, #id)();
+
+  @override
+  Set<Column> get primaryKey => {eventAId, eventBId};
+
+  @override
+  List<String> get customConstraints => [
+    _layerCheck,
+    'CHECK (event_a_id < event_b_id)',
+  ];
 }
 
 class Tags extends Table {
@@ -270,4 +377,6 @@ const layeredTables = [
   'stories',
   'attachments',
   'event_tags',
+  'event_people',
+  'event_links',
 ];
