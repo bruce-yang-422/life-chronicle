@@ -86,4 +86,4 @@
 
 ## 授權
 
-尚未決定。
+本專案以 [MIT License](LICENSE) 開源授權。
