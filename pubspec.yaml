@@ -11,13 +11,12 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  # 對應目前安裝的 Flutter 3.38.5（Dart 3.10.4）
-  sdk: ^3.10.4
+  # 對應目前安裝的 Flutter 3.47.6（Dart 3.13.5）
+  sdk: ^3.13.5
 
 # 套件版本注意事項：
-# - 目前 Flutter SDK 版本較舊，部分最新版套件不相容，版本已固定為相容組合
-# - 升級 Flutter（flutter upgrade）後，才可放寬版本並改用最新版套件
 # - 查看可更新的套件：flutter pub outdated
+# - 升級主要版本前先確認相容性與變更說明，升級後執行 flutter analyze 與 flutter test
 dependencies:
   flutter:
     sdk: flutter
@@ -26,12 +25,12 @@ dependencies:
     sdk: flutter
 
   # iOS 風格圖示（CupertinoIcons）
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^2.0.0
   # 狀態管理
-  flutter_riverpod: ^3.3.2
-  # 本機 SQLite（drift 與 drift_dev 版本必須一致）
-  drift: ">=2.31.0 <2.32.0"
-  drift_flutter: ^0.2.8
+  flutter_riverpod: ^3.4.3
+  # 本機 SQLite（drift 與 drift_dev 的次版本需一致，例如都是 2.35.x）
+  drift: ^2.35.2
+  drift_flutter: ^0.3.1
   # 檔案路徑、SHA-256、ZIP 封存
   path_provider: ^2.1.6
   path: ^1.9.1
@@ -40,15 +39,15 @@ dependencies:
   # 附件匯入、備份分享
   file_picker: ^13.1.0
   share_plus: ^13.3.1
-  # 日期格式（版本由 flutter_localizations 決定，不可自行升級）
-  intl: ^0.20.2
+  # 日期格式（版本由 flutter_localizations 決定）
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   # drift 程式碼產生（執行：dart run build_runner build）
-  build_runner: ^2.15.1
-  drift_dev: ">=2.31.0 <2.32.0"
+  build_runner: ^2.16.2
+  drift_dev: ^2.35.1
   # 程式碼風格檢查規則，設定於 analysis_options.yaml
   flutter_lints: ^6.0.0
 
