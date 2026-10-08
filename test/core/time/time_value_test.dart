@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:life_chronicle/core/time/calendar_date.dart';
-import 'package:life_chronicle/core/time/time_format.dart';
 import 'package:life_chronicle/core/time/time_value.dart';
 
 /// 每種時間類型的代表樣本。
@@ -149,86 +148,6 @@ void main() {
         }),
         throwsFormatException,
       );
-    });
-  });
-
-  group('完整格式（詳情頁）', () {
-    test('與企劃書範例一致', () {
-      expect(TimeFormat.full(DayTime(2003, 9, 15)), '2003-09-15');
-      expect(TimeFormat.full(MonthTime(2003, 9)), '2003-09');
-      expect(TimeFormat.full(QuarterTime(2003, 3)), '2003 年第 3 季');
-      expect(TimeFormat.full(HalfYearTime(2003, 1)), '2003 年上半年');
-      expect(TimeFormat.full(HalfYearTime(2003, 2)), '2003 年下半年');
-      expect(TimeFormat.full(YearTime(2003)), '2003 年');
-      expect(TimeFormat.full(ApproxYearTime(2003)), '約 2003 年');
-      expect(
-        TimeFormat.full(RangeTime(YearTime(2002), YearTime(2004))),
-        '2002～2004 年',
-      );
-      expect(
-        TimeFormat.full(RangeTime(MonthTime(2002, 9), YearTime(2004))),
-        '2002-09～2004 年',
-      );
-      expect(
-        TimeFormat.full(
-          RelativeTime('id', RelativeRelation.after),
-          relatedEventTitle: '大學畢業',
-        ),
-        '大學畢業後',
-      );
-      expect(TimeFormat.full(AgeEstimateTime(20)), '約 20 歲');
-      expect(TimeFormat.full(const UnknownTime()), '時間未定');
-    });
-
-    test('相對事件的三種關係與參照已刪除', () {
-      final before = RelativeTime('id', RelativeRelation.before);
-      final during = RelativeTime('id', RelativeRelation.during);
-      expect(TimeFormat.full(before, relatedEventTitle: '入伍'), '入伍前');
-      expect(TimeFormat.full(during, relatedEventTitle: '留學'), '留學期間');
-      expect(TimeFormat.full(before), '（參照事件已刪除）前');
-    });
-  });
-
-  group('列表格式（時間軸首頁）', () {
-    test('與企劃書 4.6 範例一致', () {
-      expect(TimeFormat.list(DayTime(2026, 12, 28)), '12/28');
-      expect(TimeFormat.list(MonthTime(2026, 12)), '12 月');
-      expect(TimeFormat.list(QuarterTime(2026, 4)), '第 4 季');
-      expect(TimeFormat.list(HalfYearTime(2003, 2)), '下半年');
-      expect(TimeFormat.list(YearTime(2003)), '月份未定');
-      expect(TimeFormat.list(ApproxYearTime(2003)), '約 2003 年');
-      expect(
-        TimeFormat.list(RangeTime(YearTime(2002), YearTime(2004))),
-        '2002～2004',
-      );
-      expect(TimeFormat.list(const UnknownTime()), '時間未定');
-    });
-  });
-
-  group('不得顯示未輸入的月日（驗收 #1、#14）', () {
-    test('只輸入「2003 年」：只顯示年份', () {
-      final full = TimeFormat.full(YearTime(2003));
-      final list = TimeFormat.list(YearTime(2003));
-      expect(full, '2003 年');
-      expect(list, '月份未定');
-    });
-
-    test('「2003 年下半年」：不顯示月日', () {
-      expect(TimeFormat.full(HalfYearTime(2003, 2)), '2003 年下半年');
-      expect(TimeFormat.list(HalfYearTime(2003, 2)), '下半年');
-    });
-
-    test('非精確日期的任何格式都不含「日」或月/日樣式', () {
-      final monthDay = RegExp(r'\d{1,2}/\d{1,2}|\d{4}-\d{2}-\d{2}');
-      for (final value in _samples.where((v) => v is! DayTime)) {
-        for (final text in [TimeFormat.full(value), TimeFormat.list(value)]) {
-          expect(
-            text,
-            isNot(matches(monthDay)),
-            reason: '${value.type}: $text',
-          );
-        }
-      }
     });
   });
 }

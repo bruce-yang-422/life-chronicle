@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_en.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -92,7 +93,10 @@ abstract class AppLocalizations {
       ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('zh')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('zh'),
+  ];
 
   /// APP 名稱
   ///
@@ -106,7 +110,7 @@ abstract class AppLocalizations {
   /// **'人生時間軸'**
   String get navTimeline;
 
-  /// 主導航：搜尋與視圖
+  /// 主導航：搜尋與視圖（同時用於底部導覽列，譯文需簡短以免換行）
   ///
   /// In zh, this message translates to:
   /// **'搜尋與視圖'**
@@ -124,7 +128,7 @@ abstract class AppLocalizations {
   /// **'故事篇章'**
   String get navStories;
 
-  /// 主導航：資料與備份
+  /// 主導航：資料與備份（同時用於底部導覽列，譯文需簡短以免換行）
   ///
   /// In zh, this message translates to:
   /// **'資料與備份'**
@@ -135,6 +139,114 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'此功能開發中'**
   String get placeholderComingSoon;
+
+  /// 完整格式：季度
+  ///
+  /// In zh, this message translates to:
+  /// **'{year} 年第 {quarter} 季'**
+  String timeQuarterFull(String year, String quarter);
+
+  /// 完整格式：半年；half 為 first 或 second
+  ///
+  /// In zh, this message translates to:
+  /// **'{year} 年{half, select, first{上半年} other{下半年}}'**
+  String timeHalfYearFull(String year, String half);
+
+  /// 完整格式：年份
+  ///
+  /// In zh, this message translates to:
+  /// **'{year} 年'**
+  String timeYearFull(String year);
+
+  /// 約略年份
+  ///
+  /// In zh, this message translates to:
+  /// **'約 {year} 年'**
+  String timeApproxYear(String year);
+
+  /// 完整格式：起訖皆為年份的範圍
+  ///
+  /// In zh, this message translates to:
+  /// **'{start}～{end} 年'**
+  String timeRangeYearsFull(String start, String end);
+
+  /// 列表格式：起訖皆為年份的範圍
+  ///
+  /// In zh, this message translates to:
+  /// **'{start}～{end}'**
+  String timeRangeYearsList(String start, String end);
+
+  /// 一般時間範圍，起訖已格式化
+  ///
+  /// In zh, this message translates to:
+  /// **'{start}～{end}'**
+  String timeRange(String start, String end);
+
+  /// 相對事件：之後
+  ///
+  /// In zh, this message translates to:
+  /// **'{title}後'**
+  String timeRelativeAfter(String title);
+
+  /// 相對事件：之前
+  ///
+  /// In zh, this message translates to:
+  /// **'{title}前'**
+  String timeRelativeBefore(String title);
+
+  /// 相對事件：期間
+  ///
+  /// In zh, this message translates to:
+  /// **'{title}期間'**
+  String timeRelativeDuring(String title);
+
+  /// 相對事件的參照事件已刪除時代替標題
+  ///
+  /// In zh, this message translates to:
+  /// **'（參照事件已刪除）'**
+  String get timeDeletedReference;
+
+  /// 年齡推估
+  ///
+  /// In zh, this message translates to:
+  /// **'約 {age} 歲'**
+  String timeAgeEstimate(String age);
+
+  /// 完全未知的時間
+  ///
+  /// In zh, this message translates to:
+  /// **'時間未定'**
+  String get timeUnknown;
+
+  /// 列表格式：精確日期（月、日已補零）
+  ///
+  /// In zh, this message translates to:
+  /// **'{month}/{day}'**
+  String timeListDay(String month, String day);
+
+  /// 列表格式：年月
+  ///
+  /// In zh, this message translates to:
+  /// **'{month} 月'**
+  String timeListMonth(String month);
+
+  /// 列表格式：季度
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {quarter} 季'**
+  String timeListQuarter(String quarter);
+
+  /// 列表格式：半年；half 為 first 或 second
+  ///
+  /// In zh, this message translates to:
+  /// **'{half, select, first{上半年} other{下半年}}'**
+  String timeListHalfYear(String half);
+
+  /// 列表格式：只知年份
+  ///
+  /// In zh, this message translates to:
+  /// **'月份未定'**
+  String get timeListYearOnly;
 }
 
 class _AppLocalizationsDelegate
@@ -148,7 +260,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['zh'].contains(locale.languageCode);
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -157,6 +269,8 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
     case 'zh':
       return AppLocalizationsZh();
   }
