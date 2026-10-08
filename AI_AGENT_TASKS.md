@@ -49,7 +49,19 @@
 ### 0.6 Git 規範
 
 - 遠端儲存庫：<https://github.com/bruce-yang-422/life-chronicle>，主分支 `main`。
-- **commit 訊息使用繁體中文**：第一行為摘要，空一行後以清單列出重點。
+- **commit 訊息使用繁體中文＋英文**，格式如下：
+
+  ```text
+  新增時間軸排序比較器 / Add timeline sort comparator
+
+  - 實作 §5.1 舊到新與新到舊排序規則
+  - 以兩張範例表為測試資料
+
+  - Implement oldest-first and newest-first rules from §5.1
+  - Use both example tables as test fixtures
+  ```
+
+  第一行為「中文摘要 / English summary」；內文先列中文重點，空一行後列對應的英文重點。
 - **commit 訊息與 PR 說明禁止包含任何署名**：不得加入 `Co-Authored-By`、Contributors、「Generated with …」等字樣。
 - 一個任務一個（或少數幾個）commit，不混入無關修改；`build/`、`.dart_tool/`、`node_modules/` 等不得提交。
 - 未經使用者同意，不得 push、強制推送（force push）或改寫已推送的歷史。
