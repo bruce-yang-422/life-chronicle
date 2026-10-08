@@ -7352,7 +7352,7 @@ class EventTagsCompanion extends UpdateCompanion<EventTag> {
   }
 }
 
-class $PeopleTable extends People with TableInfo<$PeopleTable, PeopleData> {
+class $PeopleTable extends People with TableInfo<$PeopleTable, Person> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -7409,7 +7409,7 @@ class $PeopleTable extends People with TableInfo<$PeopleTable, PeopleData> {
   static const String $name = 'people';
   @override
   VerificationContext validateIntegrity(
-    Insertable<PeopleData> instance, {
+    Insertable<Person> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -7452,9 +7452,9 @@ class $PeopleTable extends People with TableInfo<$PeopleTable, PeopleData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  PeopleData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Person map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return PeopleData(
+    return Person(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id'],
@@ -7480,14 +7480,14 @@ class $PeopleTable extends People with TableInfo<$PeopleTable, PeopleData> {
   }
 }
 
-class PeopleData extends DataClass implements Insertable<PeopleData> {
+class Person extends DataClass implements Insertable<Person> {
   final String id;
   final String displayName;
 
   /// 比對用的正規化名稱，規則同地點，唯一。
   final String nameKey;
   final DateTime createdAt;
-  const PeopleData({
+  const Person({
     required this.id,
     required this.displayName,
     required this.nameKey,
@@ -7512,12 +7512,12 @@ class PeopleData extends DataClass implements Insertable<PeopleData> {
     );
   }
 
-  factory PeopleData.fromJson(
+  factory Person.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return PeopleData(
+    return Person(
       id: serializer.fromJson<String>(json['id']),
       displayName: serializer.fromJson<String>(json['displayName']),
       nameKey: serializer.fromJson<String>(json['nameKey']),
@@ -7535,19 +7535,19 @@ class PeopleData extends DataClass implements Insertable<PeopleData> {
     };
   }
 
-  PeopleData copyWith({
+  Person copyWith({
     String? id,
     String? displayName,
     String? nameKey,
     DateTime? createdAt,
-  }) => PeopleData(
+  }) => Person(
     id: id ?? this.id,
     displayName: displayName ?? this.displayName,
     nameKey: nameKey ?? this.nameKey,
     createdAt: createdAt ?? this.createdAt,
   );
-  PeopleData copyWithCompanion(PeopleCompanion data) {
-    return PeopleData(
+  Person copyWithCompanion(PeopleCompanion data) {
+    return Person(
       id: data.id.present ? data.id.value : this.id,
       displayName: data.displayName.present
           ? data.displayName.value
@@ -7559,7 +7559,7 @@ class PeopleData extends DataClass implements Insertable<PeopleData> {
 
   @override
   String toString() {
-    return (StringBuffer('PeopleData(')
+    return (StringBuffer('Person(')
           ..write('id: $id, ')
           ..write('displayName: $displayName, ')
           ..write('nameKey: $nameKey, ')
@@ -7573,14 +7573,14 @@ class PeopleData extends DataClass implements Insertable<PeopleData> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is PeopleData &&
+      (other is Person &&
           other.id == this.id &&
           other.displayName == this.displayName &&
           other.nameKey == this.nameKey &&
           other.createdAt == this.createdAt);
 }
 
-class PeopleCompanion extends UpdateCompanion<PeopleData> {
+class PeopleCompanion extends UpdateCompanion<Person> {
   final Value<String> id;
   final Value<String> displayName;
   final Value<String> nameKey;
@@ -7603,7 +7603,7 @@ class PeopleCompanion extends UpdateCompanion<PeopleData> {
        displayName = Value(displayName),
        nameKey = Value(nameKey),
        createdAt = Value(createdAt);
-  static Insertable<PeopleData> custom({
+  static Insertable<Person> custom({
     Expression<String>? id,
     Expression<String>? displayName,
     Expression<String>? nameKey,
@@ -7670,7 +7670,7 @@ class PeopleCompanion extends UpdateCompanion<PeopleData> {
 }
 
 class $EventPeopleTable extends EventPeople
-    with TableInfo<$EventPeopleTable, EventPeopleData> {
+    with TableInfo<$EventPeopleTable, EventPerson> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -7767,7 +7767,7 @@ class $EventPeopleTable extends EventPeople
   static const String $name = 'event_people';
   @override
   VerificationContext validateIntegrity(
-    Insertable<EventPeopleData> instance, {
+    Insertable<EventPerson> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -7827,9 +7827,9 @@ class $EventPeopleTable extends EventPeople
   @override
   Set<GeneratedColumn> get $primaryKey => {eventId, personId};
   @override
-  EventPeopleData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  EventPerson map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return EventPeopleData(
+    return EventPerson(
       layer: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}layer'],
@@ -7863,14 +7863,14 @@ class $EventPeopleTable extends EventPeople
   }
 }
 
-class EventPeopleData extends DataClass implements Insertable<EventPeopleData> {
+class EventPerson extends DataClass implements Insertable<EventPerson> {
   final String layer;
   final String authorId;
   final DateTime createdAt;
   final String? archiveSessionId;
   final String eventId;
   final String personId;
-  const EventPeopleData({
+  const EventPerson({
     required this.layer,
     required this.authorId,
     required this.createdAt,
@@ -7905,12 +7905,12 @@ class EventPeopleData extends DataClass implements Insertable<EventPeopleData> {
     );
   }
 
-  factory EventPeopleData.fromJson(
+  factory EventPerson.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return EventPeopleData(
+    return EventPerson(
       layer: serializer.fromJson<String>(json['layer']),
       authorId: serializer.fromJson<String>(json['authorId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -7932,14 +7932,14 @@ class EventPeopleData extends DataClass implements Insertable<EventPeopleData> {
     };
   }
 
-  EventPeopleData copyWith({
+  EventPerson copyWith({
     String? layer,
     String? authorId,
     DateTime? createdAt,
     Value<String?> archiveSessionId = const Value.absent(),
     String? eventId,
     String? personId,
-  }) => EventPeopleData(
+  }) => EventPerson(
     layer: layer ?? this.layer,
     authorId: authorId ?? this.authorId,
     createdAt: createdAt ?? this.createdAt,
@@ -7949,8 +7949,8 @@ class EventPeopleData extends DataClass implements Insertable<EventPeopleData> {
     eventId: eventId ?? this.eventId,
     personId: personId ?? this.personId,
   );
-  EventPeopleData copyWithCompanion(EventPeopleCompanion data) {
-    return EventPeopleData(
+  EventPerson copyWithCompanion(EventPeopleCompanion data) {
+    return EventPerson(
       layer: data.layer.present ? data.layer.value : this.layer,
       authorId: data.authorId.present ? data.authorId.value : this.authorId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -7964,7 +7964,7 @@ class EventPeopleData extends DataClass implements Insertable<EventPeopleData> {
 
   @override
   String toString() {
-    return (StringBuffer('EventPeopleData(')
+    return (StringBuffer('EventPerson(')
           ..write('layer: $layer, ')
           ..write('authorId: $authorId, ')
           ..write('createdAt: $createdAt, ')
@@ -7987,7 +7987,7 @@ class EventPeopleData extends DataClass implements Insertable<EventPeopleData> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is EventPeopleData &&
+      (other is EventPerson &&
           other.layer == this.layer &&
           other.authorId == this.authorId &&
           other.createdAt == this.createdAt &&
@@ -7996,7 +7996,7 @@ class EventPeopleData extends DataClass implements Insertable<EventPeopleData> {
           other.personId == this.personId);
 }
 
-class EventPeopleCompanion extends UpdateCompanion<EventPeopleData> {
+class EventPeopleCompanion extends UpdateCompanion<EventPerson> {
   final Value<String> layer;
   final Value<String> authorId;
   final Value<DateTime> createdAt;
@@ -8026,7 +8026,7 @@ class EventPeopleCompanion extends UpdateCompanion<EventPeopleData> {
        createdAt = Value(createdAt),
        eventId = Value(eventId),
        personId = Value(personId);
-  static Insertable<EventPeopleData> custom({
+  static Insertable<EventPerson> custom({
     Expression<String>? layer,
     Expression<String>? authorId,
     Expression<DateTime>? createdAt,
@@ -8548,7 +8548,7 @@ class EventLinksCompanion extends UpdateCompanion<EventLink> {
 }
 
 class $ChangeHistoryTable extends ChangeHistory
-    with TableInfo<$ChangeHistoryTable, ChangeHistoryData> {
+    with TableInfo<$ChangeHistoryTable, ChangeHistoryEntry> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -8628,7 +8628,7 @@ class $ChangeHistoryTable extends ChangeHistory
   static const String $name = 'change_history';
   @override
   VerificationContext validateIntegrity(
-    Insertable<ChangeHistoryData> instance, {
+    Insertable<ChangeHistoryEntry> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -8674,9 +8674,9 @@ class $ChangeHistoryTable extends ChangeHistory
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ChangeHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  ChangeHistoryEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ChangeHistoryData(
+    return ChangeHistoryEntry(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -8706,14 +8706,14 @@ class $ChangeHistoryTable extends ChangeHistory
   }
 }
 
-class ChangeHistoryData extends DataClass
-    implements Insertable<ChangeHistoryData> {
+class ChangeHistoryEntry extends DataClass
+    implements Insertable<ChangeHistoryEntry> {
   final int id;
   final String entityId;
   final String operation;
   final String authorId;
   final DateTime timestamp;
-  const ChangeHistoryData({
+  const ChangeHistoryEntry({
     required this.id,
     required this.entityId,
     required this.operation,
@@ -8741,12 +8741,12 @@ class ChangeHistoryData extends DataClass
     );
   }
 
-  factory ChangeHistoryData.fromJson(
+  factory ChangeHistoryEntry.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ChangeHistoryData(
+    return ChangeHistoryEntry(
       id: serializer.fromJson<int>(json['id']),
       entityId: serializer.fromJson<String>(json['entityId']),
       operation: serializer.fromJson<String>(json['operation']),
@@ -8766,21 +8766,21 @@ class ChangeHistoryData extends DataClass
     };
   }
 
-  ChangeHistoryData copyWith({
+  ChangeHistoryEntry copyWith({
     int? id,
     String? entityId,
     String? operation,
     String? authorId,
     DateTime? timestamp,
-  }) => ChangeHistoryData(
+  }) => ChangeHistoryEntry(
     id: id ?? this.id,
     entityId: entityId ?? this.entityId,
     operation: operation ?? this.operation,
     authorId: authorId ?? this.authorId,
     timestamp: timestamp ?? this.timestamp,
   );
-  ChangeHistoryData copyWithCompanion(ChangeHistoryCompanion data) {
-    return ChangeHistoryData(
+  ChangeHistoryEntry copyWithCompanion(ChangeHistoryCompanion data) {
+    return ChangeHistoryEntry(
       id: data.id.present ? data.id.value : this.id,
       entityId: data.entityId.present ? data.entityId.value : this.entityId,
       operation: data.operation.present ? data.operation.value : this.operation,
@@ -8791,7 +8791,7 @@ class ChangeHistoryData extends DataClass
 
   @override
   String toString() {
-    return (StringBuffer('ChangeHistoryData(')
+    return (StringBuffer('ChangeHistoryEntry(')
           ..write('id: $id, ')
           ..write('entityId: $entityId, ')
           ..write('operation: $operation, ')
@@ -8806,7 +8806,7 @@ class ChangeHistoryData extends DataClass
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ChangeHistoryData &&
+      (other is ChangeHistoryEntry &&
           other.id == this.id &&
           other.entityId == this.entityId &&
           other.operation == this.operation &&
@@ -8814,7 +8814,7 @@ class ChangeHistoryData extends DataClass
           other.timestamp == this.timestamp);
 }
 
-class ChangeHistoryCompanion extends UpdateCompanion<ChangeHistoryData> {
+class ChangeHistoryCompanion extends UpdateCompanion<ChangeHistoryEntry> {
   final Value<int> id;
   final Value<String> entityId;
   final Value<String> operation;
@@ -8837,7 +8837,7 @@ class ChangeHistoryCompanion extends UpdateCompanion<ChangeHistoryData> {
        operation = Value(operation),
        authorId = Value(authorId),
        timestamp = Value(timestamp);
-  static Insertable<ChangeHistoryData> custom({
+  static Insertable<ChangeHistoryEntry> custom({
     Expression<int>? id,
     Expression<String>? entityId,
     Expression<String>? operation,
@@ -9735,7 +9735,7 @@ final class $$AuthorsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$EventPeopleTable, List<EventPeopleData>>
+  static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
     aliasName: 'authors__id__event_people__author_id',
@@ -9771,7 +9771,7 @@ final class $$AuthorsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$ChangeHistoryTable, List<ChangeHistoryData>>
+  static MultiTypedResultKey<$ChangeHistoryTable, List<ChangeHistoryEntry>>
   _changeHistoryRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.changeHistory,
     aliasName: 'authors__id__change_history__author_id',
@@ -10770,7 +10770,7 @@ class $$AuthorsTableTableManager
                         await $_getPrefetchedData<
                           Author,
                           $AuthorsTable,
-                          EventPeopleData
+                          EventPerson
                         >(
                           currentTable: table,
                           referencedTable: $$AuthorsTableReferences
@@ -10812,7 +10812,7 @@ class $$AuthorsTableTableManager
                         await $_getPrefetchedData<
                           Author,
                           $AuthorsTable,
-                          ChangeHistoryData
+                          ChangeHistoryEntry
                         >(
                           currentTable: table,
                           referencedTable: $$AuthorsTableReferences
@@ -11090,7 +11090,7 @@ final class $$ArchiveSessionsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$EventPeopleTable, List<EventPeopleData>>
+  static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
     aliasName: 'archive_sessions__id__event_people__archive_session_id',
@@ -12248,7 +12248,7 @@ class $$ArchiveSessionsTableTableManager
                         await $_getPrefetchedData<
                           ArchiveSession,
                           $ArchiveSessionsTable,
-                          EventPeopleData
+                          EventPerson
                         >(
                           currentTable: table,
                           referencedTable: $$ArchiveSessionsTableReferences
@@ -13228,7 +13228,7 @@ final class $$EventsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$EventPeopleTable, List<EventPeopleData>>
+  static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
     aliasName: 'events__id__event_people__event_id',
@@ -14492,7 +14492,7 @@ class $$EventsTableTableManager
                         await $_getPrefetchedData<
                           Event,
                           $EventsTable,
-                          EventPeopleData
+                          EventPerson
                         >(
                           currentTable: table,
                           referencedTable: $$EventsTableReferences
@@ -19179,10 +19179,10 @@ typedef $$PeopleTableUpdateCompanionBuilder = PeopleCompanion Function({
 });
 
 final class $$PeopleTableReferences
-    extends BaseReferences<_$AppDatabase, $PeopleTable, PeopleData> {
+    extends BaseReferences<_$AppDatabase, $PeopleTable, Person> {
   $$PeopleTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$EventPeopleTable, List<EventPeopleData>>
+  static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
     aliasName: 'people__id__event_people__person_id',
@@ -19340,14 +19340,14 @@ class $$PeopleTableTableManager
         RootTableManager<
           _$AppDatabase,
           $PeopleTable,
-          PeopleData,
+          Person,
           $$PeopleTableFilterComposer,
           $$PeopleTableOrderingComposer,
           $$PeopleTableAnnotationComposer,
           $$PeopleTableCreateCompanionBuilder,
           $$PeopleTableUpdateCompanionBuilder,
-          (PeopleData, $$PeopleTableReferences),
-          PeopleData,
+          (Person, $$PeopleTableReferences),
+          Person,
           PrefetchHooks Function({bool eventPeopleRefs})
         > {
   $$PeopleTableTableManager(_$AppDatabase db, $PeopleTable table)
@@ -19392,7 +19392,7 @@ class $$PeopleTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$PeopleTable, PeopleData>(table),
+                  e.readTable<$PeopleTable, Person>(table),
                   $$PeopleTableReferences(db, table, e),
                 ),
               )
@@ -19406,9 +19406,9 @@ class $$PeopleTableTableManager
                 return [
                   if (eventPeopleRefs)
                     await $_getPrefetchedData<
-                      PeopleData,
+                      Person,
                       $PeopleTable,
-                      EventPeopleData
+                      EventPerson
                     >(
                       currentTable: table,
                       referencedTable: $$PeopleTableReferences
@@ -19434,14 +19434,14 @@ typedef $$PeopleTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $PeopleTable,
-      PeopleData,
+      Person,
       $$PeopleTableFilterComposer,
       $$PeopleTableOrderingComposer,
       $$PeopleTableAnnotationComposer,
       $$PeopleTableCreateCompanionBuilder,
       $$PeopleTableUpdateCompanionBuilder,
-      (PeopleData, $$PeopleTableReferences),
-      PeopleData,
+      (Person, $$PeopleTableReferences),
+      Person,
       PrefetchHooks Function({bool eventPeopleRefs})
     >;
 typedef $$EventPeopleTableCreateCompanionBuilder =
@@ -19466,7 +19466,7 @@ typedef $$EventPeopleTableUpdateCompanionBuilder =
     });
 
 final class $$EventPeopleTableReferences
-    extends BaseReferences<_$AppDatabase, $EventPeopleTable, EventPeopleData> {
+    extends BaseReferences<_$AppDatabase, $EventPeopleTable, EventPerson> {
   $$EventPeopleTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
@@ -19876,14 +19876,14 @@ class $$EventPeopleTableTableManager
         RootTableManager<
           _$AppDatabase,
           $EventPeopleTable,
-          EventPeopleData,
+          EventPerson,
           $$EventPeopleTableFilterComposer,
           $$EventPeopleTableOrderingComposer,
           $$EventPeopleTableAnnotationComposer,
           $$EventPeopleTableCreateCompanionBuilder,
           $$EventPeopleTableUpdateCompanionBuilder,
-          (EventPeopleData, $$EventPeopleTableReferences),
-          EventPeopleData,
+          (EventPerson, $$EventPeopleTableReferences),
+          EventPerson,
           PrefetchHooks Function({
             bool authorId,
             bool archiveSessionId,
@@ -19941,7 +19941,7 @@ class $$EventPeopleTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$EventPeopleTable, EventPeopleData>(table),
+                  e.readTable<$EventPeopleTable, EventPerson>(table),
                   $$EventPeopleTableReferences(db, table, e),
                 ),
               )
@@ -20032,14 +20032,14 @@ typedef $$EventPeopleTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $EventPeopleTable,
-      EventPeopleData,
+      EventPerson,
       $$EventPeopleTableFilterComposer,
       $$EventPeopleTableOrderingComposer,
       $$EventPeopleTableAnnotationComposer,
       $$EventPeopleTableCreateCompanionBuilder,
       $$EventPeopleTableUpdateCompanionBuilder,
-      (EventPeopleData, $$EventPeopleTableReferences),
-      EventPeopleData,
+      (EventPerson, $$EventPeopleTableReferences),
+      EventPerson,
       PrefetchHooks Function({
         bool authorId,
         bool archiveSessionId,
@@ -20667,7 +20667,7 @@ typedef $$ChangeHistoryTableUpdateCompanionBuilder =
 
 final class $$ChangeHistoryTableReferences
     extends
-        BaseReferences<_$AppDatabase, $ChangeHistoryTable, ChangeHistoryData> {
+        BaseReferences<_$AppDatabase, $ChangeHistoryTable, ChangeHistoryEntry> {
   $$ChangeHistoryTableReferences(
     super.$_db,
     super.$_table,
@@ -20848,14 +20848,14 @@ class $$ChangeHistoryTableTableManager
         RootTableManager<
           _$AppDatabase,
           $ChangeHistoryTable,
-          ChangeHistoryData,
+          ChangeHistoryEntry,
           $$ChangeHistoryTableFilterComposer,
           $$ChangeHistoryTableOrderingComposer,
           $$ChangeHistoryTableAnnotationComposer,
           $$ChangeHistoryTableCreateCompanionBuilder,
           $$ChangeHistoryTableUpdateCompanionBuilder,
-          (ChangeHistoryData, $$ChangeHistoryTableReferences),
-          ChangeHistoryData,
+          (ChangeHistoryEntry, $$ChangeHistoryTableReferences),
+          ChangeHistoryEntry,
           PrefetchHooks Function({bool authorId})
         > {
   $$ChangeHistoryTableTableManager(_$AppDatabase db, $ChangeHistoryTable table)
@@ -20900,7 +20900,7 @@ class $$ChangeHistoryTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$ChangeHistoryTable, ChangeHistoryData>(table),
+                  e.readTable<$ChangeHistoryTable, ChangeHistoryEntry>(table),
                   $$ChangeHistoryTableReferences(db, table, e),
                 ),
               )
@@ -20952,14 +20952,14 @@ typedef $$ChangeHistoryTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $ChangeHistoryTable,
-      ChangeHistoryData,
+      ChangeHistoryEntry,
       $$ChangeHistoryTableFilterComposer,
       $$ChangeHistoryTableOrderingComposer,
       $$ChangeHistoryTableAnnotationComposer,
       $$ChangeHistoryTableCreateCompanionBuilder,
       $$ChangeHistoryTableUpdateCompanionBuilder,
-      (ChangeHistoryData, $$ChangeHistoryTableReferences),
-      ChangeHistoryData,
+      (ChangeHistoryEntry, $$ChangeHistoryTableReferences),
+      ChangeHistoryEntry,
       PrefetchHooks Function({bool authorId})
     >;
 

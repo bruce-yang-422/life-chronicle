@@ -297,6 +297,7 @@ class Places extends Table {
 }
 
 /// 參與人物：與「作者」不同，是事件中出現的人。
+@DataClassName('Person')
 class People extends Table {
   TextColumn get id => text()();
   TextColumn get displayName => text()();
@@ -310,6 +311,7 @@ class People extends Table {
 }
 
 /// 事件與參與人物的多對多對照。
+@DataClassName('EventPerson')
 class EventPeople extends Table with LayerColumns {
   TextColumn get eventId => text().references(Events, #id)();
   TextColumn get personId => text().references(People, #id)();
@@ -360,6 +362,7 @@ class EventTags extends Table with LayerColumns {
 }
 
 /// 修訂來源紀錄。第一階段只記錄，不實作清除機制（保存期限待決策）。
+@DataClassName('ChangeHistoryEntry')
 class ChangeHistory extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get entityId => text()();
