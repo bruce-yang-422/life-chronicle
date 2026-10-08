@@ -10,7 +10,7 @@
 - **編年體＋紀事本末**：時間是第一層導航；點進事件閱讀起因、經過、結果、感受與多次回顧。
 - **附件獨立保存**：照片、影片、聲音、PDF 完整複製到 APP 私有目錄，以 SHA-256 去重。
 - **開放格式備份**：ZIP 封存包含 JSON（權威資料）、CommonMark Markdown、原始附件與校驗碼。
-- **死亡模式**：生前原始紀錄層唯讀，家屬追憶層獨立保存，層級依加入時間判定且永不變更。
+- **生命典藏模式（Life Archive Mode）**：啟用後，既有的原始生命紀錄轉為唯讀，保留當事人的人生歷程。後續追憶層仍允許新增、修改及刪除回憶。紀錄層級於建立時確定，不因模式切換而改變。模式可經由多步驟確認啟用或解除，無須死亡驗證或外部伺服器。
 - **不用學就會用**：UX 最高準則，手機與平板皆有對應版面。
 
 ## 技術架構
@@ -29,14 +29,14 @@
 
 | 工具 | 版本／說明 |
 | --- | --- |
-| Flutter SDK | 3.38.5（stable），Dart 3.10.4 |
+| Flutter SDK | 3.47.6（stable），Dart 3.13.5 |
 | 編輯器 | VS Code（Flutter、Dart extension）＋ Android Studio |
 | Android | Android SDK 36、Android Emulator（AVD） |
 | iOS（第二階段） | 需 macOS＋Xcode 與 Apple Developer 帳號 |
 
 套件 ID（applicationId）：`io.github.bruce_yang_422.life_chronicle`
 
-> 注意：目前 Flutter SDK 版本較舊，`pubspec.yaml` 已將 drift 等套件固定在相容版本。請勿任意執行 `flutter pub upgrade --major-versions`；升級 Flutter SDK 後再一併評估。
+> 注意：升級 Flutter SDK 或套件主要版本前，先確認相容性；升級後執行 `flutter analyze` 與 `flutter test`。`drift` 與 `drift_dev` 的次版本需保持一致。
 
 ## 快速開始
 

@@ -15,7 +15,7 @@
 <li>用同一份資料同時支援編年體、紀事本末、履歷提取與人生回顧。</li>
 <li>容許事後數日、數年甚至數十年追記，且保留發生與記錄時間的差別。</li>
 <li>支援照片、影片、聲音、PDF、聘書、證書等附件並避免 APP 內重複複製。</li>
-<li>可供家族在身後閱讀，追憶內容與生前原始紀錄分層保存。</li>
+<li>可供家族長期閱讀與傳承，後續追憶與原始生命紀錄分層保存。</li>
 <li>離線使用與開放格式可攜性，不依賴供應商儲存服務。</li>
 </ol>
 <h3>2.2 明確不做</h3>
@@ -102,12 +102,12 @@
 <tr>
 <td>子女／家族</td>
 <td>了解父母的青春與人生</td>
-<td>唯讀瀏覽、家屬追憶</td>
+<td>唯讀瀏覽、後續追憶</td>
 </tr>
 <tr>
 <td>失親父母</td>
 <td>長年後追記夭折孩子的往事</td>
-<td>代理建檔、追憶層</td>
+<td>代理建檔、後續追憶層</td>
 </tr>
 </tbody>
 </table>
@@ -252,7 +252,7 @@
 </ol>
 <h4>篩選：取代首頁分類膠囊列</h4>
 <ul>
-<li><strong>移除</strong>首頁常駐的「全部、學業、職涯、感情、家庭」分類膠囊列，分類移入「篩選」面板，與人生階段、標籤、人物、紀錄層（生前原始／家屬追憶）並列。</li>
+<li><strong>移除</strong>首頁常駐的「全部、學業、職涯、感情、家庭」分類膠囊列，分類移入「篩選」面板，與人生階段、標籤、人物、紀錄層（原始生命紀錄／後續追憶）並列。</li>
 <li><strong>篩選狀態必須永遠看得見</strong>：套用後頂部顯示篩選條件標籤（如「職涯 ✕」）與「符合 6／20 筆」，一次點擊即可清除，避免使用者誤以為資料不見。</li>
 <li>篩選後無符合事件的年份自動隱藏，年份清單同步只列出有結果的年份。</li>
 </ul>
@@ -672,7 +672,7 @@
 <h3>7.5 平台儲存原則</h3>
 <p>iOS 使用適當的 <code>Application Support</code> 持久性資料位置；Android 使用 <code>filesDir</code> 等持久性 APP 私有儲存，而不是 Cache／Temporary。APP 卸載、裝置損壞或重置仍可能讓本機副本消失，因此仍需外部備份。系統備份與實際手機剩餘空間須分別告知。</p>
 <h2>8. 資料保存、開放格式與備份</h2>
-<p>日常操作以本機 <strong>SQLite</strong> 管理事件、關聯、全文索引、引用計數及封存狀態；媒體內容獨立保存在 APP 私有目錄。SQLite 是本機檔案，<strong>不需要資料庫伺服器</strong>。</p>
+<p>日常操作以本機 <strong>SQLite</strong> 管理事件、關聯、全文索引、引用計數及典藏狀態；媒體內容獨立保存在 APP 私有目錄。SQLite 是本機檔案，<strong>不需要資料庫伺服器</strong>。</p>
 <h3>8.1 封存包設計原則</h3>
 <ol>
 <li><strong>APP 消失後仍可讀</strong>：不需安裝任何特定軟體，用作業系統內建解壓縮、瀏覽器、文字編輯器、相片／影片播放器即可閱讀全部內容。</li>
@@ -711,7 +711,7 @@
 │   │   │   └── 2003-09-15_01J9Z3K8QXR4T6V8W0Y2A4C6E8.md
 │   │   └── undated/              # 時間未定的事件
 │   ├── stories/
-│   └── memorial/                 # 家屬追憶層，與生前原始層分開
+│   └── remembrance/              # 後續追憶層，與原始生命紀錄層分開
 └── media/
     └── 3a/
         └── 3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b.jpg
@@ -779,7 +779,7 @@
 - 時間：2003-09-15
 - 類別：學業
 - 地點：台北
-- 紀錄層：生前原始紀錄
+- 紀錄層：原始生命紀錄
 - 作者：王大明（本人），2003-09-20 記錄
 
 ## 起因
@@ -791,9 +791,9 @@
 
 ![入學典禮合照](../../../media/3a/3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b.jpg)
 
-## 家屬追憶
+## 後續追憶
 
-- [2045 年 女兒王小美追記](../../memorial/2045-03-02_01K2A7B9C3D5E7F9G1H3J5K7M9.md)
+- [2045 年 女兒王小美追記](../../remembrance/2045-03-02_01K2A7B9C3D5E7F9G1H3J5K7M9.md)
 </code></pre>
 <h3>8.5 ZIP 格式規範</h3>
 <ul>
@@ -843,7 +843,7 @@
 </tr>
 <tr>
 <td><code>archive_state</code></td>
-<td>匯出當下的死亡模式狀態與封存期間（見第 9 節）</td>
+<td>匯出當下的生命典藏模式狀態與典藏期間（見第 9 節）</td>
 </tr>
 <tr>
 <td><code>encryption</code></td>
@@ -893,19 +893,50 @@
 </ul>
 <h3>8.10 備份管理</h3>
 <p>支援匯出到使用者選定的外接硬碟、NAS、iCloud Drive、Google Drive 或其他資料夾／服務（經作業系統分享或檔案選取機制），<strong>不由開發者代管</strong>。顯示最近一次<strong>完成並驗證</strong>的備份，並可對已存在的封存包再次執行驗證。建議多地分散保存，並在解除安裝前提醒：APP 私有檔案可能會連同 APP 被刪除。</p>
-<h2>9. 死亡模式：可逆封存、家屬追憶獨立</h2>
-<p>死亡模式是<strong>手動切換的檔案狀態</strong>，不代表 APP 已驗證死亡，也不需要上傳死亡證明。</p>
+<h2>9. 生命典藏模式（Life Archive Mode）：原始紀錄唯讀、後續追憶獨立</h2>
+<p><strong>生命典藏模式</strong>：將既有的人生紀錄轉為唯讀保存，保留當事人原始的生命歷程；後續仍可由家人新增、編輯及刪除獨立的追憶內容。</p>
+<p>生命典藏模式是<strong>手動切換的檔案狀態</strong>，不代表 APP 已驗證當事人離世，也無須死亡驗證或外部伺服器。命名使用「典藏」表達長期保存與傳承，而非強調生命終結；企劃書、APP 介面、README 與開發規格一律使用下列名稱：</p>
+<table>
+<thead>
+<tr>
+<th>正式名稱</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>生命典藏模式</td>
+<td>模式名稱（Life Archive Mode），<code>mode = life_archive</code>；一般模式為 <code>mode = normal</code></td>
+</tr>
+<tr>
+<td>啟用生命典藏</td>
+<td>進入生命典藏模式的操作</td>
+</tr>
+<tr>
+<td>解除生命典藏</td>
+<td>回到一般模式的操作</td>
+</tr>
+<tr>
+<td>原始生命紀錄層</td>
+<td><code>layer = original</code>，啟用生命典藏前加入的內容</td>
+</tr>
+<tr>
+<td>後續追憶層</td>
+<td><code>layer = remembrance</code>，生命典藏期間加入的內容</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li><strong>一般模式</strong>：授權編輯者可新增、修改生前人生節點及相關內容。</li>
-<li><strong>死亡模式</strong>：既有的生前原始紀錄層統一變成唯讀；身後追憶層允許家屬新增、修改、刪除自己的回憶及附件。</li>
-<li>模式可以關閉，透過設定頁 → 說明影響 → 勾選確認 → 輸入指定確認文字的多步驟程序；關閉後不刪除追憶層。</li>
-<li>啟用前提示匯出<strong>生前快照備份</strong>。可逆唯讀是防止誤編輯的操作機制，不是防竄改的法律保全。</li>
+<li><strong>一般模式</strong>：授權編輯者可新增、修改人生節點及相關內容。</li>
+<li><strong>生命典藏模式</strong>：既有的原始生命紀錄層統一變成唯讀；後續追憶層允許家人新增、修改、刪除自己的回憶及附件。</li>
+<li>啟用與解除都透過設定頁 → 說明影響 → 勾選確認 → 輸入指定確認文字的多步驟程序；解除後不刪除後續追憶層。</li>
+<li>啟用前提示匯出<strong>典藏前快照備份</strong>。可逆唯讀是防止誤編輯的操作機制，不是防竄改的法律保全。</li>
 </ul>
-<h3>9.1 封存範圍：依「何時、由誰加入」判定，不依內容的時間</h3>
+<h3>9.1 典藏範圍：依「何時、由誰加入」判定，不依內容的時間</h3>
 <p><strong>核心規則：每筆內容屬於哪一層，只由「加入系統當下的檔案狀態」決定，與事件發生時間、照片拍攝時間、檔案日期無關。</strong></p>
 <ul>
-<li>死亡模式<strong>啟用前</strong>加入的內容 → 生前原始層 <code>original</code>。</li>
-<li>死亡模式<strong>啟用期間</strong>加入的內容 → 身後追憶層 <code>memorial</code>。</li>
+<li><strong>啟用生命典藏前</strong>加入的內容 → 原始生命紀錄層 <code>original</code>。</li>
+<li><strong>生命典藏期間</strong>加入的內容 → 後續追憶層 <code>remembrance</code>。</li>
 <li>判定時<strong>絕不參考</strong>：事件時間 <code>event_time</code>、照片拍攝時間（EXIF）、檔案修改時間、主角死亡日期。</li>
 </ul>
 <p><strong>範例</strong>：家屬在 2045 年把父親 1990 年的一張照片加入系統。</p>
@@ -920,8 +951,8 @@
 <tbody>
 <tr>
 <td><code>layer</code></td>
-<td><code>memorial</code></td>
-<td>2045 年加入時檔案為死亡模式，屬身後追憶層</td>
+<td><code>remembrance</code></td>
+<td>2045 年加入時檔案為生命典藏模式，屬後續追憶層</td>
 </tr>
 <tr>
 <td><code>captured_at</code></td>
@@ -941,15 +972,15 @@
 <tr>
 <td>可否編輯</td>
 <td>可</td>
-<td>家屬可修改說明或移除，不會因為拍攝於生前而被鎖定</td>
+<td>家屬可修改說明或移除，不會因為拍攝時間較早而被鎖定</td>
 </tr>
 </tbody>
 </table>
-<p>這張照片會出現在時間軸 1990 年的位置，但以「家屬追憶」樣式標示，並註明加入者與加入時間。若家屬把照片附加到父親生前建立的 1990 年事件，<strong>原事件本身不被修改</strong>，照片以追憶層附件的形式附掛在事件下方的「家屬追憶」區塊。</p>
+<p>這張照片會出現在時間軸 1990 年的位置，但以「後續追憶」樣式標示，並註明加入者與加入時間。若家屬把照片附加到父親原本建立的 1990 年事件，<strong>原事件本身不被修改</strong>，照片以後續追憶層附件的形式附掛在事件下方的「後續追憶」區塊。</p>
 <h3>9.2 層級不可變更</h3>
 <ul>
-<li><code>layer</code> 由資料存取層在<strong>建立時自動寫入</strong>，使用者無法選擇，也<strong>沒有任何操作可在建立後變更層級</strong>——包括編輯、搬移、複製、匯入、關閉或重新啟用死亡模式。</li>
-<li>追憶層內容的作者<strong>不得設為主角本人</strong>；生前原始層的作者可以是本人或代為建檔的家人（如父母替子女建檔），一律如實記錄。</li>
+<li><code>layer</code> 由資料存取層在<strong>建立時自動寫入</strong>，使用者無法選擇，也<strong>沒有任何操作可在建立後變更層級</strong>——包括編輯、搬移、複製、匯入、解除或重新啟用生命典藏。</li>
+<li>後續追憶層內容的作者<strong>不得設為主角本人</strong>；原始生命紀錄層的作者可以是本人或代為建檔的家人（如父母替子女建檔），一律如實記錄。</li>
 <li>「層級」（何時加入）與「作者」（誰寫的）是兩個獨立欄位，畫面同時顯示，不互相推斷。</li>
 </ul>
 <h3>9.3 操作權限矩陣</h3>
@@ -958,14 +989,14 @@
 <tr>
 <th>操作</th>
 <th>一般模式</th>
-<th>死亡模式</th>
+<th>生命典藏模式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>新增內容</td>
 <td>寫入 <code>original</code></td>
-<td>寫入 <code>memorial</code></td>
+<td>寫入 <code>remembrance</code></td>
 </tr>
 <tr>
 <td>修改／刪除 <code>original</code> 內容</td>
@@ -973,14 +1004,14 @@
 <td><strong>不可</strong>（唯讀）</td>
 </tr>
 <tr>
-<td>修改／刪除 <code>memorial</code> 內容</td>
-<td>可，修改後仍為 <code>memorial</code></td>
+<td>修改／刪除 <code>remembrance</code> 內容</td>
+<td>可，修改後仍為 <code>remembrance</code></td>
 <td>可</td>
 </tr>
 <tr>
 <td>對既有 <code>original</code> 事件補充照片或回憶</td>
 <td>寫入 <code>original</code></td>
-<td>以 <code>memorial</code> 附件／回憶附掛，原事件不變</td>
+<td>以 <code>remembrance</code> 附件／回憶附掛，原事件不變</td>
 </tr>
 <tr>
 <td>變更任何內容的 <code>layer</code></td>
@@ -1000,17 +1031,17 @@
 </tbody>
 </table>
 <p>權限由資料存取層統一檢查，所有寫入（介面操作、匯入、批次處理）都經過同一套規則，不依賴各畫面自行判斷。</p>
-<h3>9.4 關閉與重新啟用</h3>
+<h3>9.4 解除與重新啟用</h3>
 <ul>
-<li><strong>關閉死亡模式</strong>：生前原始層恢復可編輯；<strong>追憶層內容維持 <code>memorial</code></strong>，仍以「家屬追憶」樣式、作者與加入時間標示，<strong>不會因關閉而併入或被誤認為本人原始紀錄</strong>。</li>
-<li>關閉後新增的內容依核心規則寫入 <code>original</code>；若有家屬在此時補寫追憶，作者欄位仍如實記錄為該家屬。</li>
-<li>每一次啟用／關閉都記錄為一段<strong>封存期間</strong>（<code>archive_sessions</code>：啟用時間、啟用者、關閉時間、關閉者），每筆追憶內容記錄自己建立於哪一段封存期間，可追溯。</li>
-<li>若死亡模式是誤啟用，期間加入的內容仍為追憶層，不提供轉層；本人可在一般模式下另行建立新紀錄。</li>
+<li><strong>解除生命典藏</strong>：原始生命紀錄層恢復可編輯；<strong>後續追憶層內容維持 <code>remembrance</code></strong>，仍以「後續追憶」樣式、作者與加入時間標示，<strong>不會因解除而併入或被誤認為本人原始紀錄</strong>。</li>
+<li>解除後新增的內容依核心規則寫入 <code>original</code>；若有家屬在此時補寫追憶，作者欄位仍如實記錄為該家屬。</li>
+<li>每一次啟用／解除都記錄為一段<strong>典藏期間</strong>（<code>archive_sessions</code>：啟用時間、啟用者、解除時間、解除者），每筆追憶內容記錄自己建立於哪一段典藏期間，可追溯。</li>
+<li>若生命典藏是誤啟用，期間加入的內容仍為後續追憶層，不提供轉層；本人可在一般模式下另行建立新紀錄。</li>
 </ul>
 <h3>9.5 匯出與匯入</h3>
 <ul>
-<li>封存包的 JSON 為每筆內容保留 <code>layer</code>、<code>author_id</code>、<code>created_at</code>、<code>archive_session_id</code>；Markdown 將追憶內容放在 <code>markdown/memorial/</code>，事件頁以「家屬追憶」標題連結，與生前原文分開（見 8.2、8.4）。</li>
-<li>匯入時<strong>依封存包原樣還原層級，不重新判定</strong>；在死亡模式下匯入<strong>新</strong>照片或文件（非還原備份）則依核心規則寫入 <code>memorial</code>。</li>
+<li>封存包的 JSON 為每筆內容保留 <code>layer</code>、<code>author_id</code>、<code>created_at</code>、<code>archive_session_id</code>；Markdown 將追憶內容放在 <code>markdown/remembrance/</code>，事件頁以「後續追憶」標題連結，與原始生命紀錄分開（見 8.2、8.4）。</li>
+<li>匯入時<strong>依封存包原樣還原層級，不重新判定</strong>；在生命典藏模式下匯入<strong>新</strong>照片或文件（非還原備份）則依核心規則寫入 <code>remembrance</code>。</li>
 </ul>
 <p>家族取得裝置或備份的具體途徑不由 APP 管理；<strong>不能假設遺族必然能解鎖手機</strong>，所以外部備份與解密資訊的適當交接依然重要。</p>
 <h2>10. 資料模型草案</h2>
@@ -1051,7 +1082,7 @@
 <tr>
 <td><code>reflections</code></td>
 <td>id, event_id, recorded_at, content_md, provenance, ＋層級欄位</td>
-<td>多次回顧與家屬追憶</td>
+<td>多次回顧與後續追憶</td>
 </tr>
 <tr>
 <td><code>stories</code> / <code>story_events</code></td>
@@ -1075,13 +1106,13 @@
 </tr>
 <tr>
 <td><code>archive_settings</code></td>
-<td>subject_id, mode, current_session_id</td>
-<td>目前封存狀態</td>
+<td>subject_id, mode（<code>normal</code>／<code>life_archive</code>）, current_session_id</td>
+<td>目前典藏狀態</td>
 </tr>
 <tr>
 <td><code>archive_sessions</code></td>
 <td>id, subject_id, activated_at, activated_by, deactivated_at, deactivated_by</td>
-<td>每段死亡模式期間</td>
+<td>每段生命典藏期間</td>
 </tr>
 <tr>
 <td><code>change_history</code></td>
@@ -1092,9 +1123,9 @@
 </table>
 <p><strong>層級欄位</strong>（所有內容表共用）：<code>layer</code>、<code>author_id</code>、<code>created_at</code>、<code>archive_session_id</code>。</p>
 <ul>
-<li><code>layer</code> 為 <code>original</code> 或 <code>memorial</code>，依第 9 節核心規則在<strong>建立時由資料存取層自動寫入，之後不可變更</strong>；判定只看當下的 <code>archive_settings.mode</code>，不參考任何內容時間。</li>
-<li><code>archive_session_id</code> 只在 <code>memorial</code> 內容填寫，指向建立時所屬的封存期間。</li>
-<li>資料庫層加上約束：<code>layer = memorial</code> 的內容，其 <code>author_id</code> 不可為主角本人；<code>layer</code> 欄位禁止更新（以觸發器拒絕 UPDATE）。</li>
+<li><code>layer</code> 為 <code>original</code> 或 <code>remembrance</code>，依第 9 節核心規則在<strong>建立時由資料存取層自動寫入，之後不可變更</strong>；判定只看當下的 <code>archive_settings.mode</code>，不參考任何內容時間。</li>
+<li><code>archive_session_id</code> 只在 <code>remembrance</code> 內容填寫，指向建立時所屬的典藏期間。</li>
+<li>資料庫層加上約束：<code>layer = remembrance</code> 的內容，其 <code>author_id</code> 不可為主角本人；<code>layer</code> 欄位禁止更新（以觸發器拒絕 UPDATE）。</li>
 <li>操作權限（第 9.3 節矩陣）由資料存取層統一檢查，介面、匯入、批次處理都不得繞過。</li>
 </ul>
 <p>時間欄位採具備 <code>precision</code>、<code>certainty</code>、<code>start</code>、<code>end</code>、<code>relative_to_event_id</code> 等屬性的結構，不能全部塞入單一必填日期欄；<code>sort_start</code>、<code>sort_end</code> 依 5.1 標準自動換算並建立索引，供時間軸排序與區間查詢使用。附件的 <code>captured_at</code>（拍攝或內容時間）與 <code>imported_at</code>（加入時間）分開保存。</p>
@@ -1168,8 +1199,8 @@
 </tr>
 <tr>
 <td><strong>第三階段</strong></td>
-<td>死亡模式、家屬追憶層、多人作者標示、備份驗證、長期相容及批次匯入</td>
-<td>唯讀原始層不可直接編輯；模式可逆；追憶獨立匯出還原</td>
+<td>生命典藏模式、後續追憶層、多人作者標示、備份驗證、長期相容及批次匯入</td>
+<td>唯讀原始生命紀錄層不可直接編輯；模式可逆；追憶獨立匯出還原</td>
 </tr>
 <tr>
 <td><strong>後續選配</strong></td>
@@ -1189,7 +1220,7 @@
 <li>大檔匯入中斷：不得將不完整附件誤標為可用，重啟後可恢復或安全清理。</li>
 <li>僅引用模式下原檔遺失：明確標示不可用，不假裝有完整副本。</li>
 <li>匯出含附件 ZIP：在 Windows、macOS、Android 用系統內建工具解開，Markdown 可閱讀、媒體可開啟、<code>index.html</code> 可用瀏覽器瀏覽；<code>SHA256SUMS.txt</code> 可用 <code>certutil</code>／<code>shasum</code> 驗證通過；另一裝置匯入後筆數與事件連結完全一致。</li>
-<li>開啟死亡模式後生前層無法修改；家屬追憶層可新增修改刪除；關閉後兩層資料都在。</li>
+<li>啟用生命典藏後原始生命紀錄層無法修改；後續追憶層可新增修改刪除；解除生命典藏後兩層資料都在。</li>
 <li>履歷視圖僅提取教育與職涯欄位，不把私人感情紀錄帶入。</li>
 <li>平板橫向開啟：顯示左時間軸、右紀事本末雙欄；旋轉為直向後保留目前選取節點與編輯內容。</li>
 <li>系統字級調至最大、開啟深色模式：主要畫面不破版、文字不被截斷，觸控目標仍達 48dp。</li>
@@ -1203,9 +1234,9 @@
 <li>竄改封存包內任一檔案（含 <code>manifest.json</code>）後匯入：驗證失敗並列出受影響項目，不靜默匯入。</li>
 <li>匯入含 <code>../</code> 路徑或符號連結的惡意 ZIP：拒絕匯入，APP 私有目錄外沒有任何檔案被寫入。</li>
 <li>影音總量超過 4 GB：ZIP64 封存可正常匯出、驗證、匯入；選擇分割時每一包都能單獨解開。</li>
-<li>死亡模式下，家屬於 2045 年加入父親 1990 年的照片：照片屬 <code>memorial</code> 層、可編輯、顯示於時間軸 1990 年並標示「家屬追憶」；附加到 1990 年原始事件時，原事件內容與修改時間不變。</li>
-<li>關閉死亡模式後：先前的家屬追憶仍標示為追憶、作者為家屬；不能將其作者改為主角本人，也不能把層級改為 <code>original</code>。</li>
-<li>匯出後再匯入另一裝置（不論該裝置是否為死亡模式）：每筆內容的 <code>layer</code>、作者、建立時間與封存期間完全保留。</li>
+<li>生命典藏模式下，家屬於 2045 年加入父親 1990 年的照片：照片屬 <code>remembrance</code> 層、可編輯、顯示於時間軸 1990 年並標示「後續追憶」；附加到 1990 年原始事件時，原事件內容與修改時間不變。</li>
+<li>解除生命典藏後：先前的後續追憶仍標示為追憶、作者為家屬；不能將其作者改為主角本人，也不能把層級改為 <code>original</code>。</li>
+<li>匯出後再匯入另一裝置（不論該裝置是否為生命典藏模式）：每筆內容的 <code>layer</code>、作者、建立時間與典藏期間完全保留。</li>
 <li>某年 20 筆事件：年份標題顯示「20 筆」，並完整列出 20 筆，不省略。</li>
 <li>建立跨 50 年的 1,000 筆事件：從 2026 年經年份按鈕一次點選跳到 1990 年；連續捲動與快速捲動條皆無明顯卡頓。</li>
 <li>套用「職涯」篩選：頂部顯示篩選標籤與符合筆數，無結果的年份隱藏；一次點擊清除後恢復全部。</li>
