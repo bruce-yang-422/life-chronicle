@@ -53,6 +53,8 @@ dev_dependencies:
 
 # Flutter 專用設定
 flutter:
+  # 依 l10n.yaml 產生介面文字類別（lib/l10n/）
+  generate: true
   # 使用 Material Icons 圖示字型
   uses-material-design: true
 

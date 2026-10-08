@@ -1,0 +1,6 @@
+# 介面文字（gen-l10n）設定：只提供繁體中文
+arb-dir: lib/l10n
+template-arb-file: app_zh.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
