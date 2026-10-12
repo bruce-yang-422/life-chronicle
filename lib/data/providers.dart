@@ -8,6 +8,13 @@ import 'repositories/person_repository.dart';
 import 'repositories/place_repository.dart';
 import 'repositories/profile_repository.dart';
 import 'repositories/repository_context.dart';
+import 'repositories/timeline_repository.dart';
+import 'repositories/timeline_preferences_store.dart';
+
+final timelinePreferencesStoreProvider =
+    FutureProvider<TimelinePreferencesStore>(
+      (ref) => FileTimelinePreferencesStore.open(),
+    );
 
 /// 資料庫連線。測試時以記憶體資料庫覆寫。
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -63,3 +70,48 @@ final timelineItemsProvider = StreamProvider<List<TimelineItem<Event>>>((
   final repository = await ref.watch(eventRepositoryProvider.future);
   yield* repository.watchTimeline();
 });
+
+final timelineRepositoryProvider = FutureProvider<TimelineRepository>(
+  (ref) async =>
+      TimelineRepository(await ref.watch(repositoryContextProvider.future)),
+);
+
+final timelineYearsProvider = StreamProvider<List<TimelineYearCount>>((
+  ref,
+) async* {
+  final filter = ref.watch(timelineFilterProvider);
+  final repository = await ref.watch(timelineRepositoryProvider.future);
+  yield* repository.watchYears(filter: filter);
+});
+
+final timelineAllYearsProvider = StreamProvider<List<TimelineYearCount>>((
+  ref,
+) async* {
+  final repository = await ref.watch(timelineRepositoryProvider.future);
+  yield* repository.watchYears();
+});
+
+class TimelineFilterController extends Notifier<TimelineFilter> {
+  @override
+  TimelineFilter build() => const TimelineFilter();
+  void apply(TimelineFilter filter) => state = filter;
+}
+
+final timelineFilterProvider =
+    NotifierProvider<TimelineFilterController, TimelineFilter>(
+      TimelineFilterController.new,
+    );
+
+final timelineFilterOptionsProvider =
+    FutureProvider.autoDispose<TimelineFilterOptions>((ref) async {
+      final repository = await ref.watch(timelineRepositoryProvider.future);
+      return repository.filterOptions();
+    });
+
+/// 離開畫面後釋放該年份的事件與資料庫監聽。
+final timelineYearProvider = StreamProvider.autoDispose
+    .family<TimelineYearData, int?>((ref, year) async* {
+      final filter = ref.watch(timelineFilterProvider);
+      final repository = await ref.watch(timelineRepositoryProvider.future);
+      yield* repository.watchYear(year, filter: filter);
+    });

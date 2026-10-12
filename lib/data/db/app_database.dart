@@ -16,6 +16,7 @@ part 'app_database.g.dart';
     Events,
     EventSections,
     LifePeriods,
+    EventLifePeriods,
     Reflections,
     Stories,
     StoryEvents,
@@ -81,12 +82,12 @@ List<String> layerTriggers(String table) => [
   'CREATE TRIGGER ${table}_remembrance_author_insert '
       'BEFORE INSERT ON $table '
       "WHEN NEW.layer = 'remembrance' AND EXISTS ("
-      'SELECT 1 FROM authors WHERE id = NEW.author_id AND is_subject_self = 1) '
+      'SELECT 1 FROM authors WHERE author_id = NEW.author_id AND is_subject_self = 1) '
       "BEGIN SELECT RAISE(ABORT, '後續追憶層內容的作者不得為主角本人'); END",
   'CREATE TRIGGER ${table}_remembrance_author_update '
       'BEFORE UPDATE OF author_id ON $table '
       "WHEN NEW.layer = 'remembrance' AND EXISTS ("
-      'SELECT 1 FROM authors WHERE id = NEW.author_id AND is_subject_self = 1) '
+      'SELECT 1 FROM authors WHERE author_id = NEW.author_id AND is_subject_self = 1) '
       "BEGIN SELECT RAISE(ABORT, '後續追憶層內容的作者不得為主角本人'); END",
 ];
 
@@ -95,6 +96,6 @@ final String _authorSelfFlagTrigger =
     'CREATE TRIGGER authors_self_flag_guard '
     'BEFORE UPDATE OF is_subject_self ON authors '
     'WHEN NEW.is_subject_self = 1 AND ('
-    '${layeredTables.map((t) => "EXISTS (SELECT 1 FROM $t WHERE author_id = NEW.id AND layer = 'remembrance')").join(' OR ')}'
+    '${layeredTables.map((t) => "EXISTS (SELECT 1 FROM $t WHERE author_id = NEW.author_id AND layer = 'remembrance')").join(' OR ')}'
     ') '
     "BEGIN SELECT RAISE(ABORT, '此作者已撰寫後續追憶，不可標記為主角本人'); END";

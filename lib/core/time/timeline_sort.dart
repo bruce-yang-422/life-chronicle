@@ -61,6 +61,16 @@ class TimelineGroup<T> {
 ///
 /// 畫面、匯出或其他功能需要依時間排序時，一律呼叫本類別，不得另寫排序邏輯。
 abstract final class TimelineSort {
+  /// 年份導航與分組共用同一方向；時間未定固定在最後。
+  static List<int?> orderYears(Iterable<int?> years, SortDirection direction) {
+    final unique = years.toSet();
+    final known = unique.whereType<int>().toList()..sort();
+    return [
+      ...direction == SortDirection.newestFirst ? known.reversed : known,
+      if (unique.contains(null)) null,
+    ];
+  }
+
   /// 比較兩個項目（不含相對事件的緊鄰規則）。
   ///
   /// 舊到新：
@@ -212,13 +222,9 @@ abstract final class TimelineSort {
     for (final item in sort(items, direction)) {
       buckets.putIfAbsent(item.groupYear, () => []).add(item);
     }
-    final years = buckets.keys.whereType<int>().toList()..sort();
-    final ordered = direction == SortDirection.newestFirst
-        ? years.reversed
-        : years;
     return [
-      for (final year in ordered) TimelineGroup(year, buckets[year]!),
-      if (buckets.containsKey(null)) TimelineGroup(null, buckets[null]!),
+      for (final year in orderYears(buckets.keys, direction))
+        TimelineGroup(year, buckets[year]!),
     ];
   }
 }

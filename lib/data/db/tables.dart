@@ -4,6 +4,25 @@ import 'package:drift/drift.dart';
 //
 // 第一階段用不到的資料表也先建立，避免日後遷移。
 // 欄位名稱以 snake_case 對應到 SQL（見 build.yaml）。
+// Dart 模型共用 id 存取介面，以 named 映射至具體的 SQL 主鍵名稱。
+
+/// 初始資料庫的主鍵名稱，供結構驗證使用。
+const primaryKeyColumnNames = {
+  'subjects': 'subject_id',
+  'authors': 'author_id',
+  'archive_sessions': 'archive_session_id',
+  'events': 'event_id',
+  'event_sections': 'event_section_id',
+  'life_periods': 'life_period_id',
+  'reflections': 'reflection_id',
+  'stories': 'story_id',
+  'blobs': 'blob_id',
+  'attachments': 'attachment_id',
+  'places': 'place_id',
+  'people': 'person_id',
+  'tags': 'tag_id',
+  'change_history': 'change_history_id',
+};
 
 /// 層級代號（企劃書第 9 節）：原始生命紀錄層、後續追憶層。
 abstract final class Layer {
@@ -42,7 +61,7 @@ mixin LayerColumns on Table {
 
 /// 生命檔案主角。
 class Subjects extends Table {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('subject_id')();
   TextColumn get displayName => text()();
 
   /// 生日，以時間值 JSON 保存（精確日期、年月或年份）。
@@ -57,7 +76,7 @@ class Subjects extends Table {
 
 /// 作者：本人或家人，與主角分離。
 class Authors extends Table {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('author_id')();
   TextColumn get displayName => text()();
   TextColumn get role => text()();
 
@@ -88,7 +107,7 @@ class ArchiveSettings extends Table {
 
 /// 每段生命典藏期間。
 class ArchiveSessions extends Table {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('archive_session_id')();
   TextColumn get subjectId => text().references(Subjects, #id)();
   DateTimeColumn get activatedAt => dateTime()();
   @ReferenceName('activatedArchiveSessions')
@@ -105,7 +124,7 @@ class ArchiveSessions extends Table {
 @TableIndex(name: 'events_sort_start', columns: {#sortStart})
 @TableIndex(name: 'events_sort_end', columns: {#sortEnd})
 class Events extends Table with LayerColumns {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('event_id')();
   TextColumn get subjectId => text().references(Subjects, #id)();
   TextColumn get title => text()();
   TextColumn get category => text().nullable()();
@@ -147,7 +166,7 @@ class Events extends Table with LayerColumns {
 
 /// 記述段落：使用者自由組成（企劃書 4.2）。
 class EventSections extends Table with LayerColumns {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('event_section_id')();
   TextColumn get eventId => text().references(Events, #id)();
 
   /// 顯示標題；未命名的「記述」可為 null。
@@ -167,7 +186,7 @@ class EventSections extends Table with LayerColumns {
 
 /// 求學、任職等區間。
 class LifePeriods extends Table with LayerColumns {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('life_period_id')();
   TextColumn get subjectId => text().references(Subjects, #id)();
   TextColumn get type => text()();
 
@@ -184,9 +203,21 @@ class LifePeriods extends Table with LayerColumns {
   List<String> get customConstraints => [_layerCheck];
 }
 
+/// 事件明確連結到人生階段；不依時間區間自動推斷歸屬。
+class EventLifePeriods extends Table with LayerColumns {
+  TextColumn get eventId => text().references(Events, #id)();
+  TextColumn get lifePeriodId => text().references(LifePeriods, #id)();
+
+  @override
+  Set<Column> get primaryKey => {eventId, lifePeriodId};
+
+  @override
+  List<String> get customConstraints => [_layerCheck];
+}
+
 /// 多次回顧與後續追憶（只能追加）。
 class Reflections extends Table with LayerColumns {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('reflection_id')();
   TextColumn get eventId => text().references(Events, #id)();
   DateTimeColumn get recordedAt => dateTime()();
   TextColumn get contentMd => text()();
@@ -201,7 +232,7 @@ class Reflections extends Table with LayerColumns {
 
 /// 紀事本末篇章。
 class Stories extends Table with LayerColumns {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('story_id')();
   TextColumn get title => text()();
 
   @override
@@ -225,7 +256,7 @@ class StoryEvents extends Table {
 
 /// 單一實體檔案（以 SHA-256 去重）。
 class Blobs extends Table {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('blob_id')();
   TextColumn get sha256 => text().unique()();
   IntColumn get byteSize => integer()();
   TextColumn get mediaType => text()();
@@ -238,7 +269,7 @@ class Blobs extends Table {
 
 /// 附件引用：多個事件可共用同一個 blob。
 class Attachments extends Table with LayerColumns {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('attachment_id')();
   TextColumn get eventId => text().references(Events, #id)();
   TextColumn get blobId => text().references(Blobs, #id)();
   TextColumn get displayName => text()();
@@ -268,7 +299,7 @@ class Attachments extends Table with LayerColumns {
 
 /// 地點（企劃書 4.1）：同一地點只保存一次。名稱與座標至少擇一。
 class Places extends Table {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('place_id')();
 
   /// 顯示名稱（使用者第一次輸入的寫法）；純座標地點可為 null。
   TextColumn get name => text().nullable()();
@@ -299,7 +330,7 @@ class Places extends Table {
 /// 參與人物：與「作者」不同，是事件中出現的人。
 @DataClassName('Person')
 class People extends Table {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('person_id')();
   TextColumn get displayName => text()();
 
   /// 比對用的正規化名稱，規則同地點，唯一。
@@ -343,7 +374,7 @@ class EventLinks extends Table with LayerColumns {
 }
 
 class Tags extends Table {
-  TextColumn get id => text()();
+  TextColumn get id => text().named('tag_id')();
   TextColumn get label => text().unique()();
 
   @override
@@ -364,7 +395,7 @@ class EventTags extends Table with LayerColumns {
 /// 修訂來源紀錄。第一階段只記錄，不實作清除機制（保存期限待決策）。
 @DataClassName('ChangeHistoryEntry')
 class ChangeHistory extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  IntColumn get id => integer().named('change_history_id').autoIncrement()();
   TextColumn get entityId => text()();
   TextColumn get operation => text()();
   TextColumn get authorId => text().references(Authors, #id)();
@@ -382,4 +413,5 @@ const layeredTables = [
   'event_tags',
   'event_people',
   'event_links',
+  'event_life_periods',
 ];

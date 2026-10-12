@@ -355,6 +355,7 @@ class EventRepository {
           'EXISTS (SELECT 1 FROM reflections WHERE event_id = ?1 AND layer = ?2) OR '
           'EXISTS (SELECT 1 FROM event_tags WHERE event_id = ?1 AND layer = ?2) OR '
           'EXISTS (SELECT 1 FROM event_people WHERE event_id = ?1 AND layer = ?2) OR '
+          'EXISTS (SELECT 1 FROM event_life_periods WHERE event_id = ?1 AND layer = ?2) OR '
           'EXISTS (SELECT 1 FROM event_links '
           'WHERE (event_a_id = ?1 OR event_b_id = ?1) AND layer = ?2)'
           ') AS has_remembrance',
@@ -372,6 +373,7 @@ class EventRepository {
       'reflections',
       'event_tags',
       'event_people',
+      'event_life_periods',
     ]) {
       await db.customStatement(
         'DELETE FROM $table WHERE event_id = ? AND layer = ?',

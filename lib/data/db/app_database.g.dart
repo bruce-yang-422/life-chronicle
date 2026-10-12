@@ -11,7 +11,7 @@ class $SubjectsTable extends Subjects with TableInfo<$SubjectsTable, Subject> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'subject_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -64,8 +64,11 @@ class $SubjectsTable extends Subjects with TableInfo<$SubjectsTable, Subject> {
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('subject_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['subject_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -103,7 +106,7 @@ class $SubjectsTable extends Subjects with TableInfo<$SubjectsTable, Subject> {
     return Subject(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}subject_id'],
       )!,
       displayName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -144,7 +147,7 @@ class Subject extends DataClass implements Insertable<Subject> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['subject_id'] = Variable<String>(id);
     map['display_name'] = Variable<String>(displayName);
     if (!nullToAbsent || birthDate != null) {
       map['birth_date'] = Variable<String>(birthDate);
@@ -265,7 +268,7 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'subject_id': id,
       if (displayName != null) 'display_name': displayName,
       if (birthDate != null) 'birth_date': birthDate,
       if (deathDate != null) 'death_date': deathDate,
@@ -293,7 +296,7 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['subject_id'] = Variable<String>(id.value);
     }
     if (displayName.present) {
       map['display_name'] = Variable<String>(displayName.value);
@@ -331,7 +334,7 @@ class $AuthorsTable extends Authors with TableInfo<$AuthorsTable, Author> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'author_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -386,8 +389,11 @@ class $AuthorsTable extends Authors with TableInfo<$AuthorsTable, Author> {
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('author_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['author_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -430,7 +436,7 @@ class $AuthorsTable extends Authors with TableInfo<$AuthorsTable, Author> {
     return Author(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}author_id'],
       )!,
       displayName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -469,7 +475,7 @@ class Author extends DataClass implements Insertable<Author> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['author_id'] = Variable<String>(id);
     map['display_name'] = Variable<String>(displayName);
     map['role'] = Variable<String>(role);
     map['is_subject_self'] = Variable<bool>(isSubjectSelf);
@@ -585,7 +591,7 @@ class AuthorsCompanion extends UpdateCompanion<Author> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'author_id': id,
       if (displayName != null) 'display_name': displayName,
       if (role != null) 'role': role,
       if (isSubjectSelf != null) 'is_subject_self': isSubjectSelf,
@@ -613,7 +619,7 @@ class AuthorsCompanion extends UpdateCompanion<Author> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['author_id'] = Variable<String>(id.value);
     }
     if (displayName.present) {
       map['display_name'] = Variable<String>(displayName.value);
@@ -652,7 +658,7 @@ class $ArchiveSessionsTable extends ArchiveSessions
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'archive_session_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -669,7 +675,7 @@ class $ArchiveSessionsTable extends ArchiveSessions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES subjects (id)',
+      'REFERENCES subjects (subject_id)',
     ),
   );
   static const VerificationMeta _activatedAtMeta = const VerificationMeta(
@@ -694,7 +700,7 @@ class $ArchiveSessionsTable extends ArchiveSessions
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _deactivatedAtMeta = const VerificationMeta(
@@ -720,7 +726,7 @@ class $ArchiveSessionsTable extends ArchiveSessions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   @override
@@ -744,8 +750,11 @@ class $ArchiveSessionsTable extends ArchiveSessions
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('archive_session_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['archive_session_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -808,7 +817,7 @@ class $ArchiveSessionsTable extends ArchiveSessions
     return ArchiveSession(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}archive_session_id'],
       )!,
       subjectId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -857,7 +866,7 @@ class ArchiveSession extends DataClass implements Insertable<ArchiveSession> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['archive_session_id'] = Variable<String>(id);
     map['subject_id'] = Variable<String>(subjectId);
     map['activated_at'] = Variable<DateTime>(activatedAt);
     map['activated_by'] = Variable<String>(activatedBy);
@@ -1023,7 +1032,7 @@ class ArchiveSessionsCompanion extends UpdateCompanion<ArchiveSession> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'archive_session_id': id,
       if (subjectId != null) 'subject_id': subjectId,
       if (activatedAt != null) 'activated_at': activatedAt,
       if (activatedBy != null) 'activated_by': activatedBy,
@@ -1057,7 +1066,7 @@ class ArchiveSessionsCompanion extends UpdateCompanion<ArchiveSession> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['archive_session_id'] = Variable<String>(id.value);
     }
     if (subjectId.present) {
       map['subject_id'] = Variable<String>(subjectId.value);
@@ -1112,7 +1121,7 @@ class $ArchiveSettingsTable extends ArchiveSettings
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES subjects (id)',
+      'REFERENCES subjects (subject_id)',
     ),
   );
   static const VerificationMeta _modeMeta = const VerificationMeta('mode');
@@ -1136,7 +1145,7 @@ class $ArchiveSettingsTable extends ArchiveSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   @override
@@ -1382,7 +1391,7 @@ class $PlacesTable extends Places with TableInfo<$PlacesTable, Place> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'place_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -1475,8 +1484,11 @@ class $PlacesTable extends Places with TableInfo<$PlacesTable, Place> {
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('place_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['place_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -1529,7 +1541,7 @@ class $PlacesTable extends Places with TableInfo<$PlacesTable, Place> {
     return Place(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}place_id'],
       )!,
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1590,7 +1602,7 @@ class Place extends DataClass implements Insertable<Place> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['place_id'] = Variable<String>(id);
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
     }
@@ -1759,7 +1771,7 @@ class PlacesCompanion extends UpdateCompanion<Place> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'place_id': id,
       if (name != null) 'name': name,
       if (nameKey != null) 'name_key': nameKey,
       if (latitude != null) 'latitude': latitude,
@@ -1796,7 +1808,7 @@ class PlacesCompanion extends UpdateCompanion<Place> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['place_id'] = Variable<String>(id.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1863,7 +1875,7 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -1888,13 +1900,13 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'event_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -1911,7 +1923,7 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES subjects (id)',
+      'REFERENCES subjects (subject_id)',
     ),
   );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
@@ -1990,7 +2002,7 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES places (id)',
+      'REFERENCES places (place_id)',
     ),
   );
   static const VerificationMeta _privacyMeta = const VerificationMeta(
@@ -2103,8 +2115,11 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
         ),
       );
     }
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('event_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['event_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -2221,7 +2236,7 @@ class $EventsTable extends Events with TableInfo<$EventsTable, Event> {
       ),
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}event_id'],
       )!,
       subjectId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -2338,7 +2353,7 @@ class Event extends DataClass implements Insertable<Event> {
     if (!nullToAbsent || archiveSessionId != null) {
       map['archive_session_id'] = Variable<String>(archiveSessionId);
     }
-    map['id'] = Variable<String>(id);
+    map['event_id'] = Variable<String>(id);
     map['subject_id'] = Variable<String>(subjectId);
     map['title'] = Variable<String>(title);
     if (!nullToAbsent || category != null) {
@@ -2676,7 +2691,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
       if (authorId != null) 'author_id': authorId,
       if (createdAt != null) 'created_at': createdAt,
       if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
-      if (id != null) 'id': id,
+      if (id != null) 'event_id': id,
       if (subjectId != null) 'subject_id': subjectId,
       if (title != null) 'title': title,
       if (category != null) 'category': category,
@@ -2751,7 +2766,7 @@ class EventsCompanion extends UpdateCompanion<Event> {
       map['archive_session_id'] = Variable<String>(archiveSessionId.value);
     }
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['event_id'] = Variable<String>(id.value);
     }
     if (subjectId.present) {
       map['subject_id'] = Variable<String>(subjectId.value);
@@ -2847,7 +2862,7 @@ class $EventSectionsTable extends EventSections
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -2872,13 +2887,13 @@ class $EventSectionsTable extends EventSections
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'event_section_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -2895,7 +2910,7 @@ class $EventSectionsTable extends EventSections
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
@@ -2998,8 +3013,11 @@ class $EventSectionsTable extends EventSections
         ),
       );
     }
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('event_section_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['event_section_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -3069,7 +3087,7 @@ class $EventSectionsTable extends EventSections
       ),
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}event_section_id'],
       )!,
       eventId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -3136,7 +3154,7 @@ class EventSection extends DataClass implements Insertable<EventSection> {
     if (!nullToAbsent || archiveSessionId != null) {
       map['archive_session_id'] = Variable<String>(archiveSessionId);
     }
-    map['id'] = Variable<String>(id);
+    map['event_section_id'] = Variable<String>(id);
     map['event_id'] = Variable<String>(eventId);
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
@@ -3359,7 +3377,7 @@ class EventSectionsCompanion extends UpdateCompanion<EventSection> {
       if (authorId != null) 'author_id': authorId,
       if (createdAt != null) 'created_at': createdAt,
       if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
-      if (id != null) 'id': id,
+      if (id != null) 'event_section_id': id,
       if (eventId != null) 'event_id': eventId,
       if (title != null) 'title': title,
       if (suggestionKey != null) 'suggestion_key': suggestionKey,
@@ -3413,7 +3431,7 @@ class EventSectionsCompanion extends UpdateCompanion<EventSection> {
       map['archive_session_id'] = Variable<String>(archiveSessionId.value);
     }
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['event_section_id'] = Variable<String>(id.value);
     }
     if (eventId.present) {
       map['event_id'] = Variable<String>(eventId.value);
@@ -3481,7 +3499,7 @@ class $LifePeriodsTable extends LifePeriods
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -3506,13 +3524,13 @@ class $LifePeriodsTable extends LifePeriods
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'life_period_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -3529,7 +3547,7 @@ class $LifePeriodsTable extends LifePeriods
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES subjects (id)',
+      'REFERENCES subjects (subject_id)',
     ),
   );
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -3642,8 +3660,11 @@ class $LifePeriodsTable extends LifePeriods
         ),
       );
     }
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('life_period_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['life_period_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -3719,7 +3740,7 @@ class $LifePeriodsTable extends LifePeriods
       ),
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}life_period_id'],
       )!,
       subjectId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -3790,7 +3811,7 @@ class LifePeriod extends DataClass implements Insertable<LifePeriod> {
     if (!nullToAbsent || archiveSessionId != null) {
       map['archive_session_id'] = Variable<String>(archiveSessionId);
     }
-    map['id'] = Variable<String>(id);
+    map['life_period_id'] = Variable<String>(id);
     map['subject_id'] = Variable<String>(subjectId);
     map['type'] = Variable<String>(type);
     map['start_time'] = Variable<String>(startTime);
@@ -4027,7 +4048,7 @@ class LifePeriodsCompanion extends UpdateCompanion<LifePeriod> {
       if (authorId != null) 'author_id': authorId,
       if (createdAt != null) 'created_at': createdAt,
       if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
-      if (id != null) 'id': id,
+      if (id != null) 'life_period_id': id,
       if (subjectId != null) 'subject_id': subjectId,
       if (type != null) 'type': type,
       if (startTime != null) 'start_time': startTime,
@@ -4084,7 +4105,7 @@ class LifePeriodsCompanion extends UpdateCompanion<LifePeriod> {
       map['archive_session_id'] = Variable<String>(archiveSessionId.value);
     }
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['life_period_id'] = Variable<String>(id.value);
     }
     if (subjectId.present) {
       map['subject_id'] = Variable<String>(subjectId.value);
@@ -4130,6 +4151,450 @@ class LifePeriodsCompanion extends UpdateCompanion<LifePeriod> {
   }
 }
 
+class $EventLifePeriodsTable extends EventLifePeriods
+    with TableInfo<$EventLifePeriodsTable, EventLifePeriod> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EventLifePeriodsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _layerMeta = const VerificationMeta('layer');
+  @override
+  late final GeneratedColumn<String> layer = GeneratedColumn<String>(
+    'layer',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorIdMeta = const VerificationMeta(
+    'authorId',
+  );
+  @override
+  late final GeneratedColumn<String> authorId = GeneratedColumn<String>(
+    'author_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES authors (author_id)',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _archiveSessionIdMeta = const VerificationMeta(
+    'archiveSessionId',
+  );
+  @override
+  late final GeneratedColumn<String> archiveSessionId = GeneratedColumn<String>(
+    'archive_session_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES archive_sessions (archive_session_id)',
+    ),
+  );
+  static const VerificationMeta _eventIdMeta = const VerificationMeta(
+    'eventId',
+  );
+  @override
+  late final GeneratedColumn<String> eventId = GeneratedColumn<String>(
+    'event_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES events (event_id)',
+    ),
+  );
+  static const VerificationMeta _lifePeriodIdMeta = const VerificationMeta(
+    'lifePeriodId',
+  );
+  @override
+  late final GeneratedColumn<String> lifePeriodId = GeneratedColumn<String>(
+    'life_period_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES life_periods (life_period_id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    layer,
+    authorId,
+    createdAt,
+    archiveSessionId,
+    eventId,
+    lifePeriodId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'event_life_periods';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EventLifePeriod> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('layer')) {
+      context.handle(
+        _layerMeta,
+        layer.isAcceptableOrUnknown(data['layer']!, _layerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_layerMeta);
+    }
+    if (data.containsKey('author_id')) {
+      context.handle(
+        _authorIdMeta,
+        authorId.isAcceptableOrUnknown(data['author_id']!, _authorIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_authorIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('archive_session_id')) {
+      context.handle(
+        _archiveSessionIdMeta,
+        archiveSessionId.isAcceptableOrUnknown(
+          data['archive_session_id']!,
+          _archiveSessionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('event_id')) {
+      context.handle(
+        _eventIdMeta,
+        eventId.isAcceptableOrUnknown(data['event_id']!, _eventIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventIdMeta);
+    }
+    if (data.containsKey('life_period_id')) {
+      context.handle(
+        _lifePeriodIdMeta,
+        lifePeriodId.isAcceptableOrUnknown(
+          data['life_period_id']!,
+          _lifePeriodIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lifePeriodIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {eventId, lifePeriodId};
+  @override
+  EventLifePeriod map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EventLifePeriod(
+      layer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}layer'],
+      )!,
+      authorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      archiveSessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}archive_session_id'],
+      ),
+      eventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_id'],
+      )!,
+      lifePeriodId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}life_period_id'],
+      )!,
+    );
+  }
+
+  @override
+  $EventLifePeriodsTable createAlias(String alias) {
+    return $EventLifePeriodsTable(attachedDatabase, alias);
+  }
+}
+
+class EventLifePeriod extends DataClass implements Insertable<EventLifePeriod> {
+  final String layer;
+  final String authorId;
+  final DateTime createdAt;
+  final String? archiveSessionId;
+  final String eventId;
+  final String lifePeriodId;
+  const EventLifePeriod({
+    required this.layer,
+    required this.authorId,
+    required this.createdAt,
+    this.archiveSessionId,
+    required this.eventId,
+    required this.lifePeriodId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['layer'] = Variable<String>(layer);
+    map['author_id'] = Variable<String>(authorId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || archiveSessionId != null) {
+      map['archive_session_id'] = Variable<String>(archiveSessionId);
+    }
+    map['event_id'] = Variable<String>(eventId);
+    map['life_period_id'] = Variable<String>(lifePeriodId);
+    return map;
+  }
+
+  EventLifePeriodsCompanion toCompanion(bool nullToAbsent) {
+    return EventLifePeriodsCompanion(
+      layer: Value(layer),
+      authorId: Value(authorId),
+      createdAt: Value(createdAt),
+      archiveSessionId: archiveSessionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archiveSessionId),
+      eventId: Value(eventId),
+      lifePeriodId: Value(lifePeriodId),
+    );
+  }
+
+  factory EventLifePeriod.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EventLifePeriod(
+      layer: serializer.fromJson<String>(json['layer']),
+      authorId: serializer.fromJson<String>(json['authorId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      archiveSessionId: serializer.fromJson<String?>(json['archiveSessionId']),
+      eventId: serializer.fromJson<String>(json['eventId']),
+      lifePeriodId: serializer.fromJson<String>(json['lifePeriodId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'layer': serializer.toJson<String>(layer),
+      'authorId': serializer.toJson<String>(authorId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'archiveSessionId': serializer.toJson<String?>(archiveSessionId),
+      'eventId': serializer.toJson<String>(eventId),
+      'lifePeriodId': serializer.toJson<String>(lifePeriodId),
+    };
+  }
+
+  EventLifePeriod copyWith({
+    String? layer,
+    String? authorId,
+    DateTime? createdAt,
+    Value<String?> archiveSessionId = const Value.absent(),
+    String? eventId,
+    String? lifePeriodId,
+  }) => EventLifePeriod(
+    layer: layer ?? this.layer,
+    authorId: authorId ?? this.authorId,
+    createdAt: createdAt ?? this.createdAt,
+    archiveSessionId: archiveSessionId.present
+        ? archiveSessionId.value
+        : this.archiveSessionId,
+    eventId: eventId ?? this.eventId,
+    lifePeriodId: lifePeriodId ?? this.lifePeriodId,
+  );
+  EventLifePeriod copyWithCompanion(EventLifePeriodsCompanion data) {
+    return EventLifePeriod(
+      layer: data.layer.present ? data.layer.value : this.layer,
+      authorId: data.authorId.present ? data.authorId.value : this.authorId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      archiveSessionId: data.archiveSessionId.present
+          ? data.archiveSessionId.value
+          : this.archiveSessionId,
+      eventId: data.eventId.present ? data.eventId.value : this.eventId,
+      lifePeriodId: data.lifePeriodId.present
+          ? data.lifePeriodId.value
+          : this.lifePeriodId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EventLifePeriod(')
+          ..write('layer: $layer, ')
+          ..write('authorId: $authorId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('archiveSessionId: $archiveSessionId, ')
+          ..write('eventId: $eventId, ')
+          ..write('lifePeriodId: $lifePeriodId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    layer,
+    authorId,
+    createdAt,
+    archiveSessionId,
+    eventId,
+    lifePeriodId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EventLifePeriod &&
+          other.layer == this.layer &&
+          other.authorId == this.authorId &&
+          other.createdAt == this.createdAt &&
+          other.archiveSessionId == this.archiveSessionId &&
+          other.eventId == this.eventId &&
+          other.lifePeriodId == this.lifePeriodId);
+}
+
+class EventLifePeriodsCompanion extends UpdateCompanion<EventLifePeriod> {
+  final Value<String> layer;
+  final Value<String> authorId;
+  final Value<DateTime> createdAt;
+  final Value<String?> archiveSessionId;
+  final Value<String> eventId;
+  final Value<String> lifePeriodId;
+  final Value<int> rowid;
+  const EventLifePeriodsCompanion({
+    this.layer = const Value.absent(),
+    this.authorId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.archiveSessionId = const Value.absent(),
+    this.eventId = const Value.absent(),
+    this.lifePeriodId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  EventLifePeriodsCompanion.insert({
+    required String layer,
+    required String authorId,
+    required DateTime createdAt,
+    this.archiveSessionId = const Value.absent(),
+    required String eventId,
+    required String lifePeriodId,
+    this.rowid = const Value.absent(),
+  }) : layer = Value(layer),
+       authorId = Value(authorId),
+       createdAt = Value(createdAt),
+       eventId = Value(eventId),
+       lifePeriodId = Value(lifePeriodId);
+  static Insertable<EventLifePeriod> custom({
+    Expression<String>? layer,
+    Expression<String>? authorId,
+    Expression<DateTime>? createdAt,
+    Expression<String>? archiveSessionId,
+    Expression<String>? eventId,
+    Expression<String>? lifePeriodId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (layer != null) 'layer': layer,
+      if (authorId != null) 'author_id': authorId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
+      if (eventId != null) 'event_id': eventId,
+      if (lifePeriodId != null) 'life_period_id': lifePeriodId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  EventLifePeriodsCompanion copyWith({
+    Value<String>? layer,
+    Value<String>? authorId,
+    Value<DateTime>? createdAt,
+    Value<String?>? archiveSessionId,
+    Value<String>? eventId,
+    Value<String>? lifePeriodId,
+    Value<int>? rowid,
+  }) {
+    return EventLifePeriodsCompanion(
+      layer: layer ?? this.layer,
+      authorId: authorId ?? this.authorId,
+      createdAt: createdAt ?? this.createdAt,
+      archiveSessionId: archiveSessionId ?? this.archiveSessionId,
+      eventId: eventId ?? this.eventId,
+      lifePeriodId: lifePeriodId ?? this.lifePeriodId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (layer.present) {
+      map['layer'] = Variable<String>(layer.value);
+    }
+    if (authorId.present) {
+      map['author_id'] = Variable<String>(authorId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (archiveSessionId.present) {
+      map['archive_session_id'] = Variable<String>(archiveSessionId.value);
+    }
+    if (eventId.present) {
+      map['event_id'] = Variable<String>(eventId.value);
+    }
+    if (lifePeriodId.present) {
+      map['life_period_id'] = Variable<String>(lifePeriodId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EventLifePeriodsCompanion(')
+          ..write('layer: $layer, ')
+          ..write('authorId: $authorId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('archiveSessionId: $archiveSessionId, ')
+          ..write('eventId: $eventId, ')
+          ..write('lifePeriodId: $lifePeriodId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ReflectionsTable extends Reflections
     with TableInfo<$ReflectionsTable, Reflection> {
   @override
@@ -4156,7 +4621,7 @@ class $ReflectionsTable extends Reflections
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -4181,13 +4646,13 @@ class $ReflectionsTable extends Reflections
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'reflection_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -4204,7 +4669,7 @@ class $ReflectionsTable extends Reflections
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   static const VerificationMeta _recordedAtMeta = const VerificationMeta(
@@ -4297,8 +4762,11 @@ class $ReflectionsTable extends Reflections
         ),
       );
     }
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('reflection_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['reflection_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -4359,7 +4827,7 @@ class $ReflectionsTable extends Reflections
       ),
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}reflection_id'],
       )!,
       eventId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -4416,7 +4884,7 @@ class Reflection extends DataClass implements Insertable<Reflection> {
     if (!nullToAbsent || archiveSessionId != null) {
       map['archive_session_id'] = Variable<String>(archiveSessionId);
     }
-    map['id'] = Variable<String>(id);
+    map['reflection_id'] = Variable<String>(id);
     map['event_id'] = Variable<String>(eventId);
     map['recorded_at'] = Variable<DateTime>(recordedAt);
     map['content_md'] = Variable<String>(contentMd);
@@ -4621,7 +5089,7 @@ class ReflectionsCompanion extends UpdateCompanion<Reflection> {
       if (authorId != null) 'author_id': authorId,
       if (createdAt != null) 'created_at': createdAt,
       if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
-      if (id != null) 'id': id,
+      if (id != null) 'reflection_id': id,
       if (eventId != null) 'event_id': eventId,
       if (recordedAt != null) 'recorded_at': recordedAt,
       if (contentMd != null) 'content_md': contentMd,
@@ -4672,7 +5140,7 @@ class ReflectionsCompanion extends UpdateCompanion<Reflection> {
       map['archive_session_id'] = Variable<String>(archiveSessionId.value);
     }
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['reflection_id'] = Variable<String>(id.value);
     }
     if (eventId.present) {
       map['event_id'] = Variable<String>(eventId.value);
@@ -4735,7 +5203,7 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -4760,13 +5228,13 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'story_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -4835,8 +5303,11 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
         ),
       );
     }
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('story_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['story_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -4875,7 +5346,7 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
       ),
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}story_id'],
       )!,
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -4914,7 +5385,7 @@ class Story extends DataClass implements Insertable<Story> {
     if (!nullToAbsent || archiveSessionId != null) {
       map['archive_session_id'] = Variable<String>(archiveSessionId);
     }
-    map['id'] = Variable<String>(id);
+    map['story_id'] = Variable<String>(id);
     map['title'] = Variable<String>(title);
     return map;
   }
@@ -5061,7 +5532,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
       if (authorId != null) 'author_id': authorId,
       if (createdAt != null) 'created_at': createdAt,
       if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
-      if (id != null) 'id': id,
+      if (id != null) 'story_id': id,
       if (title != null) 'title': title,
       if (rowid != null) 'rowid': rowid,
     });
@@ -5103,7 +5574,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
       map['archive_session_id'] = Variable<String>(archiveSessionId.value);
     }
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['story_id'] = Variable<String>(id.value);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -5146,7 +5617,7 @@ class $StoryEventsTable extends StoryEvents
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES stories (id)',
+      'REFERENCES stories (story_id)',
     ),
   );
   static const VerificationMeta _eventIdMeta = const VerificationMeta(
@@ -5160,7 +5631,7 @@ class $StoryEventsTable extends StoryEvents
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   static const VerificationMeta _positionMeta = const VerificationMeta(
@@ -5411,7 +5882,7 @@ class $BlobsTable extends Blobs with TableInfo<$BlobsTable, Blob> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'blob_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -5490,8 +5961,11 @@ class $BlobsTable extends Blobs with TableInfo<$BlobsTable, Blob> {
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('blob_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['blob_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -5549,7 +6023,7 @@ class $BlobsTable extends Blobs with TableInfo<$BlobsTable, Blob> {
     return Blob(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}blob_id'],
       )!,
       sha256: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -5598,7 +6072,7 @@ class Blob extends DataClass implements Insertable<Blob> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['blob_id'] = Variable<String>(id);
     map['sha256'] = Variable<String>(sha256);
     map['byte_size'] = Variable<int>(byteSize);
     map['media_type'] = Variable<String>(mediaType);
@@ -5742,7 +6216,7 @@ class BlobsCompanion extends UpdateCompanion<Blob> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'blob_id': id,
       if (sha256 != null) 'sha256': sha256,
       if (byteSize != null) 'byte_size': byteSize,
       if (mediaType != null) 'media_type': mediaType,
@@ -5776,7 +6250,7 @@ class BlobsCompanion extends UpdateCompanion<Blob> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['blob_id'] = Variable<String>(id.value);
     }
     if (sha256.present) {
       map['sha256'] = Variable<String>(sha256.value);
@@ -5840,7 +6314,7 @@ class $AttachmentsTable extends Attachments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -5865,13 +6339,13 @@ class $AttachmentsTable extends Attachments
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'attachment_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -5888,7 +6362,7 @@ class $AttachmentsTable extends Attachments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   static const VerificationMeta _blobIdMeta = const VerificationMeta('blobId');
@@ -5900,7 +6374,7 @@ class $AttachmentsTable extends Attachments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES blobs (id)',
+      'REFERENCES blobs (blob_id)',
     ),
   );
   static const VerificationMeta _displayNameMeta = const VerificationMeta(
@@ -6053,8 +6527,11 @@ class $AttachmentsTable extends Attachments
         ),
       );
     }
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('attachment_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['attachment_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -6172,7 +6649,7 @@ class $AttachmentsTable extends Attachments
       ),
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}attachment_id'],
       )!,
       eventId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -6269,7 +6746,7 @@ class Attachment extends DataClass implements Insertable<Attachment> {
     if (!nullToAbsent || archiveSessionId != null) {
       map['archive_session_id'] = Variable<String>(archiveSessionId);
     }
-    map['id'] = Variable<String>(id);
+    map['attachment_id'] = Variable<String>(id);
     map['event_id'] = Variable<String>(eventId);
     map['blob_id'] = Variable<String>(blobId);
     map['display_name'] = Variable<String>(displayName);
@@ -6587,7 +7064,7 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
       if (authorId != null) 'author_id': authorId,
       if (createdAt != null) 'created_at': createdAt,
       if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
-      if (id != null) 'id': id,
+      if (id != null) 'attachment_id': id,
       if (eventId != null) 'event_id': eventId,
       if (blobId != null) 'blob_id': blobId,
       if (displayName != null) 'display_name': displayName,
@@ -6656,7 +7133,7 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
       map['archive_session_id'] = Variable<String>(archiveSessionId.value);
     }
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['attachment_id'] = Variable<String>(id.value);
     }
     if (eventId.present) {
       map['event_id'] = Variable<String>(eventId.value);
@@ -6726,7 +7203,7 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'tag_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -6756,8 +7233,11 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('tag_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['tag_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -6780,7 +7260,7 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
     return Tag(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}tag_id'],
       )!,
       label: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -6802,7 +7282,7 @@ class Tag extends DataClass implements Insertable<Tag> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['tag_id'] = Variable<String>(id);
     map['label'] = Variable<String>(label);
     return map;
   }
@@ -6877,7 +7357,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'tag_id': id,
       if (label != null) 'label': label,
       if (rowid != null) 'rowid': rowid,
     });
@@ -6899,7 +7379,7 @@ class TagsCompanion extends UpdateCompanion<Tag> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['tag_id'] = Variable<String>(id.value);
     }
     if (label.present) {
       map['label'] = Variable<String>(label.value);
@@ -6947,7 +7427,7 @@ class $EventTagsTable extends EventTags
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -6972,7 +7452,7 @@ class $EventTagsTable extends EventTags
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _eventIdMeta = const VerificationMeta(
@@ -6986,7 +7466,7 @@ class $EventTagsTable extends EventTags
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   static const VerificationMeta _tagIdMeta = const VerificationMeta('tagId');
@@ -6998,7 +7478,7 @@ class $EventTagsTable extends EventTags
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES tags (id)',
+      'REFERENCES tags (tag_id)',
     ),
   );
   @override
@@ -7360,7 +7840,7 @@ class $PeopleTable extends People with TableInfo<$PeopleTable, Person> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
+    'person_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -7414,8 +7894,11 @@ class $PeopleTable extends People with TableInfo<$PeopleTable, Person> {
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('person_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['person_id']!, _idMeta),
+      );
     } else if (isInserting) {
       context.missing(_idMeta);
     }
@@ -7457,7 +7940,7 @@ class $PeopleTable extends People with TableInfo<$PeopleTable, Person> {
     return Person(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}person_id'],
       )!,
       displayName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -7496,7 +7979,7 @@ class Person extends DataClass implements Insertable<Person> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['person_id'] = Variable<String>(id);
     map['display_name'] = Variable<String>(displayName);
     map['name_key'] = Variable<String>(nameKey);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -7611,7 +8094,7 @@ class PeopleCompanion extends UpdateCompanion<Person> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'person_id': id,
       if (displayName != null) 'display_name': displayName,
       if (nameKey != null) 'name_key': nameKey,
       if (createdAt != null) 'created_at': createdAt,
@@ -7639,7 +8122,7 @@ class PeopleCompanion extends UpdateCompanion<Person> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['person_id'] = Variable<String>(id.value);
     }
     if (displayName.present) {
       map['display_name'] = Variable<String>(displayName.value);
@@ -7695,7 +8178,7 @@ class $EventPeopleTable extends EventPeople
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -7720,7 +8203,7 @@ class $EventPeopleTable extends EventPeople
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _eventIdMeta = const VerificationMeta(
@@ -7734,7 +8217,7 @@ class $EventPeopleTable extends EventPeople
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   static const VerificationMeta _personIdMeta = const VerificationMeta(
@@ -7748,7 +8231,7 @@ class $EventPeopleTable extends EventPeople
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES people (id)',
+      'REFERENCES people (person_id)',
     ),
   );
   @override
@@ -8134,7 +8617,7 @@ class $EventLinksTable extends EventLinks
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -8159,7 +8642,7 @@ class $EventLinksTable extends EventLinks
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES archive_sessions (id)',
+      'REFERENCES archive_sessions (archive_session_id)',
     ),
   );
   static const VerificationMeta _eventAIdMeta = const VerificationMeta(
@@ -8173,7 +8656,7 @@ class $EventLinksTable extends EventLinks
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   static const VerificationMeta _eventBIdMeta = const VerificationMeta(
@@ -8187,7 +8670,7 @@ class $EventLinksTable extends EventLinks
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES events (id)',
+      'REFERENCES events (event_id)',
     ),
   );
   @override
@@ -8556,7 +9039,7 @@ class $ChangeHistoryTable extends ChangeHistory
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
+    'change_history_id',
     aliasedName,
     false,
     hasAutoIncrement: true,
@@ -8599,7 +9082,7 @@ class $ChangeHistoryTable extends ChangeHistory
     type: DriftSqlType.string,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES authors (id)',
+      'REFERENCES authors (author_id)',
     ),
   );
   static const VerificationMeta _timestampMeta = const VerificationMeta(
@@ -8633,8 +9116,11 @@ class $ChangeHistoryTable extends ChangeHistory
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    if (data.containsKey('change_history_id')) {
+      context.handle(
+        _idMeta,
+        id.isAcceptableOrUnknown(data['change_history_id']!, _idMeta),
+      );
     }
     if (data.containsKey('entity_id')) {
       context.handle(
@@ -8679,7 +9165,7 @@ class $ChangeHistoryTable extends ChangeHistory
     return ChangeHistoryEntry(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
-        data['${effectivePrefix}id'],
+        data['${effectivePrefix}change_history_id'],
       )!,
       entityId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -8723,7 +9209,7 @@ class ChangeHistoryEntry extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
+    map['change_history_id'] = Variable<int>(id);
     map['entity_id'] = Variable<String>(entityId);
     map['operation'] = Variable<String>(operation);
     map['author_id'] = Variable<String>(authorId);
@@ -8845,7 +9331,7 @@ class ChangeHistoryCompanion extends UpdateCompanion<ChangeHistoryEntry> {
     Expression<DateTime>? timestamp,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
+      if (id != null) 'change_history_id': id,
       if (entityId != null) 'entity_id': entityId,
       if (operation != null) 'operation': operation,
       if (authorId != null) 'author_id': authorId,
@@ -8873,7 +9359,7 @@ class ChangeHistoryCompanion extends UpdateCompanion<ChangeHistoryEntry> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['change_history_id'] = Variable<int>(id.value);
     }
     if (entityId.present) {
       map['entity_id'] = Variable<String>(entityId.value);
@@ -8918,6 +9404,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $EventsTable events = $EventsTable(this);
   late final $EventSectionsTable eventSections = $EventSectionsTable(this);
   late final $LifePeriodsTable lifePeriods = $LifePeriodsTable(this);
+  late final $EventLifePeriodsTable eventLifePeriods = $EventLifePeriodsTable(
+    this,
+  );
   late final $ReflectionsTable reflections = $ReflectionsTable(this);
   late final $StoriesTable stories = $StoriesTable(this);
   late final $StoryEventsTable storyEvents = $StoryEventsTable(this);
@@ -8950,6 +9439,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     events,
     eventSections,
     lifePeriods,
+    eventLifePeriods,
     reflections,
     stories,
     storyEvents,
@@ -8991,14 +9481,14 @@ final class $$SubjectsTableReferences
   static MultiTypedResultKey<$ArchiveSessionsTable, List<ArchiveSession>>
   _archiveSessionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.archiveSessions,
-    aliasName: 'subjects__id__archive_sessions__subject_id',
+    aliasName: 'subjects__subject_id__archive_sessions__subject_id',
   );
 
   $$ArchiveSessionsTableProcessedTableManager get archiveSessionsRefs {
-    final manager = $$ArchiveSessionsTableTableManager(
-      $_db,
-      $_db.archiveSessions,
-    ).filter((f) => f.subjectId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager =
+        $$ArchiveSessionsTableTableManager($_db, $_db.archiveSessions).filter(
+          (f) => f.subjectId.id.sqlEquals($_itemColumn<String>('subject_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(
       _archiveSessionsRefsTable($_db),
@@ -9011,14 +9501,14 @@ final class $$SubjectsTableReferences
   static MultiTypedResultKey<$ArchiveSettingsTable, List<ArchiveSetting>>
   _archiveSettingsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.archiveSettings,
-    aliasName: 'subjects__id__archive_settings__subject_id',
+    aliasName: 'subjects__subject_id__archive_settings__subject_id',
   );
 
   $$ArchiveSettingsTableProcessedTableManager get archiveSettingsRefs {
-    final manager = $$ArchiveSettingsTableTableManager(
-      $_db,
-      $_db.archiveSettings,
-    ).filter((f) => f.subjectId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager =
+        $$ArchiveSettingsTableTableManager($_db, $_db.archiveSettings).filter(
+          (f) => f.subjectId.id.sqlEquals($_itemColumn<String>('subject_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(
       _archiveSettingsRefsTable($_db),
@@ -9032,14 +9522,13 @@ final class $$SubjectsTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.events,
-    aliasName: 'subjects__id__events__subject_id',
+    aliasName: 'subjects__subject_id__events__subject_id',
   );
 
   $$EventsTableProcessedTableManager get eventsRefs {
-    final manager = $$EventsTableTableManager(
-      $_db,
-      $_db.events,
-    ).filter((f) => f.subjectId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$EventsTableTableManager($_db, $_db.events).filter(
+      (f) => f.subjectId.id.sqlEquals($_itemColumn<String>('subject_id')!),
+    );
 
     final cache = $_typedResult.readTableOrNull(_eventsRefsTable($_db));
     return ProcessedTableManager(
@@ -9050,14 +9539,14 @@ final class $$SubjectsTableReferences
   static MultiTypedResultKey<$LifePeriodsTable, List<LifePeriod>>
   _lifePeriodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.lifePeriods,
-    aliasName: 'subjects__id__life_periods__subject_id',
+    aliasName: 'subjects__subject_id__life_periods__subject_id',
   );
 
   $$LifePeriodsTableProcessedTableManager get lifePeriodsRefs {
-    final manager = $$LifePeriodsTableTableManager(
-      $_db,
-      $_db.lifePeriods,
-    ).filter((f) => f.subjectId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$LifePeriodsTableTableManager($_db, $_db.lifePeriods)
+        .filter(
+          (f) => f.subjectId.id.sqlEquals($_itemColumn<String>('subject_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_lifePeriodsRefsTable($_db));
     return ProcessedTableManager(
@@ -9569,14 +10058,14 @@ final class $$AuthorsTableReferences
   _activatedArchiveSessionsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.archiveSessions,
-        aliasName: 'authors__id__archive_sessions__activated_by',
+        aliasName: 'authors__author_id__archive_sessions__activated_by',
       );
 
   $$ArchiveSessionsTableProcessedTableManager get activatedArchiveSessions {
-    final manager = $$ArchiveSessionsTableTableManager(
-      $_db,
-      $_db.archiveSessions,
-    ).filter((f) => f.activatedBy.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager =
+        $$ArchiveSessionsTableTableManager($_db, $_db.archiveSessions).filter(
+          (f) => f.activatedBy.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(
       _activatedArchiveSessionsTable($_db),
@@ -9590,14 +10079,15 @@ final class $$AuthorsTableReferences
   _deactivatedArchiveSessionsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.archiveSessions,
-        aliasName: 'authors__id__archive_sessions__deactivated_by',
+        aliasName: 'authors__author_id__archive_sessions__deactivated_by',
       );
 
   $$ArchiveSessionsTableProcessedTableManager get deactivatedArchiveSessions {
-    final manager = $$ArchiveSessionsTableTableManager(
-      $_db,
-      $_db.archiveSessions,
-    ).filter((f) => f.deactivatedBy.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager =
+        $$ArchiveSessionsTableTableManager($_db, $_db.archiveSessions).filter(
+          (f) =>
+              f.deactivatedBy.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(
       _deactivatedArchiveSessionsTable($_db),
@@ -9611,14 +10101,13 @@ final class $$AuthorsTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.events,
-    aliasName: 'authors__id__events__author_id',
+    aliasName: 'authors__author_id__events__author_id',
   );
 
   $$EventsTableProcessedTableManager get eventsRefs {
-    final manager = $$EventsTableTableManager(
-      $_db,
-      $_db.events,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$EventsTableTableManager($_db, $_db.events).filter(
+      (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+    );
 
     final cache = $_typedResult.readTableOrNull(_eventsRefsTable($_db));
     return ProcessedTableManager(
@@ -9629,14 +10118,14 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$EventSectionsTable, List<EventSection>>
   _eventSectionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventSections,
-    aliasName: 'authors__id__event_sections__author_id',
+    aliasName: 'authors__author_id__event_sections__author_id',
   );
 
   $$EventSectionsTableProcessedTableManager get eventSectionsRefs {
-    final manager = $$EventSectionsTableTableManager(
-      $_db,
-      $_db.eventSections,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$EventSectionsTableTableManager($_db, $_db.eventSections)
+        .filter(
+          (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_eventSectionsRefsTable($_db));
     return ProcessedTableManager(
@@ -9647,16 +10136,36 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$LifePeriodsTable, List<LifePeriod>>
   _lifePeriodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.lifePeriods,
-    aliasName: 'authors__id__life_periods__author_id',
+    aliasName: 'authors__author_id__life_periods__author_id',
   );
 
   $$LifePeriodsTableProcessedTableManager get lifePeriodsRefs {
-    final manager = $$LifePeriodsTableTableManager(
-      $_db,
-      $_db.lifePeriods,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$LifePeriodsTableTableManager($_db, $_db.lifePeriods)
+        .filter(
+          (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_lifePeriodsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$EventLifePeriodsTable, List<EventLifePeriod>>
+  _eventLifePeriodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.eventLifePeriods,
+    aliasName: 'authors__author_id__event_life_periods__author_id',
+  );
+
+  $$EventLifePeriodsTableProcessedTableManager get eventLifePeriodsRefs {
+    final manager =
+        $$EventLifePeriodsTableTableManager($_db, $_db.eventLifePeriods).filter(
+          (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _eventLifePeriodsRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -9665,14 +10174,14 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$ReflectionsTable, List<Reflection>>
   _reflectionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.reflections,
-    aliasName: 'authors__id__reflections__author_id',
+    aliasName: 'authors__author_id__reflections__author_id',
   );
 
   $$ReflectionsTableProcessedTableManager get reflectionsRefs {
-    final manager = $$ReflectionsTableTableManager(
-      $_db,
-      $_db.reflections,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$ReflectionsTableTableManager($_db, $_db.reflections)
+        .filter(
+          (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_reflectionsRefsTable($_db));
     return ProcessedTableManager(
@@ -9684,14 +10193,13 @@ final class $$AuthorsTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.stories,
-    aliasName: 'authors__id__stories__author_id',
+    aliasName: 'authors__author_id__stories__author_id',
   );
 
   $$StoriesTableProcessedTableManager get storiesRefs {
-    final manager = $$StoriesTableTableManager(
-      $_db,
-      $_db.stories,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$StoriesTableTableManager($_db, $_db.stories).filter(
+      (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+    );
 
     final cache = $_typedResult.readTableOrNull(_storiesRefsTable($_db));
     return ProcessedTableManager(
@@ -9702,14 +10210,14 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$AttachmentsTable, List<Attachment>>
   _attachmentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.attachments,
-    aliasName: 'authors__id__attachments__author_id',
+    aliasName: 'authors__author_id__attachments__author_id',
   );
 
   $$AttachmentsTableProcessedTableManager get attachmentsRefs {
-    final manager = $$AttachmentsTableTableManager(
-      $_db,
-      $_db.attachments,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$AttachmentsTableTableManager($_db, $_db.attachments)
+        .filter(
+          (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_attachmentsRefsTable($_db));
     return ProcessedTableManager(
@@ -9720,14 +10228,13 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$EventTagsTable, List<EventTag>>
   _eventTagsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventTags,
-    aliasName: 'authors__id__event_tags__author_id',
+    aliasName: 'authors__author_id__event_tags__author_id',
   );
 
   $$EventTagsTableProcessedTableManager get eventTagsRefs {
-    final manager = $$EventTagsTableTableManager(
-      $_db,
-      $_db.eventTags,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$EventTagsTableTableManager($_db, $_db.eventTags).filter(
+      (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+    );
 
     final cache = $_typedResult.readTableOrNull(_eventTagsRefsTable($_db));
     return ProcessedTableManager(
@@ -9738,14 +10245,14 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
-    aliasName: 'authors__id__event_people__author_id',
+    aliasName: 'authors__author_id__event_people__author_id',
   );
 
   $$EventPeopleTableProcessedTableManager get eventPeopleRefs {
-    final manager = $$EventPeopleTableTableManager(
-      $_db,
-      $_db.eventPeople,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$EventPeopleTableTableManager($_db, $_db.eventPeople)
+        .filter(
+          (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_eventPeopleRefsTable($_db));
     return ProcessedTableManager(
@@ -9756,14 +10263,13 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$EventLinksTable, List<EventLink>>
   _eventLinksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventLinks,
-    aliasName: 'authors__id__event_links__author_id',
+    aliasName: 'authors__author_id__event_links__author_id',
   );
 
   $$EventLinksTableProcessedTableManager get eventLinksRefs {
-    final manager = $$EventLinksTableTableManager(
-      $_db,
-      $_db.eventLinks,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$EventLinksTableTableManager($_db, $_db.eventLinks).filter(
+      (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+    );
 
     final cache = $_typedResult.readTableOrNull(_eventLinksRefsTable($_db));
     return ProcessedTableManager(
@@ -9774,14 +10280,14 @@ final class $$AuthorsTableReferences
   static MultiTypedResultKey<$ChangeHistoryTable, List<ChangeHistoryEntry>>
   _changeHistoryRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.changeHistory,
-    aliasName: 'authors__id__change_history__author_id',
+    aliasName: 'authors__author_id__change_history__author_id',
   );
 
   $$ChangeHistoryTableProcessedTableManager get changeHistoryRefs {
-    final manager = $$ChangeHistoryTableTableManager(
-      $_db,
-      $_db.changeHistory,
-    ).filter((f) => f.authorId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$ChangeHistoryTableTableManager($_db, $_db.changeHistory)
+        .filter(
+          (f) => f.authorId.id.sqlEquals($_itemColumn<String>('author_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_changeHistoryRefsTable($_db));
     return ProcessedTableManager(
@@ -9935,6 +10441,31 @@ class $$AuthorsTableFilterComposer
           }) => $$LifePeriodsTableFilterComposer(
             $db: $db,
             $table: $db.lifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> eventLifePeriodsRefs(
+    Expression<bool> Function($$EventLifePeriodsTableFilterComposer f) f,
+  ) {
+    final $$EventLifePeriodsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.authorId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableFilterComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -10300,6 +10831,31 @@ class $$AuthorsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> eventLifePeriodsRefs<T extends Object>(
+    Expression<T> Function($$EventLifePeriodsTableAnnotationComposer a) f,
+  ) {
+    final $$EventLifePeriodsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.authorId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> reflectionsRefs<T extends Object>(
     Expression<T> Function($$ReflectionsTableAnnotationComposer a) f,
   ) {
@@ -10495,6 +11051,7 @@ class $$AuthorsTableTableManager
             bool eventsRefs,
             bool eventSectionsRefs,
             bool lifePeriodsRefs,
+            bool eventLifePeriodsRefs,
             bool reflectionsRefs,
             bool storiesRefs,
             bool attachmentsRefs,
@@ -10558,6 +11115,7 @@ class $$AuthorsTableTableManager
                 eventsRefs = false,
                 eventSectionsRefs = false,
                 lifePeriodsRefs = false,
+                eventLifePeriodsRefs = false,
                 reflectionsRefs = false,
                 storiesRefs = false,
                 attachmentsRefs = false,
@@ -10574,6 +11132,7 @@ class $$AuthorsTableTableManager
                     if (eventsRefs) db.events,
                     if (eventSectionsRefs) db.eventSections,
                     if (lifePeriodsRefs) db.lifePeriods,
+                    if (eventLifePeriodsRefs) db.eventLifePeriods,
                     if (reflectionsRefs) db.reflections,
                     if (storiesRefs) db.stories,
                     if (attachmentsRefs) db.attachments,
@@ -10680,6 +11239,27 @@ class $$AuthorsTableTableManager
                                 table,
                                 p0,
                               ).lifePeriodsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.authorId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (eventLifePeriodsRefs)
+                        await $_getPrefetchedData<
+                          Author,
+                          $AuthorsTable,
+                          EventLifePeriod
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AuthorsTableReferences
+                              ._eventLifePeriodsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AuthorsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).eventLifePeriodsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.authorId == item.id,
@@ -10855,6 +11435,7 @@ typedef $$AuthorsTableProcessedTableManager =
         bool eventsRefs,
         bool eventSectionsRefs,
         bool lifePeriodsRefs,
+        bool eventLifePeriodsRefs,
         bool reflectionsRefs,
         bool storiesRefs,
         bool attachmentsRefs,
@@ -10894,8 +11475,8 @@ final class $$ArchiveSessionsTableReferences
     super.$_typedResult,
   );
 
-  static $SubjectsTable _subjectIdTable(_$AppDatabase db) =>
-      db.subjects.createAlias('archive_sessions__subject_id__subjects__id');
+  static $SubjectsTable _subjectIdTable(_$AppDatabase db) => db.subjects
+      .createAlias('archive_sessions__subject_id__subjects__subject_id');
 
   $$SubjectsTableProcessedTableManager get subjectId {
     final $_column = $_itemColumn<String>('subject_id')!;
@@ -10911,8 +11492,8 @@ final class $$ArchiveSessionsTableReferences
     );
   }
 
-  static $AuthorsTable _activatedByTable(_$AppDatabase db) =>
-      db.authors.createAlias('archive_sessions__activated_by__authors__id');
+  static $AuthorsTable _activatedByTable(_$AppDatabase db) => db.authors
+      .createAlias('archive_sessions__activated_by__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get activatedBy {
     final $_column = $_itemColumn<String>('activated_by')!;
@@ -10928,8 +11509,8 @@ final class $$ArchiveSessionsTableReferences
     );
   }
 
-  static $AuthorsTable _deactivatedByTable(_$AppDatabase db) =>
-      db.authors.createAlias('archive_sessions__deactivated_by__authors__id');
+  static $AuthorsTable _deactivatedByTable(_$AppDatabase db) => db.authors
+      .createAlias('archive_sessions__deactivated_by__authors__author_id');
 
   $$AuthorsTableProcessedTableManager? get deactivatedBy {
     final $_column = $_itemColumn<String>('deactivated_by');
@@ -10948,13 +11529,15 @@ final class $$ArchiveSessionsTableReferences
   static MultiTypedResultKey<$ArchiveSettingsTable, List<ArchiveSetting>>
   _archiveSettingsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.archiveSettings,
-    aliasName: 'archive_sessions__id__archive_settings__current_session_id',
+    aliasName: 'archive_sessions__archive_session_id__archive_settings__current_session_id',
   );
 
   $$ArchiveSettingsTableProcessedTableManager get archiveSettingsRefs {
     final manager =
         $$ArchiveSettingsTableTableManager($_db, $_db.archiveSettings).filter(
-          (f) => f.currentSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+          (f) => f.currentSessionId.id.sqlEquals(
+            $_itemColumn<String>('archive_session_id')!,
+          ),
         );
 
     final cache = $_typedResult.readTableOrNull(
@@ -10969,12 +11552,15 @@ final class $$ArchiveSessionsTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.events,
-    aliasName: 'archive_sessions__id__events__archive_session_id',
+    aliasName:
+        'archive_sessions__archive_session_id__events__archive_session_id',
   );
 
   $$EventsTableProcessedTableManager get eventsRefs {
     final manager = $$EventsTableTableManager($_db, $_db.events).filter(
-      (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+      (f) => f.archiveSessionId.id.sqlEquals(
+        $_itemColumn<String>('archive_session_id')!,
+      ),
     );
 
     final cache = $_typedResult.readTableOrNull(_eventsRefsTable($_db));
@@ -10986,13 +11572,15 @@ final class $$ArchiveSessionsTableReferences
   static MultiTypedResultKey<$EventSectionsTable, List<EventSection>>
   _eventSectionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventSections,
-    aliasName: 'archive_sessions__id__event_sections__archive_session_id',
+    aliasName: 'archive_sessions__archive_session_id__event_sections__archive_session_id',
   );
 
   $$EventSectionsTableProcessedTableManager get eventSectionsRefs {
     final manager = $$EventSectionsTableTableManager($_db, $_db.eventSections)
         .filter(
-          (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+          (f) => f.archiveSessionId.id.sqlEquals(
+            $_itemColumn<String>('archive_session_id')!,
+          ),
         );
 
     final cache = $_typedResult.readTableOrNull(_eventSectionsRefsTable($_db));
@@ -11004,13 +11592,15 @@ final class $$ArchiveSessionsTableReferences
   static MultiTypedResultKey<$LifePeriodsTable, List<LifePeriod>>
   _lifePeriodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.lifePeriods,
-    aliasName: 'archive_sessions__id__life_periods__archive_session_id',
+    aliasName: 'archive_sessions__archive_session_id__life_periods__archive_session_id',
   );
 
   $$LifePeriodsTableProcessedTableManager get lifePeriodsRefs {
     final manager = $$LifePeriodsTableTableManager($_db, $_db.lifePeriods)
         .filter(
-          (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+          (f) => f.archiveSessionId.id.sqlEquals(
+            $_itemColumn<String>('archive_session_id')!,
+          ),
         );
 
     final cache = $_typedResult.readTableOrNull(_lifePeriodsRefsTable($_db));
@@ -11019,16 +11609,41 @@ final class $$ArchiveSessionsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$EventLifePeriodsTable, List<EventLifePeriod>>
+  _eventLifePeriodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.eventLifePeriods,
+    aliasName: 'archive_sessions__archive_session_id__event_life_periods__archive_session_id',
+  );
+
+  $$EventLifePeriodsTableProcessedTableManager get eventLifePeriodsRefs {
+    final manager =
+        $$EventLifePeriodsTableTableManager($_db, $_db.eventLifePeriods).filter(
+          (f) => f.archiveSessionId.id.sqlEquals(
+            $_itemColumn<String>('archive_session_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _eventLifePeriodsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$ReflectionsTable, List<Reflection>>
   _reflectionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.reflections,
-    aliasName: 'archive_sessions__id__reflections__archive_session_id',
+    aliasName:
+        'archive_sessions__archive_session_id__reflections__archive_session_id',
   );
 
   $$ReflectionsTableProcessedTableManager get reflectionsRefs {
     final manager = $$ReflectionsTableTableManager($_db, $_db.reflections)
         .filter(
-          (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+          (f) => f.archiveSessionId.id.sqlEquals(
+            $_itemColumn<String>('archive_session_id')!,
+          ),
         );
 
     final cache = $_typedResult.readTableOrNull(_reflectionsRefsTable($_db));
@@ -11041,12 +11656,15 @@ final class $$ArchiveSessionsTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.stories,
-    aliasName: 'archive_sessions__id__stories__archive_session_id',
+    aliasName:
+        'archive_sessions__archive_session_id__stories__archive_session_id',
   );
 
   $$StoriesTableProcessedTableManager get storiesRefs {
     final manager = $$StoriesTableTableManager($_db, $_db.stories).filter(
-      (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+      (f) => f.archiveSessionId.id.sqlEquals(
+        $_itemColumn<String>('archive_session_id')!,
+      ),
     );
 
     final cache = $_typedResult.readTableOrNull(_storiesRefsTable($_db));
@@ -11058,13 +11676,16 @@ final class $$ArchiveSessionsTableReferences
   static MultiTypedResultKey<$AttachmentsTable, List<Attachment>>
   _attachmentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.attachments,
-    aliasName: 'archive_sessions__id__attachments__archive_session_id',
+    aliasName:
+        'archive_sessions__archive_session_id__attachments__archive_session_id',
   );
 
   $$AttachmentsTableProcessedTableManager get attachmentsRefs {
     final manager = $$AttachmentsTableTableManager($_db, $_db.attachments)
         .filter(
-          (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+          (f) => f.archiveSessionId.id.sqlEquals(
+            $_itemColumn<String>('archive_session_id')!,
+          ),
         );
 
     final cache = $_typedResult.readTableOrNull(_attachmentsRefsTable($_db));
@@ -11076,12 +11697,15 @@ final class $$ArchiveSessionsTableReferences
   static MultiTypedResultKey<$EventTagsTable, List<EventTag>>
   _eventTagsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventTags,
-    aliasName: 'archive_sessions__id__event_tags__archive_session_id',
+    aliasName:
+        'archive_sessions__archive_session_id__event_tags__archive_session_id',
   );
 
   $$EventTagsTableProcessedTableManager get eventTagsRefs {
     final manager = $$EventTagsTableTableManager($_db, $_db.eventTags).filter(
-      (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+      (f) => f.archiveSessionId.id.sqlEquals(
+        $_itemColumn<String>('archive_session_id')!,
+      ),
     );
 
     final cache = $_typedResult.readTableOrNull(_eventTagsRefsTable($_db));
@@ -11093,13 +11717,15 @@ final class $$ArchiveSessionsTableReferences
   static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
-    aliasName: 'archive_sessions__id__event_people__archive_session_id',
+    aliasName: 'archive_sessions__archive_session_id__event_people__archive_session_id',
   );
 
   $$EventPeopleTableProcessedTableManager get eventPeopleRefs {
     final manager = $$EventPeopleTableTableManager($_db, $_db.eventPeople)
         .filter(
-          (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+          (f) => f.archiveSessionId.id.sqlEquals(
+            $_itemColumn<String>('archive_session_id')!,
+          ),
         );
 
     final cache = $_typedResult.readTableOrNull(_eventPeopleRefsTable($_db));
@@ -11111,12 +11737,15 @@ final class $$ArchiveSessionsTableReferences
   static MultiTypedResultKey<$EventLinksTable, List<EventLink>>
   _eventLinksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventLinks,
-    aliasName: 'archive_sessions__id__event_links__archive_session_id',
+    aliasName:
+        'archive_sessions__archive_session_id__event_links__archive_session_id',
   );
 
   $$EventLinksTableProcessedTableManager get eventLinksRefs {
     final manager = $$EventLinksTableTableManager($_db, $_db.eventLinks).filter(
-      (f) => f.archiveSessionId.id.sqlEquals($_itemColumn<String>('id')!),
+      (f) => f.archiveSessionId.id.sqlEquals(
+        $_itemColumn<String>('archive_session_id')!,
+      ),
     );
 
     final cache = $_typedResult.readTableOrNull(_eventLinksRefsTable($_db));
@@ -11310,6 +11939,31 @@ class $$ArchiveSessionsTableFilterComposer
           }) => $$LifePeriodsTableFilterComposer(
             $db: $db,
             $table: $db.lifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> eventLifePeriodsRefs(
+    Expression<bool> Function($$EventLifePeriodsTableFilterComposer f) f,
+  ) {
+    final $$EventLifePeriodsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.archiveSessionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableFilterComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -11755,6 +12409,31 @@ class $$ArchiveSessionsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> eventLifePeriodsRefs<T extends Object>(
+    Expression<T> Function($$EventLifePeriodsTableAnnotationComposer a) f,
+  ) {
+    final $$EventLifePeriodsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.archiveSessionId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> reflectionsRefs<T extends Object>(
     Expression<T> Function($$ReflectionsTableAnnotationComposer a) f,
   ) {
@@ -11927,6 +12606,7 @@ class $$ArchiveSessionsTableTableManager
             bool eventsRefs,
             bool eventSectionsRefs,
             bool lifePeriodsRefs,
+            bool eventLifePeriodsRefs,
             bool reflectionsRefs,
             bool storiesRefs,
             bool attachmentsRefs,
@@ -12001,6 +12681,7 @@ class $$ArchiveSessionsTableTableManager
                 eventsRefs = false,
                 eventSectionsRefs = false,
                 lifePeriodsRefs = false,
+                eventLifePeriodsRefs = false,
                 reflectionsRefs = false,
                 storiesRefs = false,
                 attachmentsRefs = false,
@@ -12015,6 +12696,7 @@ class $$ArchiveSessionsTableTableManager
                     if (eventsRefs) db.events,
                     if (eventSectionsRefs) db.eventSections,
                     if (lifePeriodsRefs) db.lifePeriods,
+                    if (eventLifePeriodsRefs) db.eventLifePeriods,
                     if (reflectionsRefs) db.reflections,
                     if (storiesRefs) db.stories,
                     if (attachmentsRefs) db.attachments,
@@ -12154,6 +12836,27 @@ class $$ArchiveSessionsTableTableManager
                                 table,
                                 p0,
                               ).lifePeriodsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.archiveSessionId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (eventLifePeriodsRefs)
+                        await $_getPrefetchedData<
+                          ArchiveSession,
+                          $ArchiveSessionsTable,
+                          EventLifePeriod
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ArchiveSessionsTableReferences
+                              ._eventLifePeriodsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ArchiveSessionsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).eventLifePeriodsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.archiveSessionId == item.id,
@@ -12314,6 +13017,7 @@ typedef $$ArchiveSessionsTableProcessedTableManager =
         bool eventsRefs,
         bool eventSectionsRefs,
         bool lifePeriodsRefs,
+        bool eventLifePeriodsRefs,
         bool reflectionsRefs,
         bool storiesRefs,
         bool attachmentsRefs,
@@ -12346,8 +13050,8 @@ final class $$ArchiveSettingsTableReferences
     super.$_typedResult,
   );
 
-  static $SubjectsTable _subjectIdTable(_$AppDatabase db) =>
-      db.subjects.createAlias('archive_settings__subject_id__subjects__id');
+  static $SubjectsTable _subjectIdTable(_$AppDatabase db) => db.subjects
+      .createAlias('archive_settings__subject_id__subjects__subject_id');
 
   $$SubjectsTableProcessedTableManager get subjectId {
     final $_column = $_itemColumn<String>('subject_id')!;
@@ -12365,7 +13069,7 @@ final class $$ArchiveSettingsTableReferences
 
   static $ArchiveSessionsTable _currentSessionIdTable(_$AppDatabase db) =>
       db.archiveSessions.createAlias(
-        'archive_settings__current_session_id__archive_sessions__id',
+        'archive_settings__current_session_id__archive_sessions__archive_session_id',
       );
 
   $$ArchiveSessionsTableProcessedTableManager? get currentSessionId {
@@ -12722,14 +13426,14 @@ final class $$PlacesTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.events,
-    aliasName: 'places__id__events__place_id',
+    aliasName: 'places__place_id__events__place_id',
   );
 
   $$EventsTableProcessedTableManager get eventsRefs {
     final manager = $$EventsTableTableManager(
       $_db,
       $_db.events,
-    ).filter((f) => f.placeId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.placeId.id.sqlEquals($_itemColumn<String>('place_id')!));
 
     final cache = $_typedResult.readTableOrNull(_eventsRefsTable($_db));
     return ProcessedTableManager(
@@ -13070,7 +13774,7 @@ final class $$EventsTableReferences
   $$EventsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('events__author_id__authors__id');
+      db.authors.createAlias('events__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -13086,9 +13790,10 @@ final class $$EventsTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('events__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) =>
+      db.archiveSessions.createAlias(
+        'events__archive_session_id__archive_sessions__archive_session_id',
+      );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -13105,7 +13810,7 @@ final class $$EventsTableReferences
   }
 
   static $SubjectsTable _subjectIdTable(_$AppDatabase db) =>
-      db.subjects.createAlias('events__subject_id__subjects__id');
+      db.subjects.createAlias('events__subject_id__subjects__subject_id');
 
   $$SubjectsTableProcessedTableManager get subjectId {
     final $_column = $_itemColumn<String>('subject_id')!;
@@ -13122,7 +13827,7 @@ final class $$EventsTableReferences
   }
 
   static $PlacesTable _placeIdTable(_$AppDatabase db) =>
-      db.places.createAlias('events__place_id__places__id');
+      db.places.createAlias('events__place_id__places__place_id');
 
   $$PlacesTableProcessedTableManager? get placeId {
     final $_column = $_itemColumn<String>('place_id');
@@ -13141,16 +13846,36 @@ final class $$EventsTableReferences
   static MultiTypedResultKey<$EventSectionsTable, List<EventSection>>
   _eventSectionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventSections,
-    aliasName: 'events__id__event_sections__event_id',
+    aliasName: 'events__event_id__event_sections__event_id',
   );
 
   $$EventSectionsTableProcessedTableManager get eventSectionsRefs {
     final manager = $$EventSectionsTableTableManager(
       $_db,
       $_db.eventSections,
-    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_eventSectionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$EventLifePeriodsTable, List<EventLifePeriod>>
+  _eventLifePeriodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.eventLifePeriods,
+    aliasName: 'events__event_id__event_life_periods__event_id',
+  );
+
+  $$EventLifePeriodsTableProcessedTableManager get eventLifePeriodsRefs {
+    final manager = $$EventLifePeriodsTableTableManager(
+      $_db,
+      $_db.eventLifePeriods,
+    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('event_id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _eventLifePeriodsRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -13159,14 +13884,14 @@ final class $$EventsTableReferences
   static MultiTypedResultKey<$ReflectionsTable, List<Reflection>>
   _reflectionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.reflections,
-    aliasName: 'events__id__reflections__event_id',
+    aliasName: 'events__event_id__reflections__event_id',
   );
 
   $$ReflectionsTableProcessedTableManager get reflectionsRefs {
     final manager = $$ReflectionsTableTableManager(
       $_db,
       $_db.reflections,
-    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_reflectionsRefsTable($_db));
     return ProcessedTableManager(
@@ -13177,14 +13902,14 @@ final class $$EventsTableReferences
   static MultiTypedResultKey<$StoryEventsTable, List<StoryEvent>>
   _storyEventsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.storyEvents,
-    aliasName: 'events__id__story_events__event_id',
+    aliasName: 'events__event_id__story_events__event_id',
   );
 
   $$StoryEventsTableProcessedTableManager get storyEventsRefs {
     final manager = $$StoryEventsTableTableManager(
       $_db,
       $_db.storyEvents,
-    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_storyEventsRefsTable($_db));
     return ProcessedTableManager(
@@ -13195,14 +13920,14 @@ final class $$EventsTableReferences
   static MultiTypedResultKey<$AttachmentsTable, List<Attachment>>
   _attachmentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.attachments,
-    aliasName: 'events__id__attachments__event_id',
+    aliasName: 'events__event_id__attachments__event_id',
   );
 
   $$AttachmentsTableProcessedTableManager get attachmentsRefs {
     final manager = $$AttachmentsTableTableManager(
       $_db,
       $_db.attachments,
-    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_attachmentsRefsTable($_db));
     return ProcessedTableManager(
@@ -13213,14 +13938,14 @@ final class $$EventsTableReferences
   static MultiTypedResultKey<$EventTagsTable, List<EventTag>>
   _eventTagsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventTags,
-    aliasName: 'events__id__event_tags__event_id',
+    aliasName: 'events__event_id__event_tags__event_id',
   );
 
   $$EventTagsTableProcessedTableManager get eventTagsRefs {
     final manager = $$EventTagsTableTableManager(
       $_db,
       $_db.eventTags,
-    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_eventTagsRefsTable($_db));
     return ProcessedTableManager(
@@ -13231,14 +13956,14 @@ final class $$EventsTableReferences
   static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
-    aliasName: 'events__id__event_people__event_id',
+    aliasName: 'events__event_id__event_people__event_id',
   );
 
   $$EventPeopleTableProcessedTableManager get eventPeopleRefs {
     final manager = $$EventPeopleTableTableManager(
       $_db,
       $_db.eventPeople,
-    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_eventPeopleRefsTable($_db));
     return ProcessedTableManager(
@@ -13250,14 +13975,14 @@ final class $$EventsTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.eventLinks,
-    aliasName: 'events__id__event_links__event_a_id',
+    aliasName: 'events__event_id__event_links__event_a_id',
   );
 
   $$EventLinksTableProcessedTableManager get linksAsA {
     final manager = $$EventLinksTableTableManager(
       $_db,
       $_db.eventLinks,
-    ).filter((f) => f.eventAId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventAId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_linksAsATable($_db));
     return ProcessedTableManager(
@@ -13269,14 +13994,14 @@ final class $$EventsTableReferences
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
     db.eventLinks,
-    aliasName: 'events__id__event_links__event_b_id',
+    aliasName: 'events__event_id__event_links__event_b_id',
   );
 
   $$EventLinksTableProcessedTableManager get linksAsB {
     final manager = $$EventLinksTableTableManager(
       $_db,
       $_db.eventLinks,
-    ).filter((f) => f.eventBId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.eventBId.id.sqlEquals($_itemColumn<String>('event_id')!));
 
     final cache = $_typedResult.readTableOrNull(_linksAsBTable($_db));
     return ProcessedTableManager(
@@ -13467,6 +14192,31 @@ class $$EventsTableFilterComposer
           }) => $$EventSectionsTableFilterComposer(
             $db: $db,
             $table: $db.eventSections,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> eventLifePeriodsRefs(
+    Expression<bool> Function($$EventLifePeriodsTableFilterComposer f) f,
+  ) {
+    final $$EventLifePeriodsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.eventId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableFilterComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -13988,6 +14738,31 @@ class $$EventsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> eventLifePeriodsRefs<T extends Object>(
+    Expression<T> Function($$EventLifePeriodsTableAnnotationComposer a) f,
+  ) {
+    final $$EventLifePeriodsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.eventId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> reflectionsRefs<T extends Object>(
     Expression<T> Function($$ReflectionsTableAnnotationComposer a) f,
   ) {
@@ -14183,6 +14958,7 @@ class $$EventsTableTableManager
             bool subjectId,
             bool placeId,
             bool eventSectionsRefs,
+            bool eventLifePeriodsRefs,
             bool reflectionsRefs,
             bool storyEventsRefs,
             bool attachmentsRefs,
@@ -14298,6 +15074,7 @@ class $$EventsTableTableManager
                 subjectId = false,
                 placeId = false,
                 eventSectionsRefs = false,
+                eventLifePeriodsRefs = false,
                 reflectionsRefs = false,
                 storyEventsRefs = false,
                 attachmentsRefs = false,
@@ -14310,6 +15087,7 @@ class $$EventsTableTableManager
                   db: db,
                   explicitlyWatchedTables: [
                     if (eventSectionsRefs) db.eventSections,
+                    if (eventLifePeriodsRefs) db.eventLifePeriods,
                     if (reflectionsRefs) db.reflections,
                     if (storyEventsRefs) db.storyEvents,
                     if (attachmentsRefs) db.attachments,
@@ -14398,6 +15176,27 @@ class $$EventsTableTableManager
                                 table,
                                 p0,
                               ).eventSectionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.eventId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (eventLifePeriodsRefs)
+                        await $_getPrefetchedData<
+                          Event,
+                          $EventsTable,
+                          EventLifePeriod
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EventsTableReferences
+                              ._eventLifePeriodsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EventsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).eventLifePeriodsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.eventId == item.id,
@@ -14569,6 +15368,7 @@ typedef $$EventsTableProcessedTableManager =
         bool subjectId,
         bool placeId,
         bool eventSectionsRefs,
+        bool eventLifePeriodsRefs,
         bool reflectionsRefs,
         bool storyEventsRefs,
         bool attachmentsRefs,
@@ -14616,7 +15416,7 @@ final class $$EventSectionsTableReferences
   );
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('event_sections__author_id__authors__id');
+      db.authors.createAlias('event_sections__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -14632,9 +15432,11 @@ final class $$EventSectionsTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('event_sections__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(
+    _$AppDatabase db,
+  ) => db.archiveSessions.createAlias(
+    'event_sections__archive_session_id__archive_sessions__archive_session_id',
+  );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -14651,7 +15453,7 @@ final class $$EventSectionsTableReferences
   }
 
   static $EventsTable _eventIdTable(_$AppDatabase db) =>
-      db.events.createAlias('event_sections__event_id__events__id');
+      db.events.createAlias('event_sections__event_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventId {
     final $_column = $_itemColumn<String>('event_id')!;
@@ -15208,7 +16010,7 @@ final class $$LifePeriodsTableReferences
   $$LifePeriodsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('life_periods__author_id__authors__id');
+      db.authors.createAlias('life_periods__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -15224,9 +16026,11 @@ final class $$LifePeriodsTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('life_periods__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(
+    _$AppDatabase db,
+  ) => db.archiveSessions.createAlias(
+    'life_periods__archive_session_id__archive_sessions__archive_session_id',
+  );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -15243,7 +16047,7 @@ final class $$LifePeriodsTableReferences
   }
 
   static $SubjectsTable _subjectIdTable(_$AppDatabase db) =>
-      db.subjects.createAlias('life_periods__subject_id__subjects__id');
+      db.subjects.createAlias('life_periods__subject_id__subjects__subject_id');
 
   $$SubjectsTableProcessedTableManager get subjectId {
     final $_column = $_itemColumn<String>('subject_id')!;
@@ -15256,6 +16060,29 @@ final class $$LifePeriodsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$EventLifePeriodsTable, List<EventLifePeriod>>
+  _eventLifePeriodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.eventLifePeriods,
+    aliasName:
+        'life_periods__life_period_id__event_life_periods__life_period_id',
+  );
+
+  $$EventLifePeriodsTableProcessedTableManager get eventLifePeriodsRefs {
+    final manager =
+        $$EventLifePeriodsTableTableManager($_db, $_db.eventLifePeriods).filter(
+          (f) => f.lifePeriodId.id.sqlEquals(
+            $_itemColumn<String>('life_period_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _eventLifePeriodsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -15376,6 +16203,31 @@ class $$LifePeriodsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> eventLifePeriodsRefs(
+    Expression<bool> Function($$EventLifePeriodsTableFilterComposer f) f,
+  ) {
+    final $$EventLifePeriodsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.lifePeriodId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableFilterComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -15601,6 +16453,31 @@ class $$LifePeriodsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> eventLifePeriodsRefs<T extends Object>(
+    Expression<T> Function($$EventLifePeriodsTableAnnotationComposer a) f,
+  ) {
+    final $$EventLifePeriodsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.eventLifePeriods,
+      getReferencedColumn: (t) => t.lifePeriodId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventLifePeriodsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.eventLifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LifePeriodsTableTableManager
@@ -15620,6 +16497,7 @@ class $$LifePeriodsTableTableManager
             bool authorId,
             bool archiveSessionId,
             bool subjectId,
+            bool eventLifePeriodsRefs,
           })
         > {
   $$LifePeriodsTableTableManager(_$AppDatabase db, $LifePeriodsTable table)
@@ -15702,10 +16580,13 @@ class $$LifePeriodsTableTableManager
                 authorId = false,
                 archiveSessionId = false,
                 subjectId = false,
+                eventLifePeriodsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
-                  explicitlyWatchedTables: [],
+                  explicitlyWatchedTables: [
+                    if (eventLifePeriodsRefs) db.eventLifePeriods,
+                  ],
                   addJoins:
                       <
                         T extends TableManagerState<
@@ -15759,7 +16640,29 @@ class $$LifePeriodsTableTableManager
                         return state;
                       },
                   getPrefetchedDataCallback: (items) async {
-                    return [];
+                    return [
+                      if (eventLifePeriodsRefs)
+                        await $_getPrefetchedData<
+                          LifePeriod,
+                          $LifePeriodsTable,
+                          EventLifePeriod
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LifePeriodsTableReferences
+                              ._eventLifePeriodsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LifePeriodsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).eventLifePeriodsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.lifePeriodId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
                 );
               },
@@ -15783,6 +16686,620 @@ typedef $$LifePeriodsTableProcessedTableManager =
         bool authorId,
         bool archiveSessionId,
         bool subjectId,
+        bool eventLifePeriodsRefs,
+      })
+    >;
+typedef $$EventLifePeriodsTableCreateCompanionBuilder =
+    EventLifePeriodsCompanion Function({
+      required String layer,
+      required String authorId,
+      required DateTime createdAt,
+      Value<String?> archiveSessionId,
+      required String eventId,
+      required String lifePeriodId,
+      Value<int> rowid,
+    });
+typedef $$EventLifePeriodsTableUpdateCompanionBuilder =
+    EventLifePeriodsCompanion Function({
+      Value<String> layer,
+      Value<String> authorId,
+      Value<DateTime> createdAt,
+      Value<String?> archiveSessionId,
+      Value<String> eventId,
+      Value<String> lifePeriodId,
+      Value<int> rowid,
+    });
+
+final class $$EventLifePeriodsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $EventLifePeriodsTable, EventLifePeriod> {
+  $$EventLifePeriodsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AuthorsTable _authorIdTable(_$AppDatabase db) => db.authors
+      .createAlias('event_life_periods__author_id__authors__author_id');
+
+  $$AuthorsTableProcessedTableManager get authorId {
+    final $_column = $_itemColumn<String>('author_id')!;
+
+    final manager = $$AuthorsTableTableManager(
+      $_db,
+      $_db.authors,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_authorIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) =>
+      db.archiveSessions.createAlias(
+        'event_life_periods__archive_session_id__archive_sessions__archive_session_id',
+      );
+
+  $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
+    final $_column = $_itemColumn<String>('archive_session_id');
+    if ($_column == null) return null;
+    final manager = $$ArchiveSessionsTableTableManager(
+      $_db,
+      $_db.archiveSessions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_archiveSessionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $EventsTable _eventIdTable(_$AppDatabase db) =>
+      db.events.createAlias('event_life_periods__event_id__events__event_id');
+
+  $$EventsTableProcessedTableManager get eventId {
+    final $_column = $_itemColumn<String>('event_id')!;
+
+    final manager = $$EventsTableTableManager(
+      $_db,
+      $_db.events,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_eventIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $LifePeriodsTable _lifePeriodIdTable(_$AppDatabase db) =>
+      db.lifePeriods.createAlias(
+        'event_life_periods__life_period_id__life_periods__life_period_id',
+      );
+
+  $$LifePeriodsTableProcessedTableManager get lifePeriodId {
+    final $_column = $_itemColumn<String>('life_period_id')!;
+
+    final manager = $$LifePeriodsTableTableManager(
+      $_db,
+      $_db.lifePeriods,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_lifePeriodIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$EventLifePeriodsTableFilterComposer
+    extends Composer<_$AppDatabase, $EventLifePeriodsTable> {
+  $$EventLifePeriodsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get layer => $composableBuilder(
+    column: $table.layer,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AuthorsTableFilterComposer get authorId {
+    final $$AuthorsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.authorId,
+      referencedTable: $db.authors,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AuthorsTableFilterComposer(
+            $db: $db,
+            $table: $db.authors,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ArchiveSessionsTableFilterComposer get archiveSessionId {
+    final $$ArchiveSessionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.archiveSessionId,
+      referencedTable: $db.archiveSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArchiveSessionsTableFilterComposer(
+            $db: $db,
+            $table: $db.archiveSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EventsTableFilterComposer get eventId {
+    final $$EventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.eventId,
+      referencedTable: $db.events,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventsTableFilterComposer(
+            $db: $db,
+            $table: $db.events,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LifePeriodsTableFilterComposer get lifePeriodId {
+    final $$LifePeriodsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lifePeriodId,
+      referencedTable: $db.lifePeriods,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifePeriodsTableFilterComposer(
+            $db: $db,
+            $table: $db.lifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EventLifePeriodsTableOrderingComposer
+    extends Composer<_$AppDatabase, $EventLifePeriodsTable> {
+  $$EventLifePeriodsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get layer => $composableBuilder(
+    column: $table.layer,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AuthorsTableOrderingComposer get authorId {
+    final $$AuthorsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.authorId,
+      referencedTable: $db.authors,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AuthorsTableOrderingComposer(
+            $db: $db,
+            $table: $db.authors,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ArchiveSessionsTableOrderingComposer get archiveSessionId {
+    final $$ArchiveSessionsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.archiveSessionId,
+      referencedTable: $db.archiveSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArchiveSessionsTableOrderingComposer(
+            $db: $db,
+            $table: $db.archiveSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EventsTableOrderingComposer get eventId {
+    final $$EventsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.eventId,
+      referencedTable: $db.events,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventsTableOrderingComposer(
+            $db: $db,
+            $table: $db.events,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LifePeriodsTableOrderingComposer get lifePeriodId {
+    final $$LifePeriodsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lifePeriodId,
+      referencedTable: $db.lifePeriods,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifePeriodsTableOrderingComposer(
+            $db: $db,
+            $table: $db.lifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EventLifePeriodsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EventLifePeriodsTable> {
+  $$EventLifePeriodsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get layer =>
+      $composableBuilder(column: $table.layer, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$AuthorsTableAnnotationComposer get authorId {
+    final $$AuthorsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.authorId,
+      referencedTable: $db.authors,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AuthorsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.authors,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ArchiveSessionsTableAnnotationComposer get archiveSessionId {
+    final $$ArchiveSessionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.archiveSessionId,
+      referencedTable: $db.archiveSessions,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArchiveSessionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.archiveSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EventsTableAnnotationComposer get eventId {
+    final $$EventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.eventId,
+      referencedTable: $db.events,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.events,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$LifePeriodsTableAnnotationComposer get lifePeriodId {
+    final $$LifePeriodsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.lifePeriodId,
+      referencedTable: $db.lifePeriods,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LifePeriodsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.lifePeriods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EventLifePeriodsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EventLifePeriodsTable,
+          EventLifePeriod,
+          $$EventLifePeriodsTableFilterComposer,
+          $$EventLifePeriodsTableOrderingComposer,
+          $$EventLifePeriodsTableAnnotationComposer,
+          $$EventLifePeriodsTableCreateCompanionBuilder,
+          $$EventLifePeriodsTableUpdateCompanionBuilder,
+          (EventLifePeriod, $$EventLifePeriodsTableReferences),
+          EventLifePeriod,
+          PrefetchHooks Function({
+            bool authorId,
+            bool archiveSessionId,
+            bool eventId,
+            bool lifePeriodId,
+          })
+        > {
+  $$EventLifePeriodsTableTableManager(
+    _$AppDatabase db,
+    $EventLifePeriodsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EventLifePeriodsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EventLifePeriodsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EventLifePeriodsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> layer = const Value.absent(),
+                Value<String> authorId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> archiveSessionId = const Value.absent(),
+                Value<String> eventId = const Value.absent(),
+                Value<String> lifePeriodId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => EventLifePeriodsCompanion(
+                layer: layer,
+                authorId: authorId,
+                createdAt: createdAt,
+                archiveSessionId: archiveSessionId,
+                eventId: eventId,
+                lifePeriodId: lifePeriodId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String layer,
+                required String authorId,
+                required DateTime createdAt,
+                Value<String?> archiveSessionId = const Value.absent(),
+                required String eventId,
+                required String lifePeriodId,
+                Value<int> rowid = const Value.absent(),
+              }) => EventLifePeriodsCompanion.insert(
+                layer: layer,
+                authorId: authorId,
+                createdAt: createdAt,
+                archiveSessionId: archiveSessionId,
+                eventId: eventId,
+                lifePeriodId: lifePeriodId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EventLifePeriodsTable, EventLifePeriod>(table),
+                  $$EventLifePeriodsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                authorId = false,
+                archiveSessionId = false,
+                eventId = false,
+                lifePeriodId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (authorId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.authorId,
+                            referencedTable: $$EventLifePeriodsTableReferences
+                                ._authorIdTable(db),
+                            referencedColumn: $$EventLifePeriodsTableReferences
+                                ._authorIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (archiveSessionId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.archiveSessionId,
+                            referencedTable: $$EventLifePeriodsTableReferences
+                                ._archiveSessionIdTable(db),
+                            referencedColumn: $$EventLifePeriodsTableReferences
+                                ._archiveSessionIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (eventId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.eventId,
+                            referencedTable: $$EventLifePeriodsTableReferences
+                                ._eventIdTable(db),
+                            referencedColumn: $$EventLifePeriodsTableReferences
+                                ._eventIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (lifePeriodId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.lifePeriodId,
+                            referencedTable: $$EventLifePeriodsTableReferences
+                                ._lifePeriodIdTable(db),
+                            referencedColumn: $$EventLifePeriodsTableReferences
+                                ._lifePeriodIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$EventLifePeriodsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EventLifePeriodsTable,
+      EventLifePeriod,
+      $$EventLifePeriodsTableFilterComposer,
+      $$EventLifePeriodsTableOrderingComposer,
+      $$EventLifePeriodsTableAnnotationComposer,
+      $$EventLifePeriodsTableCreateCompanionBuilder,
+      $$EventLifePeriodsTableUpdateCompanionBuilder,
+      (EventLifePeriod, $$EventLifePeriodsTableReferences),
+      EventLifePeriod,
+      PrefetchHooks Function({
+        bool authorId,
+        bool archiveSessionId,
+        bool eventId,
+        bool lifePeriodId,
       })
     >;
 typedef $$ReflectionsTableCreateCompanionBuilder =
@@ -15817,7 +17334,7 @@ final class $$ReflectionsTableReferences
   $$ReflectionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('reflections__author_id__authors__id');
+      db.authors.createAlias('reflections__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -15833,9 +17350,10 @@ final class $$ReflectionsTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('reflections__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) =>
+      db.archiveSessions.createAlias(
+        'reflections__archive_session_id__archive_sessions__archive_session_id',
+      );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -15852,7 +17370,7 @@ final class $$ReflectionsTableReferences
   }
 
   static $EventsTable _eventIdTable(_$AppDatabase db) =>
-      db.events.createAlias('reflections__event_id__events__id');
+      db.events.createAlias('reflections__event_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventId {
     final $_column = $_itemColumn<String>('event_id')!;
@@ -16382,7 +17900,7 @@ final class $$StoriesTableReferences
   $$StoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('stories__author_id__authors__id');
+      db.authors.createAlias('stories__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -16398,9 +17916,10 @@ final class $$StoriesTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('stories__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) =>
+      db.archiveSessions.createAlias(
+        'stories__archive_session_id__archive_sessions__archive_session_id',
+      );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -16419,14 +17938,14 @@ final class $$StoriesTableReferences
   static MultiTypedResultKey<$StoryEventsTable, List<StoryEvent>>
   _storyEventsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.storyEvents,
-    aliasName: 'stories__id__story_events__story_id',
+    aliasName: 'stories__story_id__story_events__story_id',
   );
 
   $$StoryEventsTableProcessedTableManager get storyEventsRefs {
     final manager = $$StoryEventsTableTableManager(
       $_db,
       $_db.storyEvents,
-    ).filter((f) => f.storyId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.storyId.id.sqlEquals($_itemColumn<String>('story_id')!));
 
     final cache = $_typedResult.readTableOrNull(_storyEventsRefsTable($_db));
     return ProcessedTableManager(
@@ -16900,7 +18419,7 @@ final class $$StoryEventsTableReferences
   $$StoryEventsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $StoriesTable _storyIdTable(_$AppDatabase db) =>
-      db.stories.createAlias('story_events__story_id__stories__id');
+      db.stories.createAlias('story_events__story_id__stories__story_id');
 
   $$StoriesTableProcessedTableManager get storyId {
     final $_column = $_itemColumn<String>('story_id')!;
@@ -16917,7 +18436,7 @@ final class $$StoryEventsTableReferences
   }
 
   static $EventsTable _eventIdTable(_$AppDatabase db) =>
-      db.events.createAlias('story_events__event_id__events__id');
+      db.events.createAlias('story_events__event_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventId {
     final $_column = $_itemColumn<String>('event_id')!;
@@ -17267,14 +18786,14 @@ final class $$BlobsTableReferences
   static MultiTypedResultKey<$AttachmentsTable, List<Attachment>>
   _attachmentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.attachments,
-    aliasName: 'blobs__id__attachments__blob_id',
+    aliasName: 'blobs__blob_id__attachments__blob_id',
   );
 
   $$AttachmentsTableProcessedTableManager get attachmentsRefs {
     final manager = $$AttachmentsTableTableManager(
       $_db,
       $_db.attachments,
-    ).filter((f) => f.blobId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.blobId.id.sqlEquals($_itemColumn<String>('blob_id')!));
 
     final cache = $_typedResult.readTableOrNull(_attachmentsRefsTable($_db));
     return ProcessedTableManager(
@@ -17596,7 +19115,7 @@ final class $$AttachmentsTableReferences
   $$AttachmentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('attachments__author_id__authors__id');
+      db.authors.createAlias('attachments__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -17612,9 +19131,10 @@ final class $$AttachmentsTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('attachments__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) =>
+      db.archiveSessions.createAlias(
+        'attachments__archive_session_id__archive_sessions__archive_session_id',
+      );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -17631,7 +19151,7 @@ final class $$AttachmentsTableReferences
   }
 
   static $EventsTable _eventIdTable(_$AppDatabase db) =>
-      db.events.createAlias('attachments__event_id__events__id');
+      db.events.createAlias('attachments__event_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventId {
     final $_column = $_itemColumn<String>('event_id')!;
@@ -17648,7 +19168,7 @@ final class $$AttachmentsTableReferences
   }
 
   static $BlobsTable _blobIdTable(_$AppDatabase db) =>
-      db.blobs.createAlias('attachments__blob_id__blobs__id');
+      db.blobs.createAlias('attachments__blob_id__blobs__blob_id');
 
   $$BlobsTableProcessedTableManager get blobId {
     final $_column = $_itemColumn<String>('blob_id')!;
@@ -18358,14 +19878,14 @@ final class $$TagsTableReferences
   static MultiTypedResultKey<$EventTagsTable, List<EventTag>>
   _eventTagsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventTags,
-    aliasName: 'tags__id__event_tags__tag_id',
+    aliasName: 'tags__tag_id__event_tags__tag_id',
   );
 
   $$EventTagsTableProcessedTableManager get eventTagsRefs {
     final manager = $$EventTagsTableTableManager(
       $_db,
       $_db.eventTags,
-    ).filter((f) => f.tagId.id.sqlEquals($_itemColumn<String>('id')!));
+    ).filter((f) => f.tagId.id.sqlEquals($_itemColumn<String>('tag_id')!));
 
     final cache = $_typedResult.readTableOrNull(_eventTagsRefsTable($_db));
     return ProcessedTableManager(
@@ -18586,7 +20106,7 @@ final class $$EventTagsTableReferences
   $$EventTagsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('event_tags__author_id__authors__id');
+      db.authors.createAlias('event_tags__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -18602,9 +20122,10 @@ final class $$EventTagsTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('event_tags__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) =>
+      db.archiveSessions.createAlias(
+        'event_tags__archive_session_id__archive_sessions__archive_session_id',
+      );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -18621,7 +20142,7 @@ final class $$EventTagsTableReferences
   }
 
   static $EventsTable _eventIdTable(_$AppDatabase db) =>
-      db.events.createAlias('event_tags__event_id__events__id');
+      db.events.createAlias('event_tags__event_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventId {
     final $_column = $_itemColumn<String>('event_id')!;
@@ -18638,7 +20159,7 @@ final class $$EventTagsTableReferences
   }
 
   static $TagsTable _tagIdTable(_$AppDatabase db) =>
-      db.tags.createAlias('event_tags__tag_id__tags__id');
+      db.tags.createAlias('event_tags__tag_id__tags__tag_id');
 
   $$TagsTableProcessedTableManager get tagId {
     final $_column = $_itemColumn<String>('tag_id')!;
@@ -19185,14 +20706,14 @@ final class $$PeopleTableReferences
   static MultiTypedResultKey<$EventPeopleTable, List<EventPerson>>
   _eventPeopleRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.eventPeople,
-    aliasName: 'people__id__event_people__person_id',
+    aliasName: 'people__person_id__event_people__person_id',
   );
 
   $$EventPeopleTableProcessedTableManager get eventPeopleRefs {
-    final manager = $$EventPeopleTableTableManager(
-      $_db,
-      $_db.eventPeople,
-    ).filter((f) => f.personId.id.sqlEquals($_itemColumn<String>('id')!));
+    final manager = $$EventPeopleTableTableManager($_db, $_db.eventPeople)
+        .filter(
+          (f) => f.personId.id.sqlEquals($_itemColumn<String>('person_id')!),
+        );
 
     final cache = $_typedResult.readTableOrNull(_eventPeopleRefsTable($_db));
     return ProcessedTableManager(
@@ -19470,7 +20991,7 @@ final class $$EventPeopleTableReferences
   $$EventPeopleTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('event_people__author_id__authors__id');
+      db.authors.createAlias('event_people__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -19486,9 +21007,11 @@ final class $$EventPeopleTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('event_people__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(
+    _$AppDatabase db,
+  ) => db.archiveSessions.createAlias(
+    'event_people__archive_session_id__archive_sessions__archive_session_id',
+  );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -19505,7 +21028,7 @@ final class $$EventPeopleTableReferences
   }
 
   static $EventsTable _eventIdTable(_$AppDatabase db) =>
-      db.events.createAlias('event_people__event_id__events__id');
+      db.events.createAlias('event_people__event_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventId {
     final $_column = $_itemColumn<String>('event_id')!;
@@ -19522,7 +21045,7 @@ final class $$EventPeopleTableReferences
   }
 
   static $PeopleTable _personIdTable(_$AppDatabase db) =>
-      db.people.createAlias('event_people__person_id__people__id');
+      db.people.createAlias('event_people__person_id__people__person_id');
 
   $$PeopleTableProcessedTableManager get personId {
     final $_column = $_itemColumn<String>('person_id')!;
@@ -20071,7 +21594,7 @@ final class $$EventLinksTableReferences
   $$EventLinksTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('event_links__author_id__authors__id');
+      db.authors.createAlias('event_links__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -20087,9 +21610,10 @@ final class $$EventLinksTableReferences
     );
   }
 
-  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) => db
-      .archiveSessions
-      .createAlias('event_links__archive_session_id__archive_sessions__id');
+  static $ArchiveSessionsTable _archiveSessionIdTable(_$AppDatabase db) =>
+      db.archiveSessions.createAlias(
+        'event_links__archive_session_id__archive_sessions__archive_session_id',
+      );
 
   $$ArchiveSessionsTableProcessedTableManager? get archiveSessionId {
     final $_column = $_itemColumn<String>('archive_session_id');
@@ -20106,7 +21630,7 @@ final class $$EventLinksTableReferences
   }
 
   static $EventsTable _eventAIdTable(_$AppDatabase db) =>
-      db.events.createAlias('event_links__event_a_id__events__id');
+      db.events.createAlias('event_links__event_a_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventAId {
     final $_column = $_itemColumn<String>('event_a_id')!;
@@ -20123,7 +21647,7 @@ final class $$EventLinksTableReferences
   }
 
   static $EventsTable _eventBIdTable(_$AppDatabase db) =>
-      db.events.createAlias('event_links__event_b_id__events__id');
+      db.events.createAlias('event_links__event_b_id__events__event_id');
 
   $$EventsTableProcessedTableManager get eventBId {
     final $_column = $_itemColumn<String>('event_b_id')!;
@@ -20675,7 +22199,7 @@ final class $$ChangeHistoryTableReferences
   );
 
   static $AuthorsTable _authorIdTable(_$AppDatabase db) =>
-      db.authors.createAlias('change_history__author_id__authors__id');
+      db.authors.createAlias('change_history__author_id__authors__author_id');
 
   $$AuthorsTableProcessedTableManager get authorId {
     final $_column = $_itemColumn<String>('author_id')!;
@@ -20982,6 +22506,8 @@ class $AppDatabaseManager {
       $$EventSectionsTableTableManager(_db, _db.eventSections);
   $$LifePeriodsTableTableManager get lifePeriods =>
       $$LifePeriodsTableTableManager(_db, _db.lifePeriods);
+  $$EventLifePeriodsTableTableManager get eventLifePeriods =>
+      $$EventLifePeriodsTableTableManager(_db, _db.eventLifePeriods);
   $$ReflectionsTableTableManager get reflections =>
       $$ReflectionsTableTableManager(_db, _db.reflections);
   $$StoriesTableTableManager get stories =>

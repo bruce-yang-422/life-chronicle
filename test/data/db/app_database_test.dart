@@ -107,6 +107,46 @@ void main() {
     );
   });
 
+  test('主鍵具名且所有外鍵指向實際欄位', () async {
+    for (final entry in primaryKeyColumnNames.entries) {
+      final columns = await db
+          .customSelect('PRAGMA table_info("${entry.key}")')
+          .get();
+      expect(
+        columns.map((row) => row.read<String>('name')),
+        isNot(contains('id')),
+      );
+      expect(
+        columns
+            .where((row) => row.read<int>('pk') > 0)
+            .map((row) => row.read<String>('name')),
+        [entry.value],
+      );
+    }
+    for (final table in db.allTables) {
+      final keys = await db
+          .customSelect('PRAGMA foreign_key_list("${table.actualTableName}")')
+          .get();
+      for (final key in keys) {
+        final target = key.read<String>('table');
+        final columns = await db
+            .customSelect('PRAGMA table_info("$target")')
+            .get();
+        expect(
+          columns.map((row) => row.read<String>('name')),
+          contains(key.read<String>('to')),
+        );
+      }
+    }
+    expect(await db.customSelect('PRAGMA foreign_key_check').get(), isEmpty);
+    expect(
+      (await db.customSelect('PRAGMA user_version').getSingle()).read<int>(
+        'user_version',
+      ),
+      1,
+    );
+  });
+
   test('外鍵約束已啟用', () async {
     final row = await db.customSelect('PRAGMA foreign_keys').getSingle();
     expect(row.data.values.first, 1);
@@ -133,7 +173,7 @@ void main() {
       expect(
         () => db.customStatement(
           "UPDATE events SET layer = 'remembrance', "
-          "archive_session_id = 'session1' WHERE id = 'e1'",
+          "archive_session_id = 'session1' WHERE event_id = 'e1'",
         ),
         throwsSqlite('層級建立後不可變更'),
       );
@@ -143,7 +183,7 @@ void main() {
       await db.into(db.events).insert(event('e1'));
       expect(
         () => db.customStatement(
-          "UPDATE events SET layer = 'original' WHERE id = 'e1'",
+          "UPDATE events SET layer = 'original' WHERE event_id = 'e1'",
         ),
         throwsSqlite('層級建立後不可變更'),
       );

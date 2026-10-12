@@ -98,6 +98,12 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @timelineUnavailableFilter.
+  ///
+  /// In zh, this message translates to:
+  /// **'目前沒有可選用的對應資料'**
+  String get timelineUnavailableFilter;
+
   /// APP 名稱
   ///
   /// In zh, this message translates to:
@@ -247,6 +253,216 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'月份未定'**
   String get timeListYearOnly;
+
+  /// No description provided for @timelineOldestFirst.
+  ///
+  /// In zh, this message translates to:
+  /// **'舊→新'**
+  String get timelineOldestFirst;
+
+  /// No description provided for @timelineThisYear.
+  ///
+  /// In zh, this message translates to:
+  /// **'回到今年'**
+  String get timelineThisYear;
+
+  /// No description provided for @timelineCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 筆'**
+  String timelineCount(int count);
+
+  /// No description provided for @timelineNewestFirst.
+  ///
+  /// In zh, this message translates to:
+  /// **'新→舊'**
+  String get timelineNewestFirst;
+
+  /// No description provided for @timelineChooseYear.
+  ///
+  /// In zh, this message translates to:
+  /// **'選擇年份'**
+  String get timelineChooseYear;
+
+  /// No description provided for @timelineYearCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{year}・{count} 筆'**
+  String timelineYearCount(int count, String year);
+
+  /// No description provided for @timelineEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'還沒有生命紀錄，請從「新增節點」開始。'**
+  String get timelineEmpty;
+
+  /// No description provided for @timelineRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重試'**
+  String get timelineRetry;
+
+  /// No description provided for @timelineLoadError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法載入時間軸，請重試。'**
+  String get timelineLoadError;
+
+  /// No description provided for @timelineAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'不限'**
+  String get timelineAll;
+
+  /// No description provided for @timelineOriginal.
+  ///
+  /// In zh, this message translates to:
+  /// **'原始生命紀錄'**
+  String get timelineOriginal;
+
+  /// No description provided for @timelineMatches.
+  ///
+  /// In zh, this message translates to:
+  /// **'符合 {matched}／{total} 筆'**
+  String timelineMatches(int matched, int total);
+
+  /// No description provided for @timelineFilter.
+  ///
+  /// In zh, this message translates to:
+  /// **'篩選'**
+  String get timelineFilter;
+
+  /// No description provided for @timelineApply.
+  ///
+  /// In zh, this message translates to:
+  /// **'套用'**
+  String get timelineApply;
+
+  /// No description provided for @timelinePlace.
+  ///
+  /// In zh, this message translates to:
+  /// **'地點'**
+  String get timelinePlace;
+
+  /// No description provided for @timelineCategory.
+  ///
+  /// In zh, this message translates to:
+  /// **'類別'**
+  String get timelineCategory;
+
+  /// No description provided for @timelinePerson.
+  ///
+  /// In zh, this message translates to:
+  /// **'人物'**
+  String get timelinePerson;
+
+  /// No description provided for @timelineLayer.
+  ///
+  /// In zh, this message translates to:
+  /// **'紀錄層'**
+  String get timelineLayer;
+
+  /// No description provided for @timelineRemembrance.
+  ///
+  /// In zh, this message translates to:
+  /// **'後續追憶'**
+  String get timelineRemembrance;
+
+  /// No description provided for @timelineTag.
+  ///
+  /// In zh, this message translates to:
+  /// **'標籤'**
+  String get timelineTag;
+
+  /// No description provided for @timelineLifePeriod.
+  ///
+  /// In zh, this message translates to:
+  /// **'人生階段'**
+  String get timelineLifePeriod;
+
+  /// No description provided for @timelineClear.
+  ///
+  /// In zh, this message translates to:
+  /// **'清除篩選'**
+  String get timelineClear;
+
+  /// No description provided for @timelineDemo.
+  ///
+  /// In zh, this message translates to:
+  /// **'開發用假資料'**
+  String get timelineDemo;
+
+  /// No description provided for @timelineCompact.
+  ///
+  /// In zh, this message translates to:
+  /// **'精簡清單'**
+  String get timelineCompact;
+
+  /// No description provided for @timelineAttachments.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 個附件'**
+  String timelineAttachments(int count);
+
+  /// No description provided for @timelineEnterYear.
+  ///
+  /// In zh, this message translates to:
+  /// **'輸入年份'**
+  String get timelineEnterYear;
+
+  /// No description provided for @timelineCancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get timelineCancel;
+
+  /// No description provided for @timelineGenerate.
+  ///
+  /// In zh, this message translates to:
+  /// **'產生'**
+  String get timelineGenerate;
+
+  /// No description provided for @timelineDemoTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'測試紀錄 {number}'**
+  String timelineDemoTitle(int number);
+
+  /// No description provided for @timelineDemoCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'追加 {count} 筆假資料'**
+  String timelineDemoCount(int count);
+
+  /// No description provided for @timelinePreferencesError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法讀取或保存顯示偏好，請檢查裝置儲存空間。'**
+  String get timelinePreferencesError;
+
+  /// No description provided for @timelineCards.
+  ///
+  /// In zh, this message translates to:
+  /// **'圖文卡片'**
+  String get timelineCards;
+
+  /// No description provided for @timelineDemoConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'將追加 {count} 筆假資料至目前資料庫，不會刪除既有紀錄。建議僅在測試裝置使用。'**
+  String timelineDemoConfirm(int count);
+
+  /// No description provided for @timelineDemoCategory.
+  ///
+  /// In zh, this message translates to:
+  /// **'測試資料'**
+  String get timelineDemoCategory;
+
+  /// 正式英文名稱，來源為企劃書標題：人生編年史 Life Chronicle
+  ///
+  /// In zh, this message translates to:
+  /// **'Life Chronicle'**
+  String get timelineBrandEnglish;
 }
 
 class _AppLocalizationsDelegate

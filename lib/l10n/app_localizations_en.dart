@@ -10,6 +10,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get timelineUnavailableFilter =>
+      'Selected data is currently unavailable';
+
+  @override
   String get appTitle => 'Life Chronicle';
 
   @override
@@ -130,4 +134,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timeListYearOnly => 'Month unknown';
+
+  @override
+  String get timelineOldestFirst => 'Old → New';
+
+  @override
+  String get timelineThisYear => 'Back to this year';
+
+  @override
+  String timelineCount(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String get timelineNewestFirst => 'New → Old';
+
+  @override
+  String get timelineChooseYear => 'Choose year';
+
+  @override
+  String timelineYearCount(int count, String year) {
+    return '$year · $count entries';
+  }
+
+  @override
+  String get timelineEmpty => 'No entries yet. Start with New Entry.';
+
+  @override
+  String get timelineRetry => 'Retry';
+
+  @override
+  String get timelineLoadError => 'Could not load the timeline. Please retry.';
+
+  @override
+  String get timelineAll => 'Any';
+
+  @override
+  String get timelineOriginal => 'Original life record';
+
+  @override
+  String timelineMatches(int matched, int total) {
+    return '$matched / $total entries match';
+  }
+
+  @override
+  String get timelineFilter => 'Filter';
+
+  @override
+  String get timelineApply => 'Apply';
+
+  @override
+  String get timelinePlace => 'Place';
+
+  @override
+  String get timelineCategory => 'Category';
+
+  @override
+  String get timelinePerson => 'Person';
+
+  @override
+  String get timelineLayer => 'Record layer';
+
+  @override
+  String get timelineRemembrance => 'Remembrance';
+
+  @override
+  String get timelineTag => 'Tag';
+
+  @override
+  String get timelineLifePeriod => 'Life stage';
+
+  @override
+  String get timelineClear => 'Clear filters';
+
+  @override
+  String get timelineDemo => 'Demo data';
+
+  @override
+  String get timelineCompact => 'Compact list';
+
+  @override
+  String timelineAttachments(int count) {
+    return '$count attachments';
+  }
+
+  @override
+  String get timelineEnterYear => 'Enter year';
+
+  @override
+  String get timelineCancel => 'Cancel';
+
+  @override
+  String get timelineGenerate => 'Generate';
+
+  @override
+  String timelineDemoTitle(int number) {
+    return 'Demo entry $number';
+  }
+
+  @override
+  String timelineDemoCount(int count) {
+    return 'Add $count demo entries';
+  }
+
+  @override
+  String get timelinePreferencesError =>
+      'Could not read or save display preferences. Check device storage.';
+
+  @override
+  String get timelineCards => 'Cards';
+
+  @override
+  String timelineDemoConfirm(int count) {
+    return 'Add $count demo entries to this database. Existing entries are kept. Use a test device.';
+  }
+
+  @override
+  String get timelineDemoCategory => 'Demo';
+
+  @override
+  String get timelineBrandEnglish => 'Life Chronicle';
 }

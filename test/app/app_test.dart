@@ -1,13 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drift/native.dart';
 import 'package:life_chronicle/app/app.dart';
 import 'package:life_chronicle/app/theme.dart';
+import 'package:life_chronicle/data/db/app_database.dart';
+import 'package:life_chronicle/data/providers.dart';
+import 'package:life_chronicle/data/repositories/timeline_preferences_store.dart';
 
 Future<void> _pumpApp(WidgetTester tester, List<Locale> systemLocales) async {
   tester.platformDispatcher.localesTestValue = systemLocales;
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-  await tester.pumpWidget(const ProviderScope(child: LifeChronicleApp()));
+  final db = AppDatabase(NativeDatabase.memory());
+  addTearDown(db.close);
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        timelinePreferencesStoreProvider.overrideWith(
+          (ref) async => MemoryTimelinePreferencesStore(),
+        ),
+      ],
+      child: const LifeChronicleApp(),
+    ),
+  );
+  await tester.runAsync(() async {
+    await db.customSelect('SELECT 1').get();
+  });
+  for (var i = 0; i < 20; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump();
+  }
   await tester.pumpAndSettle();
 }
 
@@ -27,9 +52,10 @@ const _enTabs = ['Timeline', 'Search', 'New Entry', 'Stories', 'Backup'];
 
 void main() {
   group('語系跟隨系統（企劃書 4.7）', () {
-    testWidgets('系統為繁體中文：介面與 Material 元件皆為繁體中文', (tester) async {
+    databaseTestWidgets('系統為繁體中文：介面與 Material 元件皆為繁體中文', (tester) async {
       await _pumpApp(tester, [const Locale('zh', 'TW')]);
       _expectTabs(_zhTabs);
+      expect(find.text('人生編年史'), findsOneWidget);
 
       final context = tester.element(find.byType(NavigationBar));
       final locale = Localizations.localeOf(context);
@@ -37,9 +63,10 @@ void main() {
       expect(MaterialLocalizations.of(context).okButtonLabel, '確定');
     });
 
-    testWidgets('系統為英文：介面皆為英文（驗收 #31）', (tester) async {
+    databaseTestWidgets('系統為英文：介面皆為英文（驗收 #31）', (tester) async {
       await _pumpApp(tester, [const Locale('en', 'US')]);
       _expectTabs(_enTabs);
+      expect(find.text('Life Chronicle'), findsOneWidget);
 
       final context = tester.element(find.byType(NavigationBar));
       expect(MaterialLocalizations.of(context).okButtonLabel, 'OK');
@@ -66,7 +93,7 @@ void main() {
     });
   });
 
-  testWidgets('點選分頁會切換畫面', (tester) async {
+  databaseTestWidgets('點選分頁會切換畫面', (tester) async {
     await _pumpApp(tester, [const Locale('zh', 'TW')]);
 
     await tester.tap(find.text('資料與備份'));
@@ -76,7 +103,7 @@ void main() {
     expect(navBar.selectedIndex, 4);
   });
 
-  testWidgets('主題跟隨系統淺色／深色設定', (tester) async {
+  databaseTestWidgets('主題跟隨系統淺色／深色設定', (tester) async {
     tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
     await _pumpApp(tester, [const Locale('zh', 'TW')]);
@@ -89,5 +116,14 @@ void main() {
     expect(AppTheme.light().brightness, Brightness.light);
     expect(AppTheme.dark().brightness, Brightness.dark);
     expect(AppTheme.light().useMaterial3, isTrue);
+  });
+}
+
+// 先卸載 ProviderScope，再推進時間以完成 drift 的延遲監聽釋放。
+void databaseTestWidgets(String description, WidgetTesterCallback callback) {
+  testWidgets(description, (tester) async {
+    await callback(tester);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 1));
   });
 }

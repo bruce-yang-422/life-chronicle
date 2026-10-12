@@ -37,6 +37,22 @@ Map<String, Object?> _readArb(String path) =>
     jsonDecode(File(path).readAsStringSync()) as Map<String, Object?>;
 
 void main() {
+  test('Android 桌面名稱與 APP 正式中英文名稱一致', () {
+    for (final (locale, directory) in [('en', 'values'), ('zh', 'values-zh')]) {
+      final arb = _readArb('lib/l10n/app_$locale.arb');
+      final resource = File('android/app/src/main/res/$directory/strings.xml')
+          .readAsStringSync();
+      final name = RegExp(r'<string name="app_name">([^<]+)</string>')
+          .firstMatch(resource)
+          ?.group(1);
+      expect(name, arb['appTitle']);
+    }
+    expect(
+      File('android/app/src/main/AndroidManifest.xml').readAsStringSync(),
+      contains('android:label="@string/app_name"'),
+    );
+  });
+
   test('畫面程式中的字串常值不含中日韓文字', () {
     final violations = <String>[];
     for (final dir in _uiDirs) {

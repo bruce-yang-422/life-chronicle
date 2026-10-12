@@ -10,6 +10,9 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get timelineUnavailableFilter => '目前沒有可選用的對應資料';
+
+  @override
   String get appTitle => '人生編年史';
 
   @override
@@ -121,4 +124,123 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get timeListYearOnly => '月份未定';
+
+  @override
+  String get timelineOldestFirst => '舊→新';
+
+  @override
+  String get timelineThisYear => '回到今年';
+
+  @override
+  String timelineCount(int count) {
+    return '$count 筆';
+  }
+
+  @override
+  String get timelineNewestFirst => '新→舊';
+
+  @override
+  String get timelineChooseYear => '選擇年份';
+
+  @override
+  String timelineYearCount(int count, String year) {
+    return '$year・$count 筆';
+  }
+
+  @override
+  String get timelineEmpty => '還沒有生命紀錄，請從「新增節點」開始。';
+
+  @override
+  String get timelineRetry => '重試';
+
+  @override
+  String get timelineLoadError => '無法載入時間軸，請重試。';
+
+  @override
+  String get timelineAll => '不限';
+
+  @override
+  String get timelineOriginal => '原始生命紀錄';
+
+  @override
+  String timelineMatches(int matched, int total) {
+    return '符合 $matched／$total 筆';
+  }
+
+  @override
+  String get timelineFilter => '篩選';
+
+  @override
+  String get timelineApply => '套用';
+
+  @override
+  String get timelinePlace => '地點';
+
+  @override
+  String get timelineCategory => '類別';
+
+  @override
+  String get timelinePerson => '人物';
+
+  @override
+  String get timelineLayer => '紀錄層';
+
+  @override
+  String get timelineRemembrance => '後續追憶';
+
+  @override
+  String get timelineTag => '標籤';
+
+  @override
+  String get timelineLifePeriod => '人生階段';
+
+  @override
+  String get timelineClear => '清除篩選';
+
+  @override
+  String get timelineDemo => '開發用假資料';
+
+  @override
+  String get timelineCompact => '精簡清單';
+
+  @override
+  String timelineAttachments(int count) {
+    return '$count 個附件';
+  }
+
+  @override
+  String get timelineEnterYear => '輸入年份';
+
+  @override
+  String get timelineCancel => '取消';
+
+  @override
+  String get timelineGenerate => '產生';
+
+  @override
+  String timelineDemoTitle(int number) {
+    return '測試紀錄 $number';
+  }
+
+  @override
+  String timelineDemoCount(int count) {
+    return '追加 $count 筆假資料';
+  }
+
+  @override
+  String get timelinePreferencesError => '無法讀取或保存顯示偏好，請檢查裝置儲存空間。';
+
+  @override
+  String get timelineCards => '圖文卡片';
+
+  @override
+  String timelineDemoConfirm(int count) {
+    return '將追加 $count 筆假資料至目前資料庫，不會刪除既有紀錄。建議僅在測試裝置使用。';
+  }
+
+  @override
+  String get timelineDemoCategory => '測試資料';
+
+  @override
+  String get timelineBrandEnglish => 'Life Chronicle';
 }

@@ -1,5 +1,6 @@
 {
   "@@locale": "en",
+  "timelineUnavailableFilter": "Selected data is currently unavailable",
   "appTitle": "Life Chronicle",
   "navTimeline": "Timeline",
   "navSearch": "Search",
@@ -24,5 +25,98 @@
   "timeListMonth": "{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} 12{Dec} other{?}}",
   "timeListQuarter": "Q{quarter}",
   "timeListHalfYear": "{half, select, first{H1} other{H2}}",
-  "timeListYearOnly": "Month unknown"
+  "timeListYearOnly": "Month unknown",
+  "timelineOldestFirst": "Old → New",
+  "timelineThisYear": "Back to this year",
+  "timelineCount": "{count} entries",
+  "timelineNewestFirst": "New → Old",
+  "timelineChooseYear": "Choose year",
+  "timelineYearCount": "{year} · {count} entries",
+  "timelineEmpty": "No entries yet. Start with New Entry.",
+  "timelineRetry": "Retry",
+  "timelineLoadError": "Could not load the timeline. Please retry.",
+  "@timelineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineYearCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "timelineAll": "Any",
+  "timelineOriginal": "Original life record",
+  "timelineMatches": "{matched} / {total} entries match",
+  "timelineFilter": "Filter",
+  "timelineApply": "Apply",
+  "timelinePlace": "Place",
+  "timelineCategory": "Category",
+  "timelinePerson": "Person",
+  "timelineLayer": "Record layer",
+  "timelineRemembrance": "Remembrance",
+  "timelineTag": "Tag",
+  "timelineLifePeriod": "Life stage",
+  "timelineClear": "Clear filters",
+  "@timelineMatches": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "timelineDemo": "Demo data",
+  "timelineCompact": "Compact list",
+  "timelineAttachments": "{count} attachments",
+  "timelineEnterYear": "Enter year",
+  "timelineCancel": "Cancel",
+  "timelineGenerate": "Generate",
+  "timelineDemoTitle": "Demo entry {number}",
+  "timelineDemoCount": "Add {count} demo entries",
+  "timelinePreferencesError": "Could not read or save display preferences. Check device storage.",
+  "timelineCards": "Cards",
+  "timelineDemoConfirm": "Add {count} demo entries to this database. Existing entries are kept. Use a test device.",
+  "timelineDemoCategory": "Demo",
+  "@timelineAttachments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineDemoConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineDemoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineDemoTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "timelineBrandEnglish": "Life Chronicle",
+  "@timelineBrandEnglish": {
+    "description": "正式英文名稱，來源為企劃書標題：人生編年史 Life Chronicle"
+  }
 }

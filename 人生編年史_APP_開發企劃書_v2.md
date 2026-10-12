@@ -109,7 +109,7 @@
 - **編年體**：以事件發生時間排列，可跨多年顯示學業、職涯、家庭和私人事件。
 - **紀事本末**：點擊節點閱讀該事件的記述段落、日後回顧與附件；段落由使用者依事件性質自由組成（見下方），可附照片、影片、錄音及文件。
 - **專題篇章**：例如「我的大學四年」「第一次創業」「我們的戀愛史」，以關聯 ID 引用多個事件。
-- **人生階段**：學校就讀與公司任職屬起訖區間；升遷、畢業與第一天到職屬時間點，可連結到階段。
+- **人生階段**：學校就讀與公司任職屬起訖區間；升遷、畢業與第一天到職屬時間點，可明確連結到階段。事件與階段的連結保存於 `event_life_periods`，同一事件可連結多個階段，同一階段可連結多個事件；不依事件時間自動推斷歸屬。
 
 #### 記述段落：依事件自由組成，不預設固定結構
 
@@ -202,6 +202,7 @@
 - **移除**首頁常駐的「全部、學業、職涯、感情、家庭」分類膠囊列，分類移入「篩選」面板，與人生階段、標籤、人物、地點、紀錄層（原始生命紀錄／後續追憶）並列。
 - **篩選狀態必須永遠看得見**：套用後頂部顯示篩選條件標籤（如「職涯 ✕」）與「符合 6／20 筆」，一次點擊即可清除，避免使用者誤以為資料不見。
 - 篩選後無符合事件的年份自動隱藏，年份清單同步只列出有結果的年份。
+- **人生階段篩選**只比對 `event_life_periods` 中的明確連結，不以事件時間與階段區間重疊自動納入事件。
 
 #### 顯示密度與排序方向
 
@@ -466,6 +467,7 @@ LifeChronicle_20500610-1430_full.zip
 │   ├── events.json
 │   ├── event_sections.json
 │   ├── life_periods.json
+│   ├── event_life_periods.json
 │   ├── reflections.json
 │   ├── stories.json
 │   ├── attachments.json
@@ -686,24 +688,27 @@ LifeChronicle_20500610-1430_full.zip
 
 ## 10. 資料模型草案
 
+未上架期間，SQLite 結構統一維持 `schema_version = 1`，直接更新初始結構。單欄主鍵採「單數實體名稱＋`_id`」（如 `event_id`、`person_id`）；外鍵沿用對應名稱，多對多關聯保留複合主鍵。Drift 的共用 Dart `id` 屬性透過 `.named()` 對應 SQL 主鍵名稱。
+
 | 實體／資料表 | 主要欄位 | 用途 |
 | --- | --- | --- |
-| `subjects` | id, display_name, birth_date, death_date_optional | 生命檔案主角 |
-| `authors` | id, display_name, role, is_subject_self | 作者／家人，與主角分離；`is_subject_self` 標記主角本人 |
-| `events` | id, subject_id, title, category, time_payload, sort_start, sort_end, manual_order, place_id, privacy（`normal`／`private`）, deleted_at, purged_at, ＋層級欄位, updated_at | 人生節點；`deleted_at` 為軟刪除時間，`purged_at` 為永久刪除但因追憶附掛而保留標題的時間 |
-| `event_sections` | id, event_id, title, suggestion_key, position, content_md, ＋層級欄位 | 使用者自由組成的記述段落；`title` 為顯示標題（未命名的記述可為空），`suggestion_key` 僅記錄來自哪個建議項目（自訂段落為空），`position` 為排序 |
-| `life_periods` | id, subject_id, type, start_time, end_time, organization, role, ＋層級欄位 | 求學／任職等區間 |
-| `reflections` | id, event_id, recorded_at, content_md, provenance, ＋層級欄位 | 多次回顧與後續追憶 |
-| `stories` / `story_events` | id, title, ＋層級欄位；story_id, event_id, order | 紀事本末篇章 |
-| `blobs` | id, sha256, byte_size, media_type, path, verify_status | 單一實體檔案 |
-| `attachments` | id, event_id, blob_id, display_name, original_filename, role, captured_at, captured_latitude, captured_longitude, imported_at, storage_mode, ＋層級欄位 | 附件引用；拍攝座標取自 EXIF（可取得時），用於建議事件地點 |
-| `places` | id, name, name_key, latitude, longitude, radius_m, created_at | 地點；`name_key` 為比對用的正規化名稱（唯一），名稱與座標至少擇一 |
-| `people` / `event_people` | id, display_name, name_key, created_at；event_id, person_id, ＋層級欄位 | 參與人物；`name_key` 規則同地點 |
+| `subjects` | subject_id, display_name, birth_date, death_date_optional | 生命檔案主角 |
+| `authors` | author_id, display_name, role, is_subject_self | 作者／家人，與主角分離；`is_subject_self` 標記主角本人 |
+| `events` | event_id, subject_id, title, category, time_payload, sort_start, sort_end, manual_order, place_id, privacy（`normal`／`private`）, deleted_at, purged_at, ＋層級欄位, updated_at | 人生節點；`deleted_at` 為軟刪除時間，`purged_at` 為永久刪除但因追憶附掛而保留標題的時間 |
+| `event_sections` | event_section_id, event_id, title, suggestion_key, position, content_md, ＋層級欄位 | 使用者自由組成的記述段落；`title` 為顯示標題（未命名的記述可為空），`suggestion_key` 僅記錄來自哪個建議項目（自訂段落為空），`position` 為排序 |
+| `life_periods` | life_period_id, subject_id, type, start_time, end_time, organization, role, ＋層級欄位 | 求學／任職等區間 |
+| `event_life_periods` | event_id, life_period_id, ＋層級欄位 | 事件與人生階段的明確多對多連結；每對只存一列，事件與階段須屬同一主角，不依時間重疊推斷 |
+| `reflections` | reflection_id, event_id, recorded_at, content_md, provenance, ＋層級欄位 | 多次回顧與後續追憶 |
+| `stories` / `story_events` | story_id, title, ＋層級欄位；story_id, event_id, order | 紀事本末篇章 |
+| `blobs` | blob_id, sha256, byte_size, media_type, path, verify_status | 單一實體檔案 |
+| `attachments` | attachment_id, event_id, blob_id, display_name, original_filename, role, captured_at, captured_latitude, captured_longitude, imported_at, storage_mode, ＋層級欄位 | 附件引用；拍攝座標取自 EXIF（可取得時），用於建議事件地點 |
+| `places` | place_id, name, name_key, latitude, longitude, radius_m, created_at | 地點；`name_key` 為比對用的正規化名稱（唯一），名稱與座標至少擇一 |
+| `people` / `event_people` | person_id, display_name, name_key, created_at；event_id, person_id, ＋層級欄位 | 參與人物；`name_key` 規則同地點 |
 | `event_links` | event_a_id, event_b_id, ＋層級欄位 | 關聯事件（無方向）；每對事件只存一列，`event_a_id` 小於 `event_b_id` |
-| `tags` / `event_tags` | id, label; event_id, tag_id, ＋層級欄位 | 快速查詢 |
+| `tags` / `event_tags` | tag_id, label; event_id, tag_id, ＋層級欄位 | 快速查詢 |
 | `archive_settings` | subject_id, mode（`normal`／`life_archive`）, current_session_id | 目前典藏狀態 |
-| `archive_sessions` | id, subject_id, activated_at, activated_by, deactivated_at, deactivated_by | 每段生命典藏期間 |
-| `change_history` | entity_id, operation, author_id, timestamp | 修訂來源紀錄 |
+| `archive_sessions` | archive_session_id, subject_id, activated_at, activated_by, deactivated_at, deactivated_by | 每段生命典藏期間 |
+| `change_history` | change_history_id, entity_id, operation, author_id, timestamp | 修訂來源紀錄 |
 
 **層級欄位**（所有內容表共用）：`layer`、`author_id`、`created_at`、`archive_session_id`。
 

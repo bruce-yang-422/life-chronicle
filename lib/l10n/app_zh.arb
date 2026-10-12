@@ -1,5 +1,6 @@
 {
   "@@locale": "zh",
+  "timelineUnavailableFilter": "目前沒有可選用的對應資料",
   "appTitle": "人生編年史",
   "@appTitle": {
     "description": "APP 名稱"
@@ -192,5 +193,98 @@
   "timeListYearOnly": "月份未定",
   "@timeListYearOnly": {
     "description": "列表格式：只知年份"
+  },
+  "timelineOldestFirst": "舊→新",
+  "timelineThisYear": "回到今年",
+  "timelineCount": "{count} 筆",
+  "timelineNewestFirst": "新→舊",
+  "timelineChooseYear": "選擇年份",
+  "timelineYearCount": "{year}・{count} 筆",
+  "timelineEmpty": "還沒有生命紀錄，請從「新增節點」開始。",
+  "timelineRetry": "重試",
+  "timelineLoadError": "無法載入時間軸，請重試。",
+  "@timelineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineYearCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "timelineAll": "不限",
+  "timelineOriginal": "原始生命紀錄",
+  "timelineMatches": "符合 {matched}／{total} 筆",
+  "timelineFilter": "篩選",
+  "timelineApply": "套用",
+  "timelinePlace": "地點",
+  "timelineCategory": "類別",
+  "timelinePerson": "人物",
+  "timelineLayer": "紀錄層",
+  "timelineRemembrance": "後續追憶",
+  "timelineTag": "標籤",
+  "timelineLifePeriod": "人生階段",
+  "timelineClear": "清除篩選",
+  "@timelineMatches": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "timelineDemo": "開發用假資料",
+  "timelineCompact": "精簡清單",
+  "timelineAttachments": "{count} 個附件",
+  "timelineEnterYear": "輸入年份",
+  "timelineCancel": "取消",
+  "timelineGenerate": "產生",
+  "timelineDemoTitle": "測試紀錄 {number}",
+  "timelineDemoCount": "追加 {count} 筆假資料",
+  "timelinePreferencesError": "無法讀取或保存顯示偏好，請檢查裝置儲存空間。",
+  "timelineCards": "圖文卡片",
+  "timelineDemoConfirm": "將追加 {count} 筆假資料至目前資料庫，不會刪除既有紀錄。建議僅在測試裝置使用。",
+  "timelineDemoCategory": "測試資料",
+  "@timelineAttachments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineDemoConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineDemoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@timelineDemoTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "timelineBrandEnglish": "Life Chronicle",
+  "@timelineBrandEnglish": {
+    "description": "正式英文名稱，來源為企劃書標題：人生編年史 Life Chronicle"
   }
 }

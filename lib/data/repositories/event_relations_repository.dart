@@ -15,6 +15,85 @@ class EventRelationsRepository {
 
   AppDatabase get db => ctx.db;
 
+  /// 明確加入階段關聯，不以時間重疊推斷；層級仍由共用權限流程決定。
+  Future<void> addLifePeriod(String eventId, String lifePeriodId) =>
+      db.transaction(() async {
+        final event =
+            await (db.select(db.events)..where(
+                  (row) =>
+                      row.id.equals(eventId) &
+                      row.subjectId.equals(ctx.subjectId) &
+                      row.deletedAt.isNull(),
+                ))
+                .getSingleOrNull();
+        final period =
+            await (db.select(db.lifePeriods)..where(
+                  (row) =>
+                      row.id.equals(lifePeriodId) &
+                      row.subjectId.equals(ctx.subjectId),
+                ))
+                .getSingleOrNull();
+        if (event == null || period == null) {
+          throw const EventStateException('事件或人生階段不存在，無法建立連結');
+        }
+        final existing =
+            await (db.select(db.eventLifePeriods)..where(
+                  (row) =>
+                      row.eventId.equals(eventId) &
+                      row.lifePeriodId.equals(lifePeriodId),
+                ))
+                .getSingleOrNull();
+        if (existing != null) return;
+        final stamp = await ctx.stampForNew();
+        await db
+            .into(db.eventLifePeriods)
+            .insert(
+              EventLifePeriodsCompanion.insert(
+                eventId: eventId,
+                lifePeriodId: lifePeriodId,
+                layer: stamp.layerCode,
+                authorId: stamp.authorId,
+                createdAt: stamp.createdAt,
+                archiveSessionId: Value(stamp.archiveSessionId),
+              ),
+            );
+        await ctx.recordChange(eventId, ChangeOperation.update);
+      });
+
+  Future<void> removeLifePeriod(String eventId, String lifePeriodId) =>
+      db.transaction(() async {
+        final row =
+            await (db.select(db.eventLifePeriods)..where(
+                  (row) =>
+                      row.eventId.equals(eventId) &
+                      row.lifePeriodId.equals(lifePeriodId),
+                ))
+                .getSingleOrNull();
+        if (row == null) return;
+        await ctx.ensureCanModify(row.layer);
+        await (db.delete(db.eventLifePeriods)..where(
+              (row) =>
+                  row.eventId.equals(eventId) &
+                  row.lifePeriodId.equals(lifePeriodId),
+            ))
+            .go();
+        await ctx.recordChange(eventId, ChangeOperation.update);
+      });
+
+  Future<List<LifePeriod>> lifePeriodsOf(String eventId) {
+    final query =
+        db.select(db.lifePeriods).join([
+          innerJoin(
+            db.eventLifePeriods,
+            db.eventLifePeriods.lifePeriodId.equalsExp(db.lifePeriods.id),
+          ),
+        ])..where(
+          db.eventLifePeriods.eventId.equals(eventId) &
+              db.lifePeriods.subjectId.equals(ctx.subjectId),
+        );
+    return query.map((row) => row.readTable(db.lifePeriods)).get();
+  }
+
   // ---- 參與人物 ----
 
   Future<void> addPerson(String eventId, String personId) =>

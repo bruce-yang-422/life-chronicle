@@ -1,0 +1,300 @@
+// 人生編年史 Life Chronicle：APP 實際 SQLite schema v1
+// 產生指令：flutter test tools/db_schema/export_test.dart
+// 全選本檔內容，貼到 https://dbdiagram.io/ 的左側 DBML 編輯器。
+// 不包含使用者資料；SQLite 自動產生的 FTS5 輔助表與內部表不另畫出。
+Project life_chronicle {
+  database_type: 'SQLite'
+  Note: '人生編年史／Life Chronicle；schema v1。20 張業務資料表與 1 張 FTS5 虛擬表。欄位使用 SQLite 實際型別：時間戳記為 TEXT（ISO 8601；build.yaml 已啟用文字儲存），時間值 JSON 與排序日期為 TEXT。層級建立後不可修改，追憶作者不得為本人，相關觸發器見同目錄 life_chronicle.sql。'
+}
+
+Table subjects {
+  Note: '生命檔案主角；生日與死亡日期以時間值 JSON 保存。'
+  subject_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  display_name text [not null, note: '主角名稱；首次建立可為空。']
+  birth_date text [null, note: '生日時間值 JSON，不補造未輸入的月日。']
+  death_date text [null, note: '選填的死亡日期時間值 JSON。']
+}
+
+Table authors {
+  Note: '作者（本人或家人），與生命檔案主角、參與人物分開。本人作者名稱可為空，由介面顯示「我」。'
+  author_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  display_name text [not null]
+  role text [not null]
+  is_subject_self integer [not null, default: `0`, note: 'SQLite INTEGER 布林值：0＝否、1＝本人；作者若已撰寫追憶，觸發器不允許改為本人。']
+  checks {
+    `"is_subject_self" IN (0, 1)`
+  }
+}
+
+Table archive_sessions {
+  Note: '每段生命典藏期間及啟用／停用操作者。'
+  archive_session_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  subject_id text [not null, ref: > subjects.subject_id]
+  activated_at text [not null]
+  activated_by text [not null, ref: > authors.author_id]
+  deactivated_at text [null]
+  deactivated_by text [null, ref: > authors.author_id]
+}
+
+Table archive_settings {
+  Note: '每位主角最多一筆目前典藏狀態，透過 subject_id 與主角一對一對應。'
+  subject_id text [not null, pk, ref: - subjects.subject_id, note: '主角外鍵，同時為本表主鍵；每位主角最多一筆設定。']
+  mode text [not null, default: `'normal'`, note: 'normal＝一般模式；life_archive＝生命典藏模式。']
+  current_session_id text [null, ref: > archive_sessions.archive_session_id]
+  checks {
+    `mode IN ('normal', 'life_archive')`
+  }
+}
+
+Table places {
+  Note: '共用地點，不分層級；名稱或座標至少有一個。名稱正規化後唯一。'
+  place_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  name text [null]
+  name_key text [null, unique, note: '比對用正規化名稱：忽略台／臺、全半形與空白，唯一。']
+  latitude real [null]
+  longitude real [null]
+  radius_m real [null, note: '地點範圍或定位精確度的半徑，單位公尺；存在時須大於 0 且有座標。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  checks {
+    `(name IS NULL) = (name_key IS NULL)`
+    `(latitude IS NULL) = (longitude IS NULL)`
+    `name IS NOT NULL OR latitude IS NOT NULL`
+    `latitude IS NULL OR latitude BETWEEN -90 AND 90`
+    `longitude IS NULL OR longitude BETWEEN -180 AND 180`
+    `radius_m IS NULL OR (radius_m > 0 AND latitude IS NOT NULL)`
+  }
+}
+
+Table events {
+  Note: '人生節點。年份依 sort_start 分組；雙向排序由純 Dart 唯一比較器完成，不能用 SQL 排序取代。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  event_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  subject_id text [not null, ref: > subjects.subject_id]
+  title text [not null]
+  category text [null]
+  time_payload text [not null, note: '時間值 JSON：day、month、quarter、half_year、year、approx_year、range、relative、age_estimate、unknown；由 Dart 核心邏輯驗證。']
+  sort_start text [null, note: '供排序及年份分段查詢的衍生 TEXT 日期 YYYY-MM-DD；不是顯示用的確定發生日期。']
+  sort_end text [null, note: '衍生排序區間終點 TEXT 日期 YYYY-MM-DD；時間未定時為 NULL。']
+  manual_order integer [not null, default: `0`, note: '同一天多件事的手動順序；方向切換由唯一比較器處理。']
+  place_id text [null, ref: > places.place_id]
+  privacy text [not null, default: `'normal'`, note: 'normal＝一般；private＝私密。']
+  deleted_at text [null, note: '軟刪除時間 UTC ISO 8601 文字（TEXT）；一般查詢預設排除，最近刪除可復原。']
+  purged_at text [null, note: '永久刪除但保留標題供追憶依附的時間；必須已有 deleted_at。']
+  updated_at text [not null]
+  indexes {
+    sort_end [name: 'events_sort_end']
+    sort_start [name: 'events_sort_start']
+  }
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+    `privacy IN ('normal', 'private')`
+    `purged_at IS NULL OR deleted_at IS NOT NULL`
+  }
+}
+
+Table event_sections {
+  Note: '可自訂標題與順序的記述段落；不是固定的起因／經過／結果欄位。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  event_section_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  event_id text [not null, ref: > events.event_id]
+  title text [null, note: 'NULL 為未命名的記述段落。']
+  suggestion_key text [null, note: '記錄建議項目的來源；自訂段落為 NULL。']
+  position integer [not null, note: '使用者指定的內容順序。']
+  content_md text [not null]
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+  }
+}
+
+Table life_periods {
+  Note: '求學、任職等人生階段的起訖區間。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  life_period_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  subject_id text [not null, ref: > subjects.subject_id]
+  type text [not null]
+  start_time text [not null]
+  end_time text [null]
+  organization text [null]
+  role text [null]
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+  }
+}
+
+Table event_life_periods {
+  Note: '事件與人生階段的明確多對多連結；只按連結篩選，不以時間重疊推斷。相同主角檢查在 Repository 執行。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  event_id text [not null, ref: > events.event_id]
+  life_period_id text [not null, ref: > life_periods.life_period_id]
+  indexes {
+    (event_id, life_period_id) [pk]
+  }
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+  }
+}
+
+Table reflections {
+  Note: '日後回顧與後續追憶；Repository 採追加，保存各自作者及時間。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  reflection_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  event_id text [not null, ref: > events.event_id]
+  recorded_at text [not null]
+  content_md text [not null]
+  provenance text [null]
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+  }
+}
+
+Table stories {
+  Note: '紀事本末篇章，以 story_events 引用既有事件，不重複保存事件本體。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  story_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  title text [not null]
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+  }
+}
+
+Table story_events {
+  Note: '篇章與事件的多對多對照；position 為企劃書 order 欄位的實際 SQL 名稱。'
+  story_id text [not null, ref: > stories.story_id]
+  event_id text [not null, ref: > events.event_id]
+  position integer [not null, note: '使用者指定的內容順序。']
+  indexes {
+    (story_id, event_id) [pk]
+  }
+}
+
+Table blobs {
+  Note: '單一實體檔案，以完整 SHA-256 去重；多個附件可共用同一 blob。'
+  blob_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  sha256 text [not null, unique, note: '完整 SHA-256 雜湊；SQLite 未另外限制字元長度。']
+  byte_size integer [not null]
+  media_type text [not null]
+  path text [not null]
+  verify_status text [not null]
+}
+
+Table attachments {
+  Note: '事件的附件引用，區分拍攝時間與匯入時間，並保存原檔名與可取得的 EXIF 座標。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  attachment_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  event_id text [not null, ref: > events.event_id]
+  blob_id text [not null, ref: > blobs.blob_id]
+  display_name text [not null]
+  original_filename text [not null]
+  role text [null]
+  captured_at text [null, note: '可取得的拍攝／內容時間 UTC ISO 8601 文字（TEXT），與 imported_at 分開。']
+  captured_latitude real [null]
+  captured_longitude real [null]
+  imported_at text [not null, note: '加入 APP 的時間 UTC ISO 8601 文字（TEXT）。']
+  storage_mode text [not null]
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+    `(captured_latitude IS NULL) = (captured_longitude IS NULL)`
+    `captured_latitude IS NULL OR captured_latitude BETWEEN -90 AND 90`
+    `captured_longitude IS NULL OR captured_longitude BETWEEN -180 AND 180`
+  }
+}
+
+Table tags {
+  Note: '共用標籤；標籤文字唯一。'
+  tag_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  label text [not null, unique]
+}
+
+Table event_tags {
+  Note: '事件與標籤的多對多對照，對照本身保有層級與作者。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  event_id text [not null, ref: > events.event_id]
+  tag_id text [not null, ref: > tags.tag_id]
+  indexes {
+    (event_id, tag_id) [pk]
+  }
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+  }
+}
+
+Table people {
+  Note: '事件中的參與人物，與作者不同；共用參考資料，不分層級。'
+  person_id text [not null, pk, note: '識別碼；除自增修訂流水號外，APP 以 26 字元 ULID 產生。SQLite 本身未限制字元長度。']
+  display_name text [not null]
+  name_key text [not null, unique, note: '比對用正規化名稱：忽略台／臺、全半形與空白，唯一。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+}
+
+Table event_people {
+  Note: '事件與參與人物的多對多對照，對照本身保有層級與作者。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  event_id text [not null, ref: > events.event_id]
+  person_id text [not null, ref: > people.person_id]
+  indexes {
+    (event_id, person_id) [pk]
+  }
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+  }
+}
+
+Table event_links {
+  Note: '無方向的事件關聯；每對只存一列，以 event_a_id < event_b_id 排除反向重複及自我關聯。'
+  layer text [not null, note: 'original＝原始生命紀錄層；remembrance＝後續追憶層。由 Repository 在建立時判定；資料庫觸發器禁止任何 UPDATE layer。']
+  author_id text [not null, ref: > authors.author_id, note: '內容作者；觸發器拒絕後續追憶使用 is_subject_self=1 的作者。']
+  created_at text [not null, note: '建立紀錄時間，UTC ISO 8601 文字（TEXT）（Drift DateTime 的 SQLite 儲存型別）。']
+  archive_session_id text [null, ref: > archive_sessions.archive_session_id, note: 'original 必須為 NULL；remembrance 必須指向建立時的典藏期間。']
+  event_a_id text [not null, ref: > events.event_id]
+  event_b_id text [not null, ref: > events.event_id]
+  indexes {
+    (event_a_id, event_b_id) [pk]
+  }
+  checks {
+    `(layer = 'original' AND archive_session_id IS NULL) OR (layer = 'remembrance' AND archive_session_id IS NOT NULL)`
+    `event_a_id < event_b_id`
+  }
+}
+
+Table change_history {
+  Note: '修訂來源紀錄。entity_id 為多型實體識別碼，沒有單一資料表外鍵。第一階段不實作清除機制。'
+  change_history_id integer [not null, pk, increment, note: '自增的修訂流水號，INTEGER PRIMARY KEY AUTOINCREMENT。']
+  entity_id text [not null, note: '可能指向不同類型的實體，因此未宣告外鍵。']
+  operation text [not null]
+  author_id text [not null, ref: > authors.author_id, note: '修訂操作者，指向作者；本表不具有 layer 欄位。']
+  timestamp text [not null, note: '修訂時間 UTC ISO 8601 文字（TEXT）。']
+}
+
+Table search_index {
+  Note: 'SQLite FTS5 虛擬表，tokenize=unicode61；entity_type、entity_id 設為 UNINDEXED。本圖僅呈現三個邏輯欄位，不是一般 CREATE TABLE，也不呈現 FTS5 自動產生的輔助表。'
+  entity_type text [null, note: '多型資料來源類型；UNINDEXED，不建立實體表外鍵。']
+  entity_id text [null, note: '多型資料來源識別碼；UNINDEXED，不建立實體表外鍵。']
+  content text [null]
+}
