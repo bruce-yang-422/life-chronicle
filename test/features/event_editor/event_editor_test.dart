@@ -82,7 +82,7 @@ void main() {
           await tester.pump(const Duration(seconds: 1));
         }
       });
-  ui('快速新增年份與半年不补月日，儲存後開啟詳情', (tester) async {
+  ui('新增直接提供完整欄位，年份與半年不補月日，儲存後開啟詳情', (tester) async {
     final h = (await tester.runAsync(Harness.create))!;
     addTearDown(h.close);
     final store = MemoryEventDraftStore();
@@ -95,10 +95,22 @@ void main() {
     );
     await settle(tester);
     expect(find.text('何時發生: 時間未定'), findsOneWidget);
+    expect(find.text('進階編輯'), findsNothing);
+    expect(find.byType(ReorderableListView), findsOneWidget);
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    expect(find.byIcon(Icons.person_add), findsOneWidget);
+    expect(find.byIcon(Icons.map_outlined), findsOneWidget);
     await tester.enterText(find.byType(TextFormField).first, '我的大學');
     await tester.tap(find.byIcon(Icons.calendar_month));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await tester.tap(
+      find
+          .descendant(
+            of: find.byType(BottomSheet),
+            matching: find.byType(DropdownButtonFormField<String>),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('半年').last);
     await tester.pumpAndSettle();
@@ -115,7 +127,12 @@ void main() {
     await tester.tap(find.text('套用時間'));
     await tester.pumpAndSettle();
     expect(find.text('何時發生: 2003 年下半年'), findsOneWidget);
-    await tester.ensureVisible(find.text('儲存事件'));
+    await tester.scrollUntilVisible(
+      find.text('儲存事件'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('儲存事件'));
     await settle(tester);
     expect(find.text('日後回顧'), findsOneWidget);
@@ -143,7 +160,7 @@ void main() {
     final heroes = tester.widgetList<HeroMode>(find.byType(HeroMode));
     expect(heroes.every((hero) => !hero.enabled), isTrue);
   });
-  ui('進階編輯可改自訂段落標題並用可見按鈕排序', (tester) async {
+  ui('編輯直接提供自訂段落標題並用可見按鈕排序', (tester) async {
     final h = (await tester.runAsync(Harness.create))!;
     addTearDown(h.close);
     final id = (await tester.runAsync(
@@ -163,6 +180,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byTooltip('編輯事件'));
     await settle(tester);
+    expect(find.text('進階編輯'), findsNothing);
     final title = find.byWidgetPredicate(
       (widget) => widget is TextField && widget.controller?.text == '原標題',
     );
@@ -180,6 +198,10 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('儲存事件'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('儲存事件'));
     await settle(tester);
     final data = (await tester.runAsync(

@@ -29,7 +29,7 @@ class NewEventPage extends ConsumerStatefulWidget {
 class _NewEventPageState extends ConsumerState<NewEventPage> {
   EventDraft _draft = EventDraft();
   EventDraftStore? _store;
-  bool _loading = true, _busy = false, _advanced = false, _restored = false;
+  bool _loading = true, _busy = false, _restored = false;
   bool _draftError = false, _titleError = false;
   bool _locating = false, _locationError = false;
 
@@ -111,7 +111,6 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
         }
         _restored = saved != null;
         _loading = false;
-        _advanced = widget.eventId != null;
         _draftError = false;
         _version++;
       });
@@ -414,15 +413,14 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            if (_advanced)
-              TextFormField(
-                initialValue: section.title,
-                decoration: InputDecoration(labelText: l.editorSectionTitle),
-                onChanged: (value) {
-                  section.title = value;
-                  _changed();
-                },
-              ),
+            TextFormField(
+              initialValue: section.title,
+              decoration: InputDecoration(labelText: l.editorSectionTitle),
+              onChanged: (value) {
+                section.title = value;
+                _changed();
+              },
+            ),
             MarkdownEditor(
               initialValue: section.content,
               label: l.editorNarrative,
@@ -431,31 +429,30 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
                 _changed();
               },
             ),
-            if (_advanced)
-              Wrap(
-                children: [
-                  IconButton(
-                    tooltip: l.editorMoveUp,
-                    onPressed: index > 0 ? () => _move(index, index - 1) : null,
-                    icon: const Icon(Icons.arrow_upward),
-                  ),
-                  IconButton(
-                    tooltip: l.editorMoveDown,
-                    onPressed: index < _draft.sections.length - 1
-                        ? () => _move(index, index + 1)
-                        : null,
-                    icon: const Icon(Icons.arrow_downward),
-                  ),
-                  IconButton(
-                    tooltip: l.editorRemoveSection,
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () {
-                      setState(() => _draft.sections.removeAt(index));
-                      _changed();
-                    },
-                  ),
-                ],
-              ),
+            Wrap(
+              children: [
+                IconButton(
+                  tooltip: l.editorMoveUp,
+                  onPressed: index > 0 ? () => _move(index, index - 1) : null,
+                  icon: const Icon(Icons.arrow_upward),
+                ),
+                IconButton(
+                  tooltip: l.editorMoveDown,
+                  onPressed: index < _draft.sections.length - 1
+                      ? () => _move(index, index + 1)
+                      : null,
+                  icon: const Icon(Icons.arrow_downward),
+                ),
+                IconButton(
+                  tooltip: l.editorRemoveSection,
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () {
+                    setState(() => _draft.sections.removeAt(index));
+                    _changed();
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -572,7 +569,7 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
                   },
                   label: Text(l.editorTimeValue(timeLabel)),
                 ),
-                if (_advanced) ...[
+                ...[
                   TextFormField(
                     initialValue: _draft.category,
                     decoration: InputDecoration(labelText: l.editorCategory),
@@ -733,23 +730,20 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
                     ),
                   ),
                 ],
-                if (!_advanced && _draft.sections.isNotEmpty) _section(0, l),
-                if (_advanced)
-                  ReorderableListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    onReorderItem: _move,
-                    children: [
-                      for (var i = 0; i < _draft.sections.length; i++)
-                        _section(i, l),
-                    ],
-                  ),
-                if (_advanced)
-                  TextButton.icon(
-                    onPressed: _addSection,
-                    icon: const Icon(Icons.add),
-                    label: Text(l.editorAddSection),
-                  ),
+                ReorderableListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onReorderItem: _move,
+                  children: [
+                    for (var i = 0; i < _draft.sections.length; i++)
+                      _section(i, l),
+                  ],
+                ),
+                TextButton.icon(
+                  onPressed: _addSection,
+                  icon: const Icon(Icons.add),
+                  label: Text(l.editorAddSection),
+                ),
                 OutlinedButton.icon(
                   onPressed: _addAttachments,
                   icon: const Icon(Icons.attach_file),
@@ -757,15 +751,6 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
                 ),
                 for (final file in _draft.attachments)
                   ListTile(title: Text(file['name']!)),
-                TextButton(
-                  onPressed: () => setState(() {
-                    _advanced = !_advanced;
-                    if (!_advanced && _draft.sections.isEmpty) {
-                      _draft.sections.add(DraftSection());
-                    }
-                  }),
-                  child: Text(l.editorAdvanced),
-                ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: _store == null || _locating ? null : _save,
