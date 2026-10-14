@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import '../../core/time/timeline_sort.dart';
+
 import '../db/app_database.dart';
 import 'event_repository.dart';
 import 'repository_context.dart';
@@ -158,7 +160,9 @@ class EventRelationsRepository {
       final row = await (db.select(
         db.events,
       )..where((e) => e.id.equals(id))).getSingleOrNull();
-      if (row == null || row.deletedAt != null) {
+      if (row == null ||
+          row.deletedAt != null ||
+          row.subjectId != ctx.subjectId) {
         throw EventStateException('無法關聯不存在或已刪除的事件：$id');
       }
     }
@@ -199,7 +203,10 @@ class EventRelationsRepository {
       });
 
   /// 與某事件關聯的所有事件（從任一端查看都看得到），排除已刪除事件。
-  Future<List<Event>> related(String eventId) async {
+  Future<List<Event>> related(
+    String eventId, {
+    SortDirection direction = SortDirection.newestFirst,
+  }) async {
     final links =
         await (db.select(db.eventLinks)..where(
               (l) => l.eventAId.equals(eventId) | l.eventBId.equals(eventId),
@@ -209,10 +216,15 @@ class EventRelationsRepository {
       for (final l in links) l.eventAId == eventId ? l.eventBId : l.eventAId,
     ];
     if (ids.isEmpty) return const [];
-    return (db.select(db.events)
-          ..where((e) => e.id.isIn(ids) & e.deletedAt.isNull())
-          ..orderBy([(e) => OrderingTerm.asc(e.id)]))
-        .get();
+    final timeline = await EventRepository(ctx).watchTimeline().first;
+    return TimelineSort.sort(
+      timeline.where(
+        (item) =>
+            ids.contains(item.id) &&
+            (ctx.canReadPrivate || item.data.privacy != 'private'),
+      ),
+      direction,
+    ).map((item) => item.data).toList();
   }
 
   Future<EventLink?> _findLink(String a, String b) =>

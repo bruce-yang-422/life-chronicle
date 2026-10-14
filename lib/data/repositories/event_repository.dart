@@ -103,6 +103,10 @@ class EventRepository {
   Future<Event> _get(String id) async {
     final row = await find(id);
     if (row == null) throw EventStateException('事件不存在：$id');
+    if (row.subjectId != ctx.subjectId) {
+      throw const EventStateException('無法操作其他主角的事件');
+    }
+    ctx.ensureCanReadPrivate(row.privacy);
     return row;
   }
 
@@ -154,36 +158,37 @@ class EventRepository {
 
   // ---- 新增與修改 ----
 
-  Future<String> create(EventInput input) => db.transaction(() async {
-    final stamp = await ctx.stampForNew();
-    final id = ctx.newId();
-    final sortContext = await _loadSortContext(override: {id: input.time});
-    final range = _resolveForWrite(id, input.time, sortContext, null);
-    final now = ctx.now();
-    await db
-        .into(db.events)
-        .insert(
-          EventsCompanion.insert(
-            id: id,
-            subjectId: ctx.subjectId,
-            title: input.title.trim(),
-            category: Value(input.category),
-            timePayload: encodeTime(input.time),
-            sortStart: Value(range?.start.toIso()),
-            sortEnd: Value(range?.end.toIso()),
-            manualOrder: Value(input.manualOrder),
-            placeId: Value(input.placeId),
-            privacy: Value(input.privacy),
-            updatedAt: now,
-            layer: stamp.layerCode,
-            authorId: stamp.authorId,
-            createdAt: stamp.createdAt,
-            archiveSessionId: Value(stamp.archiveSessionId),
-          ),
-        );
-    await ctx.recordChange(id, ChangeOperation.create);
-    return id;
-  });
+  Future<String> create(EventInput input, {String? reservedId}) =>
+      db.transaction(() async {
+        final stamp = await ctx.stampForNew();
+        final id = reservedId ?? ctx.newId();
+        final sortContext = await _loadSortContext(override: {id: input.time});
+        final range = _resolveForWrite(id, input.time, sortContext, null);
+        final now = ctx.now();
+        await db
+            .into(db.events)
+            .insert(
+              EventsCompanion.insert(
+                id: id,
+                subjectId: ctx.subjectId,
+                title: input.title.trim(),
+                category: Value(input.category),
+                timePayload: encodeTime(input.time),
+                sortStart: Value(range?.start.toIso()),
+                sortEnd: Value(range?.end.toIso()),
+                manualOrder: Value(input.manualOrder),
+                placeId: Value(input.placeId),
+                privacy: Value(input.privacy),
+                updatedAt: now,
+                layer: stamp.layerCode,
+                authorId: stamp.authorId,
+                createdAt: stamp.createdAt,
+                archiveSessionId: Value(stamp.archiveSessionId),
+              ),
+            );
+        await ctx.recordChange(id, ChangeOperation.create);
+        return id;
+      });
 
   Future<void> update(String id, EventChanges changes) =>
       db.transaction(() async {
@@ -289,6 +294,24 @@ class EventRepository {
   }
 
   // ---- 軟刪除（企劃書 9.3） ----
+
+  Stream<List<Event>> watchDeleted() =>
+      (db.select(db.events)
+            ..where(
+              (e) =>
+                  e.subjectId.equals(ctx.subjectId) & e.deletedAt.isNotNull(),
+            )
+            ..orderBy([(e) => OrderingTerm.desc(e.deletedAt)]))
+          .watch();
+
+  Stream<List<Event>> watchReferences() => (db.select(
+    db.events,
+  )..where((e) => e.subjectId.equals(ctx.subjectId))).watch();
+
+  Future<bool> hasRemembranceContent(String id) async {
+    await _get(id);
+    return _hasRemembranceContent(id);
+  }
 
   /// 刪除事件：只記錄刪除時間，移入「最近刪除」。
   Future<void> softDelete(String id) => db.transaction(() async {

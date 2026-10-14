@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:life_chronicle/core/time/time_value.dart';
@@ -16,6 +18,109 @@ void main() {
     timeline = TimelineRepository(h.context());
   });
   tearDown(() => h.close());
+
+  test('精簡查詢保留時間排序與參照，圖文查詢才載入摘要', () async {
+    final root = await h.events().create(
+      EventInput(title: 'root', time: YearTime(2003)),
+    );
+    await h.events().create(
+      EventInput(
+        title: 'relative',
+        time: RelativeTime(root, RelativeRelation.after),
+      ),
+    );
+    await h.db
+        .into(h.db.eventSections)
+        .insert(
+          EventSectionsCompanion.insert(
+            id: 'preview-section',
+            eventId: root,
+            position: 0,
+            contentMd: 'a remembered story',
+            layer: 'original',
+            authorId: h.profile.selfAuthorId,
+            createdAt: h.now,
+          ),
+        );
+    final compact = await timeline
+        .watchYear(2003, includePreviews: false)
+        .first;
+    final cards = await timeline.watchYear(2003).first;
+    expect(compact.previews, isEmpty);
+    expect(cards.previews[root]!.summary, 'a remembered story');
+    expect(compact.referenceTitles[root], 'root');
+    for (final direction in SortDirection.values) {
+      expect(
+        TimelineSort.sort(compact.items, direction).map((item) => item.id),
+        TimelineSort.sort(cards.items, direction).map((item) => item.id),
+      );
+    }
+  });
+
+  test('年齡推估及相對參照使用生日，精簡與全量排序結果一致', () async {
+    await (h.db.update(h.db.subjects)
+          ..where((subject) => subject.id.equals(h.profile.subjectId)))
+        .write(SubjectsCompanion(birthDate: Value(encodeTime(YearTime(1980)))));
+    final root = await h.events().create(
+      EventInput(title: 'age', time: AgeEstimateTime(20)),
+    );
+    await h.events().create(
+      EventInput(
+        title: 'later',
+        time: RelativeTime(root, RelativeRelation.after),
+      ),
+    );
+    final all = await h.events().watchTimeline().first;
+    for (final direction in SortDirection.values) {
+      for (final group in TimelineSort.group(all, direction)) {
+        final data = await timeline
+            .watchYear(group.year, includePreviews: false)
+            .first;
+        expect(
+          TimelineSort.sort(data.items, direction).map((item) => item.id),
+          group.items.map((item) => item.id),
+        );
+        expect(
+          data.items.map((item) => item.effective),
+          group.items.map((item) => item.effective),
+        );
+      }
+    }
+  });
+
+  test('圖文模式持續監聽記述修改，重新開啟精簡模式後仍可取得最新摘要', () async {
+    final id = await h.events().create(
+      EventInput(title: 'event', time: YearTime(2003)),
+    );
+    final cards = StreamIterator(timeline.watchYear(2003));
+    addTearDown(cards.cancel);
+    expect(await cards.moveNext(), isTrue);
+    expect(cards.current.previews[id]!.summary, isEmpty);
+    await h.db
+        .into(h.db.eventSections)
+        .insert(
+          EventSectionsCompanion.insert(
+            id: 'live-section',
+            eventId: id,
+            position: 0,
+            contentMd: 'updated',
+            layer: 'original',
+            authorId: h.profile.selfAuthorId,
+            createdAt: h.now,
+          ),
+        );
+    expect(await cards.moveNext(), isTrue);
+    expect(cards.current.previews[id]!.summary, 'updated');
+    await cards.cancel();
+    expect(
+      (await timeline.watchYear(2003, includePreviews: false).first).previews,
+      isEmpty,
+    );
+    expect(
+      (await timeline.watchYear(2003).first).previews[id]!.summary,
+      'updated',
+    );
+  });
 
   test('年份索引完整計數，跨年依起點分組，已刪除不計入', () async {
     for (var i = 0; i < 20; i++) {
@@ -89,7 +194,7 @@ void main() {
     );
   });
 
-  test('年外相對參照被刪除時保留排序並移除可顯示的標題', () async {
+  test('年外相對參照被刪除時保留排序與原標題並標示刪除', () async {
     final root = await h.events().create(
       EventInput(title: 'root', time: YearTime(2003)),
     );
@@ -102,7 +207,8 @@ void main() {
     await h.events().softDelete(root);
     final data = await timeline.watchYear(2003).first;
     expect(data.items.single.groupYear, 2003);
-    expect(data.referenceTitles, isNot(contains(root)));
+    expect(data.referenceTitles[root], 'root');
+    expect(data.deletedReferenceIds, contains(root));
   });
 
   test('索引監聽新增、改年、刪除與復原', () async {

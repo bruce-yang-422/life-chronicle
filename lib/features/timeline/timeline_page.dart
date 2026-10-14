@@ -17,6 +17,12 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_time_texts.dart';
 import 'timeline_filter_sheet.dart';
 import 'timeline_masthead.dart';
+import '../event_detail/event_detail_page.dart';
+import '../../core/time/elapsed_time.dart';
+import '../../core/time/calendar_date.dart';
+import '../../core/time/timestamp_display.dart';
+import '../../l10n/l10n_elapsed_time.dart';
+import '../settings/time_display_settings.dart';
 
 /// 時間軸首頁：年份索引與可視年份分開載入（T07）。
 class TimelinePage extends ConsumerStatefulWidget {
@@ -27,8 +33,31 @@ class TimelinePage extends ConsumerStatefulWidget {
   ConsumerState<TimelinePage> createState() => _TimelinePageState();
 }
 
-class _TimelinePageState extends ConsumerState<TimelinePage> {
-  double get _rowExtent => _cards ? 184 : 80;
+class _TimelinePageState extends ConsumerState<TimelinePage>
+    with WidgetsBindingObserver {
+  Timer? _dayTimer;
+  CalendarDate? _lastDay;
+  CalendarDate _today() {
+    final value = TimestampDisplay.convert(
+      DateTime.now(),
+      ref.read(timeZoneProvider).value ?? 'system',
+    );
+    return CalendarDate(value.year, value.month, value.day);
+  }
+
+  void _refreshDay() {
+    if (mounted && _lastDay != null && _lastDay != _today()) {
+      setState(() => _lastDay = _today());
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refreshDay();
+  }
+
+  double get _rowExtent =>
+      (_cards ? 184 : 80) * MediaQuery.textScalerOf(context).scale(14) / 14;
   bool _cards = false;
   bool _preferencesLoaded = false;
   final _collapsed = <int?>{};
@@ -84,6 +113,11 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _dayTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => _refreshDay(),
+    );
     _restorePreferences();
   }
 
@@ -92,6 +126,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       final store = await ref.read(timelinePreferencesStoreProvider.future);
       final preferences = await store.load();
       if (!mounted) return;
+      ref.read(timelineDirectionProvider.notifier).set(preferences.direction);
       setState(() {
         _direction = preferences.direction;
         _cards = preferences.cards;
@@ -214,7 +249,9 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
 
   void _toggleDirection() {
     final year = _centerYear;
-    final data = _hasCenter ? ref.read(timelineYearProvider(year)).value : null;
+    final data = _hasCenter
+        ? ref.read(timelineYearProvider((year: year, previews: _cards))).value
+        : null;
     final position = _scroll.hasClients
         ? _scroll.offset - _yearOffset(year, _direction)
         : 0.0;
@@ -232,6 +269,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       _direction = _direction == SortDirection.newestFirst
           ? SortDirection.oldestFirst
           : SortDirection.newestFirst;
+      ref.read(timelineDirectionProvider.notifier).set(_direction);
       var offset = _yearOffset(year, _direction);
       if (id != null) {
         final items = TimelineSort.sort(data!.items, _direction);
@@ -246,6 +284,8 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _dayTimer?.cancel();
     _railTimer?.cancel();
     _scroll.dispose();
     super.dispose();
@@ -355,9 +395,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
           TimelineMasthead(trailing: kDebugMode ? _demoMenu(l10n) : null),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-            child: Row(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Expanded(
+                SizedBox(
+                  width: 125,
                   child: TextButton.icon(
                     style: TextButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary
@@ -374,7 +417,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
                 TextButton.icon(
                   style: _toolbarStyle(context),
                   onPressed: _preferencesLoaded ? _toggleDirection : null,
@@ -385,14 +427,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                         : l10n.timelineOldestFirst,
                   ),
                 ),
-                const SizedBox(width: 8),
                 TextButton.icon(
                   style: _toolbarStyle(context),
                   onPressed: _chooseFilter,
                   icon: const Icon(Icons.filter_list),
                   label: Text(l10n.timelineFilter),
                 ),
-                const SizedBox(width: 8),
                 IconButton(
                   style: _toolbarStyle(context),
                   onPressed: _preferencesLoaded ? _toggleDensity : null,
@@ -505,7 +545,10 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                                     return Consumer(
                                       builder: (context, ref, child) {
                                         final data = ref.watch(
-                                          timelineYearProvider(year),
+                                          timelineYearProvider((
+                                            year: year,
+                                            previews: _cards,
+                                          )),
                                         );
                                         return data.when(
                                           loading: () => SliverToBoxAdapter(
@@ -528,16 +571,17 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                                                     child: _failure(
                                                       l10n,
                                                       () => ref.invalidate(
-                                                        timelineYearProvider(
-                                                          year,
-                                                        ),
+                                                        timelineYearProvider((
+                                                          year: year,
+                                                          previews: _cards,
+                                                        )),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
                                           data: (data) {
-                                            if (kDebugMode &&
+                                            if ((kDebugMode || kProfileMode) &&
                                                 !_reportedFirstContent &&
                                                 data.items.isNotEmpty) {
                                               _reportedFirstContent = true;
@@ -679,14 +723,47 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   ) {
     final l10n = AppLocalizations.of(context);
     final time = item.time;
+    ref.watch(timeZoneProvider);
+    _lastDay = _today();
+    final elapsed = elapsedTimeLabel(
+      ElapsedTime.calculate(time, _lastDay!),
+      l10n,
+    );
+    final privacyLocked =
+        item.data.privacy == 'private' &&
+        !ref.watch(securityProvider).canReadPrivate;
     final date = TimeFormat.list(
       time,
       L10nTimeTexts(l10n),
       relatedEventTitle: time is RelativeTime
-          ? data.referenceTitles[time.eventId]
+          ? data.deletedReferenceIds.contains(time.eventId)
+                ? l10n.recycleDeletedTitle(data.referenceTitles[time.eventId]!)
+                : data.referenceTitles[time.eventId]
           : null,
     );
-    final preview = data.previews[item.id] ?? const TimelinePreview();
+    final preview = privacyLocked
+        ? const TimelinePreview()
+        : data.previews[item.id] ?? const TimelinePreview();
+    final title = privacyLocked
+        ? Tooltip(
+            message: l10n.securityPrivateEvent,
+            child: const Icon(Icons.lock_outline),
+          )
+        : HeroMode(
+            enabled: !MediaQuery.disableAnimationsOf(context),
+            child: Hero(
+              tag: 'event-title-${item.id}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Text(
+                  item.data.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+            ),
+          );
     final contents = _cards
         ? Card(
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -699,24 +776,42 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          date,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                date,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                elapsed,
+                                maxLines: 2,
+                                textAlign: TextAlign.end,
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary,
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          item.data.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
+                        title,
                         if (preview.summary.isNotEmpty)
                           Text(
                             preview.summary,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        Text(l10n.timelineAttachments(preview.attachmentCount)),
+                        if (!privacyLocked)
+                          Text(
+                            l10n.timelineAttachments(preview.attachmentCount),
+                          ),
                       ],
                     ),
                   ),
@@ -724,6 +819,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: _TimelineThumbnail(
+                        key: ValueKey(preview.imagePath),
                         path: preview.imagePath!,
                         label: preview.imageLabel,
                       ),
@@ -754,27 +850,36 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               children: [
                 SizedBox(
                   width: 76,
-                  child: Text(
-                    date,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      height: 1.4,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        date,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        elapsed,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          height: 1.3,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    item.data.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                if (item.data.category != null)
+                Expanded(child: title),
+                if (!privacyLocked && item.data.category != null)
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: Container(
@@ -802,22 +907,25 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               ],
             ),
           );
-    return Column(
-      key: ValueKey(item.id),
-      children: [
-        if (monthLabel != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Text(
-                monthLabel,
-                style: Theme.of(context).textTheme.labelMedium,
+    return GestureDetector(
+      onTap: () => openEventDetail(context, item.id, title: item.data.title),
+      child: Column(
+        key: ValueKey(item.id),
+        children: [
+          if (monthLabel != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Text(
+                  monthLabel,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
               ),
             ),
-          ),
-        Expanded(child: contents),
-      ],
+          Expanded(child: contents),
+        ],
+      ),
     );
   }
 
@@ -854,7 +962,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
 
 /// 縮圖只在可視列建立，離開時從圖片快取釋放。
 class _TimelineThumbnail extends StatefulWidget {
-  const _TimelineThumbnail({required this.path, this.label});
+  const _TimelineThumbnail({super.key, required this.path, this.label});
   final String path;
   final String? label;
   @override
@@ -865,6 +973,8 @@ class _TimelineThumbnailState extends State<_TimelineThumbnail> {
   late final ImageProvider _image = ResizeImage(
     FileImage(File(widget.path)),
     width: 192,
+    height: 192,
+    policy: ResizeImagePolicy.fit,
   );
   @override
   void dispose() {

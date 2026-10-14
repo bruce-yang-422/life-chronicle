@@ -130,6 +130,14 @@ class PlaceRepository {
     double? radiusM,
   }) async {
     _checkCoordinates(latitude, longitude, radiusM);
+    final previous = await find(placeId);
+    if (previous == null) throw ArgumentError('地點不存在');
+    if (previous.latitude == latitude &&
+        previous.longitude == longitude &&
+        previous.radiusM == radiusM) {
+      return;
+    }
+    // 共用地點不分事件層級；生命典藏期間仍允許補上座標。
     await (db.update(db.places)..where((p) => p.id.equals(placeId))).write(
       PlacesCompanion(
         latitude: Value(latitude),
@@ -140,13 +148,13 @@ class PlaceRepository {
   }
 
   static void _checkCoordinates(double lat, double lng, double? radius) {
-    if (lat < -90 || lat > 90) {
+    if (!lat.isFinite || lat < -90 || lat > 90) {
       throw ArgumentError.value(lat, 'latitude', '緯度須介於 -90 與 90');
     }
-    if (lng < -180 || lng > 180) {
+    if (!lng.isFinite || lng < -180 || lng > 180) {
       throw ArgumentError.value(lng, 'longitude', '經度須介於 -180 與 180');
     }
-    if (radius != null && radius <= 0) {
+    if (radius != null && (!radius.isFinite || radius <= 0)) {
       throw ArgumentError.value(radius, 'radiusM', '範圍半徑須大於 0');
     }
   }

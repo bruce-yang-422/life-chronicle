@@ -13,12 +13,12 @@ class TimelineMasthead extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
-      height: 88,
       child: Stack(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(

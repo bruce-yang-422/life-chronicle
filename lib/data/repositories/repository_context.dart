@@ -42,6 +42,7 @@ class RepositoryContext {
     this.db, {
     required this.subjectId,
     required this.actingAuthorId,
+    this.canReadPrivate = true,
     DateTime Function()? clock,
     UlidGenerator? ids,
   }) : _clock = clock ?? DateTime.now,
@@ -52,6 +53,15 @@ class RepositoryContext {
 
   /// 目前操作的作者（預設為主角本人）。
   final String actingAuthorId;
+  final bool canReadPrivate;
+  void ensureCanReadPrivate(String privacy) {
+    if (privacy == Privacy.private && !canReadPrivate) {
+      throw const PermissionDeniedException(
+        PermissionDeniedReason.privateRequiresAuthentication,
+      );
+    }
+  }
+
   final DateTime Function() _clock;
   final UlidGenerator _ids;
 

@@ -41,6 +41,15 @@ dependencies:
   share_plus: ^13.3.1
   # 日期格式（版本由 flutter_localizations 決定）
   intl: ^0.20.3
+  local_auth: 3.0.2
+  flutter_secure_storage: 10.0.0
+  flutter_map: 8.3.2
+  latlong2: 0.9.1
+  local_auth_android: 2.3.0
+  local_auth_darwin: 2.0.4
+  flutter_markdown_plus: 1.0.12
+  markdown: 7.3.1
+  timezone: 0.11.2
 
 dev_dependencies:
   flutter_test:

@@ -254,4 +254,773 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timelineBrandEnglish => 'Life Chronicle';
+
+  @override
+  String get editorName => 'Event name';
+
+  @override
+  String get editorWhen => 'When it happened';
+
+  @override
+  String get editorNarrative => 'Narrative';
+
+  @override
+  String get editorAttachments => 'Add attachments';
+
+  @override
+  String get editorAdvanced => 'Advanced editing';
+
+  @override
+  String get editorSave => 'Save event';
+
+  @override
+  String get editorEdit => 'Edit event';
+
+  @override
+  String get editorRequired => 'Enter an event name';
+
+  @override
+  String get editorError =>
+      'Could not save. Your draft is retained. Please retry.';
+
+  @override
+  String get editorDraftError =>
+      'Could not read or save the draft. Please retry.';
+
+  @override
+  String get editorRestored => 'Your unsaved draft has been restored';
+
+  @override
+  String get editorDiscard => 'Discard draft';
+
+  @override
+  String get editorDiscardConfirm => 'Discard unsaved changes?';
+
+  @override
+  String get editorCategory => 'Category';
+
+  @override
+  String get editorPlace => 'Place';
+
+  @override
+  String get editorPeople => 'People';
+
+  @override
+  String get editorAddPerson => 'Add person';
+
+  @override
+  String get editorTags => 'Tags (separated by commas)';
+
+  @override
+  String get editorPrivacy => 'Privacy';
+
+  @override
+  String get editorNormal => 'Normal';
+
+  @override
+  String get editorPrivate => 'Private';
+
+  @override
+  String get editorRelated => 'Related events';
+
+  @override
+  String get editorAddSection => 'Add section';
+
+  @override
+  String get editorSectionTitle => 'Section title (optional)';
+
+  @override
+  String get editorRemoveSection => 'Delete section';
+
+  @override
+  String get editorMoveUp => 'Move up';
+
+  @override
+  String get editorMoveDown => 'Move down';
+
+  @override
+  String get editorCustomSection => 'Custom heading';
+
+  @override
+  String get sectionCause => 'Cause';
+
+  @override
+  String get sectionProcess => 'What happened';
+
+  @override
+  String get sectionResult => 'Outcome';
+
+  @override
+  String get sectionFeeling => 'Feelings at the time';
+
+  @override
+  String get sectionDifficulty => 'Difficulties';
+
+  @override
+  String get sectionInsight => 'Insight';
+
+  @override
+  String get sectionPeople => 'People involved';
+
+  @override
+  String get sectionScene => 'Scene';
+
+  @override
+  String get sectionWords => 'Memorable words';
+
+  @override
+  String get pickerPrecision => 'Time precision';
+
+  @override
+  String get pickerYear => 'Year';
+
+  @override
+  String get pickerHalf => 'Half year';
+
+  @override
+  String get pickerQuarter => 'Quarter';
+
+  @override
+  String get pickerMonth => 'Month';
+
+  @override
+  String get pickerDay => 'Day';
+
+  @override
+  String get pickerApprox => 'Approximate year';
+
+  @override
+  String get pickerRange => 'Time range';
+
+  @override
+  String get pickerRelative => 'Relative event';
+
+  @override
+  String get pickerAge => 'Estimated age';
+
+  @override
+  String get pickerUnknown => 'Unknown time';
+
+  @override
+  String get pickerStart => 'Start';
+
+  @override
+  String get pickerEnd => 'End';
+
+  @override
+  String get pickerBefore => 'Before';
+
+  @override
+  String get pickerAfter => 'After';
+
+  @override
+  String get pickerDuring => 'During';
+
+  @override
+  String get pickerInvalid => 'Check the time values and range order';
+
+  @override
+  String get pickerApply => 'Apply time';
+
+  @override
+  String get detailMissing => 'This event is unavailable or deleted';
+
+  @override
+  String get detailRecorded => 'Record created';
+
+  @override
+  String get detailReflections => 'Later reflections';
+
+  @override
+  String get detailAddReflection => 'Add reflection';
+
+  @override
+  String get detailSaveReflection => 'Save reflection';
+
+  @override
+  String get detailAuthorSelf => 'Me';
+
+  @override
+  String detailReflectionYear(String year) {
+    return 'Added in $year';
+  }
+
+  @override
+  String get detailMedia => 'Attachments';
+
+  @override
+  String get detailOpen => 'Open attachment';
+
+  @override
+  String get detailRemoveAttachment => 'Remove attachment reference';
+
+  @override
+  String get detailRemembrance => 'Remembrance';
+
+  @override
+  String get attachmentPlan => 'Import full copies';
+
+  @override
+  String attachmentPlanBody(
+    int count,
+    String size,
+    String added,
+    String free,
+    int duplicates,
+  ) {
+    return '$count files\nOriginal size: $size\nEstimated added storage: $added\nAvailable: $free\nExisting copies: $duplicates\nOriginal files are retained. If any file fails, the entire batch is cancelled and can be retried.';
+  }
+
+  @override
+  String get attachmentImport => 'Import attachments';
+
+  @override
+  String get attachmentError =>
+      'Import failed. No files in this batch were saved. Originals are retained. Please retry.';
+
+  @override
+  String get attachmentNoSpace =>
+      'Not enough space. No attachments were imported';
+
+  @override
+  String get attachmentCancel => 'Cancel import';
+
+  @override
+  String attachmentProgress(int done, int total) {
+    return '$done of $total bytes processed';
+  }
+
+  @override
+  String get attachmentUnavailable =>
+      'Could not open the attachment. Check the file or choose a supported app';
+
+  @override
+  String get attachmentWarehouse => 'Attachment warehouse';
+
+  @override
+  String get attachmentUnreferenced => 'Unreferenced copies';
+
+  @override
+  String get attachmentClean => 'Delete copies permanently';
+
+  @override
+  String attachmentCleanConfirm(String size) {
+    return 'Delete only unreferenced app copies ($size) permanently? Original files are retained.';
+  }
+
+  @override
+  String get attachmentEmpty => 'No unreferenced copies';
+
+  @override
+  String get searchQuery =>
+      'Search titles, narratives, people, places, tags or attachments';
+
+  @override
+  String get searchFrom => 'From year (optional)';
+
+  @override
+  String get searchTo => 'To year (optional)';
+
+  @override
+  String get searchAction => 'Search';
+
+  @override
+  String get searchNoResults => 'No matching events';
+
+  @override
+  String get searchInvalid =>
+      'Years must be 1–9999 and the start must not be later than the end';
+
+  @override
+  String get searchPrivate => 'Private event';
+
+  @override
+  String detailPlaceLabel(String place) {
+    return 'Place: $place';
+  }
+
+  @override
+  String editorTimeValue(String time) {
+    return 'When it happened: $time';
+  }
+
+  @override
+  String get detailSelectEvent => 'Select an event to read its story';
+
+  @override
+  String get recycleTitle => 'Recently deleted';
+
+  @override
+  String get recycleEmpty => 'No deleted events';
+
+  @override
+  String get recycleRestore => 'Restore event';
+
+  @override
+  String get recyclePurge => 'Delete permanently';
+
+  @override
+  String get recyclePurgeConfirm =>
+      'Permanently delete event content and attachment references. This cannot be undone. Originals remain available; unused copies can be cleaned in the attachment warehouse.';
+
+  @override
+  String get recyclePreserve =>
+      'The title will be kept. Remembrance content will remain available.';
+
+  @override
+  String get recycleDelete => 'Move to recently deleted';
+
+  @override
+  String get recycleUndo => 'Undo';
+
+  @override
+  String get recycleView => 'View retained content';
+
+  @override
+  String recycleDeletedTitle(String title) {
+    return 'Original event “$title” was deleted';
+  }
+
+  @override
+  String get backupExport => 'Export ZIP backup';
+
+  @override
+  String get backupImport => 'Import and restore ZIP';
+
+  @override
+  String get backupVerify => 'Verify existing backup';
+
+  @override
+  String get backupMedia => 'Include original media copies';
+
+  @override
+  String get backupScope => 'Choose backup scope';
+
+  @override
+  String backupPlan(String required, String free, String count) {
+    return 'Estimated space required: $required\nAvailable space: $free\nEvents: $count\nSave a copy through system sharing after completion.';
+  }
+
+  @override
+  String get backupProgress => 'Processing and verifying archive';
+
+  @override
+  String get backupShare => 'Share or save ZIP and checksum sidecar';
+
+  @override
+  String get backupSuccess =>
+      'Backup complete. The ZIP was reopened and every file verified.';
+
+  @override
+  String get backupVerified => 'All files passed verification';
+
+  @override
+  String get backupFailure =>
+      'Archive processing failed. Existing data was preserved. Check space, format, and file integrity.';
+
+  @override
+  String get backupLast => 'Last completed and verified backup';
+
+  @override
+  String get backupConflict => 'Resolve differences for matching IDs';
+
+  @override
+  String get backupKeep => 'Keep current data';
+
+  @override
+  String get backupUseArchive => 'Use archived content';
+
+  @override
+  String get backupRestoreConfirm =>
+      'Restore verified archive contents? Records with matching IDs follow your individual choices. Excluded media will be marked unavailable.';
+
+  @override
+  String get backupRestoreDone => 'Restore verification report';
+
+  @override
+  String backupReport(
+    String inserted,
+    String replaced,
+    String skipped,
+    String excluded,
+    String extras,
+  ) {
+    return 'Added: $inserted\nReplaced: $replaced\nSkipped: $skipped\nIntentionally excluded media: $excluded\nExtra files ignored: $extras';
+  }
+
+  @override
+  String get backupNewFormat =>
+      'Some newer format data is not recognized. Only known fields will be restored.';
+
+  @override
+  String get backupReadme =>
+      '# Life Chronicle archive\n\nExtract all files and open index.html in a browser, or read markdown/timeline.md. Original media copies are in media/.\n\nJSON in data/ is the authoritative source. Markdown and HTML are reading copies. Edits to reading copies are not imported. Table fields are described in schema/data.schema.json. Time payloads preserve input precision; sort_start and sort_end are for ordering only.\n\nTimestamps include a timezone. SHA256SUMS.txt covers every file except itself. The external sidecar verifies the whole ZIP.\n\nSave the ZIP and its sidecar on another device. Uninstalling the app may delete private backups.\n';
+
+  @override
+  String get archiveTimeLabel => 'Time';
+
+  @override
+  String get archiveLayerLabel => 'Content layer';
+
+  @override
+  String get archiveAuthorLabel => 'Author';
+
+  @override
+  String get securityTitle => 'Security';
+
+  @override
+  String get securityUnlock => 'Unlock';
+
+  @override
+  String get securityPassword => 'App password or family code';
+
+  @override
+  String get securityAppPassword =>
+      'App password (at least six letters or digits)';
+
+  @override
+  String get securityNative => 'Use device authentication';
+
+  @override
+  String get securityReason => 'Authenticate to open Life Chronicle';
+
+  @override
+  String get securityPrivateEvent => 'Private event';
+
+  @override
+  String get securityPrivateUnlock => 'Authenticate to view private content';
+
+  @override
+  String get securityFailed =>
+      'Authentication was not completed. Check your password or use another method.';
+
+  @override
+  String securityPaused(String seconds) {
+    return 'Too many failed attempts. Wait $seconds seconds before trying again.';
+  }
+
+  @override
+  String get securityAppLock => 'Lock app on opening';
+
+  @override
+  String get securityProtectPrivate => 'Protect private events';
+
+  @override
+  String get securityPasswordOnly => 'Require app password for private events';
+
+  @override
+  String get securityHidePreview => 'Hide app preview in recents';
+
+  @override
+  String get securityFamilyPrivate =>
+      'Allow family code to open private events';
+
+  @override
+  String get securityTimeout => 'Automatic lock timeout';
+
+  @override
+  String get securityImmediate => 'Immediately';
+
+  @override
+  String get securityMinute => '1 minute';
+
+  @override
+  String get securityFiveMinutes => '5 minutes';
+
+  @override
+  String get securitySetup => 'Set up app password and backup codes';
+
+  @override
+  String get securityConsequences =>
+      'If you forget your password, use device authentication to reset it first. Use your recovery code if that is unavailable. If neither works, the app cannot recover your password. Recovery codes reset your password; family codes let family open the app. Keep external ZIP backups. App lock does not protect exported files.';
+
+  @override
+  String get securityRecovery => 'Recovery code';
+
+  @override
+  String get securityFamily => 'Family code';
+
+  @override
+  String get securityCopyConfirm =>
+      'I have written down and safely stored the displayed codes';
+
+  @override
+  String get securitySave => 'Save security settings';
+
+  @override
+  String get securityForgot => 'Forgot app password';
+
+  @override
+  String get securityReset => 'Reset app password';
+
+  @override
+  String get securityRegenerateRecovery =>
+      'Generate new recovery code (invalidates old code)';
+
+  @override
+  String get securityRegenerateFamily =>
+      'Generate new family code (invalidates old code)';
+
+  @override
+  String get securityFamilyDenied =>
+      'Family mode cannot view or change security settings. Private content follows the owner’s settings.';
+
+  @override
+  String get securityFamilyName => 'Family';
+
+  @override
+  String get securityLockNow => 'Lock now';
+
+  @override
+  String get securityStorageError =>
+      'Security settings could not be read. Retry; content remains hidden until authentication is completed.';
+
+  @override
+  String get locationCurrent => 'Use current location';
+
+  @override
+  String get locationMapPick => 'Choose a point on the map';
+
+  @override
+  String get locationRadius => 'Radius (meters, optional)';
+
+  @override
+  String get locationInvalid => 'Enter valid coordinates and a positive radius';
+
+  @override
+  String get locationUnavailable =>
+      'Location or map is unavailable. You can continue with a text location.';
+
+  @override
+  String locationCoordinates(String latitude, String longitude) {
+    return 'Latitude: $latitude  Longitude: $longitude';
+  }
+
+  @override
+  String get locationDragPin => 'Drag the pin or tap the map to choose a point';
+
+  @override
+  String get locationOffline =>
+      'Map tiles require a network connection. You can still save a text location or use current location.';
+
+  @override
+  String get locationOpenMap => 'Open in device map app';
+
+  @override
+  String get locationSave => 'Use this location';
+
+  @override
+  String get locationOsmAttribution => '© OpenStreetMap contributors';
+
+  @override
+  String get locationOsmCopyright => 'OpenStreetMap copyright information';
+
+  @override
+  String get locationPhotoSuggestion =>
+      'This photo includes capture coordinates. Use them as the event location?';
+
+  @override
+  String get locationUsePhoto => 'Use photo capture location';
+
+  @override
+  String get locationAwaitGps =>
+      'Obtaining GPS location. You can continue filling other fields';
+
+  @override
+  String get mdBold => 'Bold';
+
+  @override
+  String get mdItalic => 'Italic';
+
+  @override
+  String get mdPreview => 'Preview';
+
+  @override
+  String get mdEdit => 'Edit source';
+
+  @override
+  String get mdEmptyPreview => 'Write something to preview it.';
+
+  @override
+  String get mdHint =>
+      'Markdown supports bold, tables, lists, quotes and code. Use your phone keyboard for emoji.';
+
+  @override
+  String get mdAttachmentImage => 'Add images as attachments';
+
+  @override
+  String get mdLinkCopied => 'Link copied';
+
+  @override
+  String get mdTable => 'Insert table';
+
+  @override
+  String get mdTableTemplate =>
+      '| Column one | Column two |\n| --- | --- |\n| Content | Content |';
+
+  @override
+  String get displaySettings => 'Settings';
+
+  @override
+  String get timeZoneSetting => 'Date, time and time zone';
+
+  @override
+  String get timeZoneHelp =>
+      'Choose the time zone for recorded, reflection, attachment and deletion times. Event dates and approximate times stay unchanged.';
+
+  @override
+  String get timestampPattern => 'MMM d, y, h:mm a';
+
+  @override
+  String get zoneSystem => 'Use phone time zone';
+
+  @override
+  String get zoneTaipei => 'Taipei';
+
+  @override
+  String get zoneTokyo => 'Tokyo';
+
+  @override
+  String get zoneShanghai => 'Shanghai';
+
+  @override
+  String get zoneHongKong => 'Hong Kong';
+
+  @override
+  String get zoneSingapore => 'Singapore';
+
+  @override
+  String get zoneSydney => 'Sydney';
+
+  @override
+  String get zoneLondon => 'London';
+
+  @override
+  String get zoneParis => 'Paris';
+
+  @override
+  String get zoneNewYork => 'New York';
+
+  @override
+  String get zoneLosAngeles => 'Los Angeles';
+
+  @override
+  String get zoneUtc => 'Coordinated Universal Time (UTC)';
+
+  @override
+  String get mdHeading => 'Heading level';
+
+  @override
+  String mdHeadingLevel(int level) {
+    return 'Heading $level';
+  }
+
+  @override
+  String get mdBullets => 'Bulleted list';
+
+  @override
+  String get mdNumbers => 'Numbered list';
+
+  @override
+  String get mdIndent => 'Indent (nested list)';
+
+  @override
+  String get mdOutdent => 'Outdent';
+
+  @override
+  String get mdCode => 'Inline code';
+
+  @override
+  String get mdLink => 'Insert link';
+
+  @override
+  String get mdLinkText => 'Link text';
+
+  @override
+  String get mdLinkUrl => 'URL (https://)';
+
+  @override
+  String get mdLinkInvalid => 'Enter link text and a valid http or https URL.';
+
+  @override
+  String get mdInsert => 'Insert';
+
+  @override
+  String get pickerChooseYear => 'Choose year';
+
+  @override
+  String get pickerChooseDate => 'Choose date';
+
+  @override
+  String get elapsedToday => 'Today';
+
+  @override
+  String get elapsedThisMonth => 'This month';
+
+  @override
+  String get elapsedThisYear => 'This year';
+
+  @override
+  String get elapsedIncludesToday => 'Period includes today';
+
+  @override
+  String get elapsedUnknown => 'Time ago unknown';
+
+  @override
+  String elapsedRange(int start, int end) {
+    return '$start–$end';
+  }
+
+  @override
+  String elapsedApprox(String text) {
+    return 'About $text';
+  }
+
+  @override
+  String elapsedDaysAgo(String count) {
+    String _temp0 = intl.Intl.selectLogic(count, {'1': 'day', 'other': 'days'});
+    return '$count $_temp0 ago';
+  }
+
+  @override
+  String elapsedMonthsAgo(String count) {
+    String _temp0 = intl.Intl.selectLogic(count, {
+      '1': 'month',
+      'other': 'months',
+    });
+    return '$count $_temp0 ago';
+  }
+
+  @override
+  String elapsedYearsAgo(String count) {
+    String _temp0 = intl.Intl.selectLogic(count, {
+      '1': 'year',
+      'other': 'years',
+    });
+    return '$count $_temp0 ago';
+  }
+
+  @override
+  String elapsedDaysFuture(String count) {
+    String _temp0 = intl.Intl.selectLogic(count, {'1': 'day', 'other': 'days'});
+    return 'In $count $_temp0';
+  }
+
+  @override
+  String elapsedMonthsFuture(String count) {
+    String _temp0 = intl.Intl.selectLogic(count, {
+      '1': 'month',
+      'other': 'months',
+    });
+    return 'In $count $_temp0';
+  }
+
+  @override
+  String elapsedYearsFuture(String count) {
+    String _temp0 = intl.Intl.selectLogic(count, {
+      '1': 'year',
+      'other': 'years',
+    });
+    return 'In $count $_temp0';
+  }
 }

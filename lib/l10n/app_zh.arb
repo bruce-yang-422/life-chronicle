@@ -286,5 +286,407 @@
   "timelineBrandEnglish": "Life Chronicle",
   "@timelineBrandEnglish": {
     "description": "正式英文名稱，來源為企劃書標題：人生編年史 Life Chronicle"
+  },
+  "editorName": "事件名稱",
+  "editorWhen": "何時發生",
+  "editorNarrative": "記述",
+  "editorAttachments": "加入附件",
+  "editorAdvanced": "進階編輯",
+  "editorSave": "儲存事件",
+  "editorEdit": "編輯事件",
+  "editorRequired": "請輸入事件名稱",
+  "editorError": "無法儲存，草稿已保留。請重試。",
+  "editorDraftError": "草稿無法讀取或保存，請重試。",
+  "editorRestored": "已恢復尚未儲存的草稿",
+  "editorDiscard": "捨棄草稿",
+  "editorDiscardConfirm": "捨棄尚未儲存的內容？",
+  "editorCategory": "類別",
+  "editorPlace": "地點",
+  "editorPeople": "參與人物",
+  "editorAddPerson": "加入人物",
+  "editorTags": "標籤（以逗號分隔）",
+  "editorPrivacy": "隱私層級",
+  "editorNormal": "一般",
+  "editorPrivate": "私密",
+  "editorRelated": "關聯事件",
+  "editorAddSection": "新增段落",
+  "editorSectionTitle": "段落標題（選填）",
+  "editorRemoveSection": "刪除段落",
+  "editorMoveUp": "上移",
+  "editorMoveDown": "下移",
+  "editorCustomSection": "自訂標題",
+  "sectionCause": "起因",
+  "sectionProcess": "經過",
+  "sectionResult": "結果",
+  "sectionFeeling": "當時感受",
+  "sectionDifficulty": "困難",
+  "sectionInsight": "領悟",
+  "sectionPeople": "相關人物",
+  "sectionScene": "場景與畫面",
+  "sectionWords": "印象深刻的話",
+  "pickerPrecision": "時間精確度",
+  "pickerYear": "年份",
+  "pickerHalf": "半年",
+  "pickerQuarter": "季度",
+  "pickerMonth": "月份",
+  "pickerDay": "日期",
+  "pickerApprox": "約略年份",
+  "pickerRange": "時間範圍",
+  "pickerRelative": "相對事件",
+  "pickerAge": "年齡推估",
+  "pickerUnknown": "時間未定",
+  "pickerStart": "起點",
+  "pickerEnd": "終點",
+  "pickerBefore": "之前",
+  "pickerAfter": "之後",
+  "pickerDuring": "期間",
+  "pickerInvalid": "請檢查時間輸入及起訖順序",
+  "pickerApply": "套用時間",
+  "detailMissing": "事件不存在或已刪除",
+  "detailRecorded": "建立紀錄",
+  "detailReflections": "日後回顧",
+  "detailAddReflection": "新增回顧",
+  "detailSaveReflection": "儲存回顧",
+  "detailAuthorSelf": "我",
+  "detailReflectionYear": "{year} 年追記",
+  "detailMedia": "附件",
+  "detailOpen": "開啟附件",
+  "detailRemoveAttachment": "移除附件關聯",
+  "detailRemembrance": "後續追憶",
+  "attachmentPlan": "完整複製匯入",
+  "attachmentPlanBody": "共 {count} 個檔案\n原檔總大小：{size}\n預估新增容量：{added}\n可用空間：{free}\n相同副本：{duplicates} 個\n原檔會保留。任一檔案失敗，整批取消，可重新匯入。",
+  "attachmentImport": "匯入附件",
+  "attachmentError": "匯入失敗，整批未保存，原檔保留。請重試。",
+  "attachmentNoSpace": "可用空間不足，未匯入任何附件",
+  "attachmentCancel": "取消匯入",
+  "attachmentProgress": "已處理 {done}／{total} 位元組",
+  "attachmentUnavailable": "附件無法開啟，請確認檔案完整或選擇支援的 APP",
+  "attachmentWarehouse": "附件倉庫",
+  "attachmentUnreferenced": "待清理副本",
+  "attachmentClean": "永久清理副本",
+  "attachmentCleanConfirm": "只清理沒有引用的 APP 副本，原檔不會刪除。共 {size}，要永久清理？",
+  "attachmentEmpty": "沒有待清理的副本",
+  "searchQuery": "搜尋標題、記述、人物、地點、標籤或附件",
+  "searchFrom": "起始年份（選填）",
+  "searchTo": "結束年份（選填）",
+  "searchAction": "搜尋",
+  "searchNoResults": "沒有符合的事件",
+  "searchInvalid": "年份須為 1～9999，起始年份不可晚於結束年份",
+  "searchPrivate": "私密事件",
+  "@detailReflectionYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "@attachmentPlanBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      },
+      "added": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      },
+      "duplicates": {
+        "type": "int"
+      }
+    }
+  },
+  "@attachmentProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@attachmentCleanConfirm": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "detailPlaceLabel": "地點：{place}",
+  "@detailPlaceLabel": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "editorTimeValue": "何時發生: {time}",
+  "@editorTimeValue": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "detailSelectEvent": "選取事件以閱讀紀事本末",
+  "recycleTitle": "最近刪除",
+  "recycleEmpty": "沒有已刪除的事件",
+  "recycleRestore": "復原事件",
+  "recyclePurge": "永久刪除",
+  "recyclePurgeConfirm": "永久刪除事件內容與附件關聯，無法復原。附件原件不受影響；獨立副本可在附件倉庫清理。",
+  "recyclePreserve": "將保留標題，追憶內容不受影響。",
+  "recycleDelete": "移到最近刪除",
+  "recycleUndo": "復原",
+  "recycleView": "查看保留內容",
+  "recycleDeletedTitle": "原事件「{title}」已刪除",
+  "@recycleDeletedTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "backupExport": "匯出 ZIP 備份",
+  "backupImport": "匯入與還原 ZIP",
+  "backupVerify": "驗證既有備份",
+  "backupMedia": "包含影音原始副本",
+  "backupScope": "選擇備份範圍",
+  "backupPlan": "預估需要：{required}\n可用空間：{free}\n事件：{count} 筆\n完成後可透過系統分享另存。",
+  "@backupPlan": {
+    "placeholders": {
+      "required": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "backupProgress": "正在處理及驗證封存",
+  "backupShare": "分享或另存 ZIP 與校驗旁檔",
+  "backupSuccess": "備份完成，已重新開啟 ZIP 並逐檔驗證。",
+  "backupVerified": "全部檔案驗證通過",
+  "backupFailure": "封存處理失敗，原有資料未改動。請檢查容量、格式或檔案完整性。",
+  "backupLast": "最近一次完成並驗證的備份",
+  "backupConflict": "逐筆處理相同 ID 的差異",
+  "backupKeep": "保留目前資料",
+  "backupUseArchive": "使用封存內容",
+  "backupRestoreConfirm": "還原已驗證的封存內容？相同 ID 的資料依你的逐筆選擇處理。不含影音的項目會標示為不可用。",
+  "backupRestoreDone": "還原核對報告",
+  "backupReport": "新增：{inserted}\n替換：{replaced}\n略過：{skipped}\n刻意排除影音：{excluded}\n忽略額外檔案：{extras}",
+  "@backupReport": {
+    "placeholders": {
+      "inserted": {
+        "type": "String"
+      },
+      "replaced": {
+        "type": "String"
+      },
+      "skipped": {
+        "type": "String"
+      },
+      "excluded": {
+        "type": "String"
+      },
+      "extras": {
+        "type": "String"
+      }
+    }
+  },
+  "backupNewFormat": "部分新格式資料無法辨識，僅還原已知欄位。",
+  "backupReadme": "# 人生編年史封存\n\n解壓縮全部檔案後，以瀏覽器開啟 index.html，或閱讀 markdown/timeline.md。媒體為原始副本，位於 media/。\n\ndata/ 內 JSON 是唯一權威資料，Markdown 與 HTML 是閱讀版本；修改閱讀版本不會被匯入。各資料表檔案的欄位規格見 schema/data.schema.json。時間 payload 保存原始精確度，sort_start 與 sort_end 只供排序。\n\n所有時間戳記含時區。SHA256SUMS.txt 記錄除自身外全部檔案的 SHA-256；ZIP 外旁檔可驗證整包。\n\n請將 ZIP 與旁檔另存至其他裝置；移除 APP 可能連同私有目錄中的備份一起刪除。\n",
+  "archiveTimeLabel": "時間",
+  "archiveLayerLabel": "紀錄層",
+  "archiveAuthorLabel": "作者",
+  "securityTitle": "安全性",
+  "securityUnlock": "解鎖",
+  "securityPassword": "APP 密碼或遺族密碼",
+  "securityAppPassword": "APP 密碼（至少六位英數字）",
+  "securityNative": "使用手機原生解鎖",
+  "securityReason": "驗證身分以開啟人生編年史",
+  "securityPrivateEvent": "私密事件",
+  "securityPrivateUnlock": "驗證以查看私密內容",
+  "securityFailed": "驗證未完成，請檢查密碼或改用其他方式。",
+  "securityPaused": "連續輸錯，請等待 {seconds} 秒後再試。",
+  "@securityPaused": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "securityAppLock": "APP 開啟鎖定",
+  "securityProtectPrivate": "私密事件保護",
+  "securityPasswordOnly": "私密事件指定輸入 APP 密碼",
+  "securityHidePreview": "隱藏最近使用的 APP 預覽",
+  "securityFamilyPrivate": "允許遺族密碼開啟私密事件",
+  "securityTimeout": "自動鎖定時間",
+  "securityImmediate": "立即",
+  "securityMinute": "1 分鐘",
+  "securityFiveMinutes": "5 分鐘",
+  "securitySetup": "設定 APP 密碼與備援代碼",
+  "securityConsequences": "忘記密碼時，先以手機原生解鎖重設；仍無法驗證時才使用復原碼。若兩者都無法使用，APP 無法找回密碼。復原碼供本人重設密碼，遺族密碼供家人開啟 APP；兩者用途不同。請保留外部 ZIP 備份，APP 鎖定不會保護已匯出的檔案。",
+  "securityRecovery": "復原碼",
+  "securityFamily": "遺族密碼",
+  "securityCopyConfirm": "我已抄寫並安全保存顯示的代碼",
+  "securitySave": "儲存安全性設定",
+  "securityForgot": "忘記 APP 密碼",
+  "securityReset": "重設 APP 密碼",
+  "securityRegenerateRecovery": "重新產生復原碼（舊碼將失效）",
+  "securityRegenerateFamily": "重新產生遺族密碼（舊碼將失效）",
+  "securityFamilyDenied": "遺族模式無法查看或變更安全性設定；私密內容依本人設定提供。",
+  "securityFamilyName": "家屬",
+  "securityLockNow": "立即鎖定",
+  "securityStorageError": "無法讀取安全性設定。請重試；完成驗證前不顯示內容。",
+  "locationCurrent": "使用目前位置",
+  "locationMapPick": "在地圖釘選位置",
+  "locationRadius": "範圍半徑（公尺，可留空）",
+  "locationInvalid": "請輸入有效座標與大於零的範圍半徑",
+  "locationUnavailable": "無法取得位置或開啟地圖。可繼續使用文字地點。",
+  "locationCoordinates": "緯度：{latitude}　經度：{longitude}",
+  "@locationCoordinates": {
+    "placeholders": {
+      "latitude": {
+        "type": "String"
+      },
+      "longitude": {
+        "type": "String"
+      }
+    }
+  },
+  "locationDragPin": "拖曳釘選點調整位置，或點擊地圖選點",
+  "locationOffline": "地圖圖資需要網路。目前仍可用文字地點或目前位置儲存。",
+  "locationOpenMap": "以手機地圖 APP 開啟",
+  "locationSave": "使用這個位置",
+  "locationOsmAttribution": "© OpenStreetMap 貢獻者",
+  "locationOsmCopyright": "OpenStreetMap 著作權資訊",
+  "locationPhotoSuggestion": "照片含拍攝座標，是否用作事件地點？",
+  "locationUsePhoto": "使用照片拍攝位置",
+  "locationAwaitGps": "正在取得 GPS 位置，可繼續填寫其他欄位",
+  "mdBold": "粗體",
+  "mdItalic": "斜體",
+  "mdPreview": "預覽",
+  "mdEdit": "編輯原文",
+  "mdEmptyPreview": "先輸入記述，再查看預覽。",
+  "mdHint": "支援 Markdown：粗體、表格、清單、引用與程式碼；emoji 請使用手機鍵盤。",
+  "mdAttachmentImage": "圖片請使用附件加入",
+  "mdLinkCopied": "已複製連結",
+  "mdTable": "插入表格",
+  "mdTableTemplate": "| 欄位一 | 欄位二 |\n| --- | --- |\n| 內容 | 內容 |",
+  "displaySettings": "設定",
+  "timeZoneSetting": "時間顯示與時區",
+  "timeZoneHelp": "選擇建立紀錄、回顧、附件與刪除時間的顯示時區。事件發生日期與模糊時間不會改變。",
+  "timestampPattern": "y 年 M 月 d 日 ah:mm",
+  "zoneSystem": "跟隨手機時區",
+  "zoneTaipei": "台北",
+  "zoneTokyo": "東京",
+  "zoneShanghai": "上海",
+  "zoneHongKong": "香港",
+  "zoneSingapore": "新加坡",
+  "zoneSydney": "雪梨",
+  "zoneLondon": "倫敦",
+  "zoneParis": "巴黎",
+  "zoneNewYork": "紐約",
+  "zoneLosAngeles": "洛杉磯",
+  "zoneUtc": "世界標準時間（UTC）",
+  "mdHeading": "標題層級",
+  "mdHeadingLevel": "{level} 級標題",
+  "@mdHeadingLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "mdBullets": "項目符號清單",
+  "mdNumbers": "編號清單",
+  "mdIndent": "增加縮排（巢狀清單）",
+  "mdOutdent": "減少縮排",
+  "mdCode": "行內程式碼",
+  "mdLink": "插入連結",
+  "mdLinkText": "連結文字",
+  "mdLinkUrl": "網址（https://）",
+  "mdLinkInvalid": "請填寫連結文字及有效的 http 或 https 網址。",
+  "mdInsert": "插入",
+  "pickerChooseYear": "選擇年份",
+  "pickerChooseDate": "選擇日期",
+  "elapsedToday": "今天",
+  "elapsedThisMonth": "本月",
+  "elapsedThisYear": "今年",
+  "elapsedIncludesToday": "期間包含今天",
+  "elapsedUnknown": "距今時間未定",
+  "elapsedRange": "{start}～{end}",
+  "elapsedApprox": "約{text}",
+  "elapsedDaysAgo": "{count} 天前",
+  "elapsedMonthsAgo": "{count} 個月前",
+  "elapsedYearsAgo": "{count} 年前",
+  "elapsedDaysFuture": "{count} 天後",
+  "elapsedMonthsFuture": "{count} 個月後",
+  "elapsedYearsFuture": "{count} 年後",
+  "@elapsedRange": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "@elapsedApprox": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedDaysFuture": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedMonthsFuture": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedYearsFuture": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

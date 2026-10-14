@@ -21,10 +21,12 @@ class TimelineYearData {
     this.items,
     this.referenceTitles, [
     this.previews = const {},
+    this.deletedReferenceIds = const {},
   ]);
   final List<TimelineItem<Event>> items;
   final Map<String, String> referenceTitles;
   final Map<String, TimelinePreview> previews;
+  final Set<String> deletedReferenceIds;
 }
 
 class TimelinePreview {
@@ -96,6 +98,9 @@ class TimelineRepository {
   (String, List<Variable>) _conditions(TimelineFilter filter) {
     final clauses = <String>['subject_id = ?', 'deleted_at IS NULL'];
     final variables = <Variable>[Variable.withString(ctx.subjectId)];
+    if (filter.isActive && !ctx.canReadPrivate) {
+      clauses.add("privacy != 'private'");
+    }
     void add(String clause, String? value) {
       if (value == null) return;
       clauses.add(clause);
@@ -165,7 +170,9 @@ class TimelineRepository {
               ),
           ],
         );
-    const active = 'subject_id = ? AND deleted_at IS NULL';
+    final active =
+        'subject_id = ? AND deleted_at IS NULL '
+        "${ctx.canReadPrivate ? '' : "AND privacy != 'private'"}";
     return TimelineFilterOptions(
       categories: await options(
         'SELECT DISTINCT category AS id, category AS label '
@@ -197,6 +204,7 @@ class TimelineRepository {
   Stream<TimelineYearData> watchYear(
     int? year, {
     TimelineFilter filter = const TimelineFilter(),
+    bool includePreviews = true,
   }) {
     if (year != null && (year < 1 || year > 9999)) {
       throw ArgumentError.value(year, 'year');
@@ -224,9 +232,11 @@ class TimelineRepository {
           readsFrom: {
             db.events,
             db.subjects,
-            db.eventSections,
-            db.attachments,
-            db.blobs,
+            if (includePreviews) ...[
+              db.eventSections,
+              db.attachments,
+              db.blobs,
+            ],
             db.eventLifePeriods,
             db.eventTags,
             db.eventPeople,
@@ -268,18 +278,28 @@ class TimelineRepository {
               }
             }
           }
-          final subject = await (db.select(
-            db.subjects,
-          )..where((subject) => subject.id.equals(ctx.subjectId))).getSingle();
-          final birth = subject.birthDate == null
-              ? null
-              : decodeTime(subject.birthDate!);
+          // 只有年齡推估（包括年外參照鏈）需要主角生日。
+          TimeValue? birth;
+          if (times.values.any((time) => time is AgeEstimateTime)) {
+            final subject =
+                await (db.select(db.subjects)
+                      ..where((subject) => subject.id.equals(ctx.subjectId)))
+                    .getSingle();
+            birth = subject.birthDate == null
+                ? null
+                : decodeTime(subject.birthDate!);
+          }
           final context = DbSortContext(
             times,
             birth is CalendarTime ? birth : null,
           );
           final previews = <String, TimelinePreview>{};
-          for (var offset = 0; offset < events.length; offset += 400) {
+          // 精簡清單不顯示摘要或附件，不查詢也不監聽這些資料。
+          for (
+            var offset = 0;
+            includePreviews && offset < events.length;
+            offset += 400
+          ) {
             final ids = events
                 .skip(offset)
                 .take(400)
@@ -337,11 +357,12 @@ class TimelineRepository {
                   data: event,
                 ),
             ],
+            {for (final event in byId.values) event.id: event.title},
+            previews,
             {
               for (final event in byId.values)
-                if (event.deletedAt == null) event.id: event.title,
+                if (event.deletedAt != null) event.id,
             },
-            previews,
           );
         });
   }

@@ -1,3 +1,5 @@
+import '../../support/security_stub.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,6 +37,7 @@ Future<Harness> open(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...securityTestOverrides,
         appDatabaseProvider.overrideWithValue(h.db),
         timelinePreferencesStoreProvider.overrideWith(
           (ref) async => MemoryTimelinePreferencesStore(),
@@ -48,6 +51,62 @@ Future<Harness> open(
 }
 
 void main() {
+  databaseTestWidgets('精簡清單與圖文卡片都顯示距今時間', (tester) async {
+    final today = DateTime.now();
+    final past = today.subtract(const Duration(days: 3));
+    await open(tester, (h) async {
+      await h.events().create(
+        EventInput(
+          title: 'recent',
+          time: DayTime(past.year, past.month, past.day),
+        ),
+      );
+      await h.events().create(
+        EventInput(title: 'older', time: YearTime(today.year - 2)),
+      );
+    });
+    expect(find.text('3 天前'), findsOneWidget);
+    expect(find.text('約2 年前'), findsOneWidget);
+    await tester.tap(find.byTooltip('圖文卡片'));
+    await settle(tester);
+    expect(find.text('3 天前'), findsOneWidget);
+    expect(find.text('約2 年前'), findsOneWidget);
+  });
+  databaseTestWidgets('一般手機字級的年份、排序、篩選及顯示模式保持同一排', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await open(tester, (h) async {
+      await h.events().create(EventInput(title: 'demo', time: YearTime(2025)));
+    });
+    final sortingY = tester.getCenter(find.byIcon(Icons.swap_vert)).dy;
+    expect(
+      tester.getCenter(find.byIcon(Icons.expand_more)).dy,
+      closeTo(sortingY, 1),
+    );
+    expect(
+      tester.getCenter(find.byIcon(Icons.filter_list)).dy,
+      closeTo(sortingY, 1),
+    );
+    expect(tester.getCenter(find.byTooltip('圖文卡片')).dy, closeTo(sortingY, 1));
+    expect(tester.takeException(), isNull);
+  });
+  databaseTestWidgets('首次開啟搜尋即顯示已有紀錄，不必先提交空白條件', (tester) async {
+    await open(tester, (h) async {
+      await h.events().create(
+        EventInput(title: 'older demo', time: YearTime(2006)),
+      );
+      await h.events().create(
+        EventInput(title: 'newer demo', time: YearTime(2025)),
+      );
+    });
+    await tester.tap(find.text('搜尋與視圖'));
+    await settle(tester);
+    expect(find.text('older demo'), findsOneWidget);
+    expect(find.text('newer demo'), findsOneWidget);
+  });
+
   databaseTestWidgets('圖文卡片顯示摘要與附件數，月份分隔不為模糊時間補月份', (tester) async {
     await open(tester, (h) async {
       final id = await h.events().create(
@@ -79,7 +138,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('a remembered story'),
       500,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.descendant(
+        of: find.byType(CustomScrollView),
+        matching: find.byType(Scrollable),
+      ),
     );
     await settle(tester);
     expect(find.text('月份未定'), findsOneWidget);
@@ -142,7 +204,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('event 0'),
       350,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.descendant(
+        of: find.byType(CustomScrollView),
+        matching: find.byType(Scrollable),
+      ),
     );
     await settle(tester);
     expect(find.text('event 0'), findsOneWidget);
@@ -173,7 +238,10 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('undated'),
       350,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.descendant(
+        of: find.byType(CustomScrollView),
+        matching: find.byType(Scrollable),
+      ),
     );
     await settle(tester);
     expect(find.text('時間未定・1 筆'), findsOneWidget);

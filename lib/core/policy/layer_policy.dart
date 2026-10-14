@@ -24,6 +24,8 @@ enum ContentLayer {
 
 /// 操作被拒絕的原因（由介面層對應為 l10n 文字）。
 enum PermissionDeniedReason {
+  privateRequiresAuthentication,
+
   /// 生命典藏期間，原始生命紀錄層唯讀。
   originalIsReadOnly,
 

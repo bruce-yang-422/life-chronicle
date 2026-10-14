@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import '../l10n/app_localizations.dart';
 import 'home_shell.dart';
 import 'theme.dart';
+import '../features/security/security_gate.dart';
 
 /// 繁體中文（臺灣）。需指定 Hant 字體腳本，Material 元件才會使用繁體中文。
 const zhHantLocale = Locale.fromSubtags(
@@ -56,6 +57,7 @@ class LifeChronicleApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       home: const HomeShell(),
+      builder: (context, child) => SecurityGate(child: child!),
     );
   }
 }

@@ -1,3 +1,4 @@
+import '../support/security_stub.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +10,10 @@ import 'package:life_chronicle/data/providers.dart';
 import 'package:life_chronicle/data/repositories/timeline_preferences_store.dart';
 
 Future<void> _pumpApp(WidgetTester tester, List<Locale> systemLocales) async {
+  tester.view.physicalSize = const Size(400,900);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
   tester.platformDispatcher.localesTestValue = systemLocales;
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   final db = AppDatabase(NativeDatabase.memory());
@@ -16,6 +21,7 @@ Future<void> _pumpApp(WidgetTester tester, List<Locale> systemLocales) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...securityTestOverrides,
         appDatabaseProvider.overrideWithValue(db),
         timelinePreferencesStoreProvider.overrideWith(
           (ref) async => MemoryTimelinePreferencesStore(),

@@ -118,5 +118,407 @@
   "timelineBrandEnglish": "Life Chronicle",
   "@timelineBrandEnglish": {
     "description": "正式英文名稱，來源為企劃書標題：人生編年史 Life Chronicle"
+  },
+  "editorName": "Event name",
+  "editorWhen": "When it happened",
+  "editorNarrative": "Narrative",
+  "editorAttachments": "Add attachments",
+  "editorAdvanced": "Advanced editing",
+  "editorSave": "Save event",
+  "editorEdit": "Edit event",
+  "editorRequired": "Enter an event name",
+  "editorError": "Could not save. Your draft is retained. Please retry.",
+  "editorDraftError": "Could not read or save the draft. Please retry.",
+  "editorRestored": "Your unsaved draft has been restored",
+  "editorDiscard": "Discard draft",
+  "editorDiscardConfirm": "Discard unsaved changes?",
+  "editorCategory": "Category",
+  "editorPlace": "Place",
+  "editorPeople": "People",
+  "editorAddPerson": "Add person",
+  "editorTags": "Tags (separated by commas)",
+  "editorPrivacy": "Privacy",
+  "editorNormal": "Normal",
+  "editorPrivate": "Private",
+  "editorRelated": "Related events",
+  "editorAddSection": "Add section",
+  "editorSectionTitle": "Section title (optional)",
+  "editorRemoveSection": "Delete section",
+  "editorMoveUp": "Move up",
+  "editorMoveDown": "Move down",
+  "editorCustomSection": "Custom heading",
+  "sectionCause": "Cause",
+  "sectionProcess": "What happened",
+  "sectionResult": "Outcome",
+  "sectionFeeling": "Feelings at the time",
+  "sectionDifficulty": "Difficulties",
+  "sectionInsight": "Insight",
+  "sectionPeople": "People involved",
+  "sectionScene": "Scene",
+  "sectionWords": "Memorable words",
+  "pickerPrecision": "Time precision",
+  "pickerYear": "Year",
+  "pickerHalf": "Half year",
+  "pickerQuarter": "Quarter",
+  "pickerMonth": "Month",
+  "pickerDay": "Day",
+  "pickerApprox": "Approximate year",
+  "pickerRange": "Time range",
+  "pickerRelative": "Relative event",
+  "pickerAge": "Estimated age",
+  "pickerUnknown": "Unknown time",
+  "pickerStart": "Start",
+  "pickerEnd": "End",
+  "pickerBefore": "Before",
+  "pickerAfter": "After",
+  "pickerDuring": "During",
+  "pickerInvalid": "Check the time values and range order",
+  "pickerApply": "Apply time",
+  "detailMissing": "This event is unavailable or deleted",
+  "detailRecorded": "Record created",
+  "detailReflections": "Later reflections",
+  "detailAddReflection": "Add reflection",
+  "detailSaveReflection": "Save reflection",
+  "detailAuthorSelf": "Me",
+  "detailReflectionYear": "Added in {year}",
+  "detailMedia": "Attachments",
+  "detailOpen": "Open attachment",
+  "detailRemoveAttachment": "Remove attachment reference",
+  "detailRemembrance": "Remembrance",
+  "attachmentPlan": "Import full copies",
+  "attachmentPlanBody": "{count} files\nOriginal size: {size}\nEstimated added storage: {added}\nAvailable: {free}\nExisting copies: {duplicates}\nOriginal files are retained. If any file fails, the entire batch is cancelled and can be retried.",
+  "attachmentImport": "Import attachments",
+  "attachmentError": "Import failed. No files in this batch were saved. Originals are retained. Please retry.",
+  "attachmentNoSpace": "Not enough space. No attachments were imported",
+  "attachmentCancel": "Cancel import",
+  "attachmentProgress": "{done} of {total} bytes processed",
+  "attachmentUnavailable": "Could not open the attachment. Check the file or choose a supported app",
+  "attachmentWarehouse": "Attachment warehouse",
+  "attachmentUnreferenced": "Unreferenced copies",
+  "attachmentClean": "Delete copies permanently",
+  "attachmentCleanConfirm": "Delete only unreferenced app copies ({size}) permanently? Original files are retained.",
+  "attachmentEmpty": "No unreferenced copies",
+  "searchQuery": "Search titles, narratives, people, places, tags or attachments",
+  "searchFrom": "From year (optional)",
+  "searchTo": "To year (optional)",
+  "searchAction": "Search",
+  "searchNoResults": "No matching events",
+  "searchInvalid": "Years must be 1–9999 and the start must not be later than the end",
+  "searchPrivate": "Private event",
+  "@detailReflectionYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "@attachmentPlanBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      },
+      "added": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      },
+      "duplicates": {
+        "type": "int"
+      }
+    }
+  },
+  "@attachmentProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@attachmentCleanConfirm": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "detailPlaceLabel": "Place: {place}",
+  "@detailPlaceLabel": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "editorTimeValue": "When it happened: {time}",
+  "@editorTimeValue": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "detailSelectEvent": "Select an event to read its story",
+  "recycleTitle": "Recently deleted",
+  "recycleEmpty": "No deleted events",
+  "recycleRestore": "Restore event",
+  "recyclePurge": "Delete permanently",
+  "recyclePurgeConfirm": "Permanently delete event content and attachment references. This cannot be undone. Originals remain available; unused copies can be cleaned in the attachment warehouse.",
+  "recyclePreserve": "The title will be kept. Remembrance content will remain available.",
+  "recycleDelete": "Move to recently deleted",
+  "recycleUndo": "Undo",
+  "recycleView": "View retained content",
+  "recycleDeletedTitle": "Original event “{title}” was deleted",
+  "@recycleDeletedTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "backupExport": "Export ZIP backup",
+  "backupImport": "Import and restore ZIP",
+  "backupVerify": "Verify existing backup",
+  "backupMedia": "Include original media copies",
+  "backupScope": "Choose backup scope",
+  "backupPlan": "Estimated space required: {required}\nAvailable space: {free}\nEvents: {count}\nSave a copy through system sharing after completion.",
+  "@backupPlan": {
+    "placeholders": {
+      "required": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "backupProgress": "Processing and verifying archive",
+  "backupShare": "Share or save ZIP and checksum sidecar",
+  "backupSuccess": "Backup complete. The ZIP was reopened and every file verified.",
+  "backupVerified": "All files passed verification",
+  "backupFailure": "Archive processing failed. Existing data was preserved. Check space, format, and file integrity.",
+  "backupLast": "Last completed and verified backup",
+  "backupConflict": "Resolve differences for matching IDs",
+  "backupKeep": "Keep current data",
+  "backupUseArchive": "Use archived content",
+  "backupRestoreConfirm": "Restore verified archive contents? Records with matching IDs follow your individual choices. Excluded media will be marked unavailable.",
+  "backupRestoreDone": "Restore verification report",
+  "backupReport": "Added: {inserted}\nReplaced: {replaced}\nSkipped: {skipped}\nIntentionally excluded media: {excluded}\nExtra files ignored: {extras}",
+  "@backupReport": {
+    "placeholders": {
+      "inserted": {
+        "type": "String"
+      },
+      "replaced": {
+        "type": "String"
+      },
+      "skipped": {
+        "type": "String"
+      },
+      "excluded": {
+        "type": "String"
+      },
+      "extras": {
+        "type": "String"
+      }
+    }
+  },
+  "backupNewFormat": "Some newer format data is not recognized. Only known fields will be restored.",
+  "backupReadme": "# Life Chronicle archive\n\nExtract all files and open index.html in a browser, or read markdown/timeline.md. Original media copies are in media/.\n\nJSON in data/ is the authoritative source. Markdown and HTML are reading copies. Edits to reading copies are not imported. Table fields are described in schema/data.schema.json. Time payloads preserve input precision; sort_start and sort_end are for ordering only.\n\nTimestamps include a timezone. SHA256SUMS.txt covers every file except itself. The external sidecar verifies the whole ZIP.\n\nSave the ZIP and its sidecar on another device. Uninstalling the app may delete private backups.\n",
+  "archiveTimeLabel": "Time",
+  "archiveLayerLabel": "Content layer",
+  "archiveAuthorLabel": "Author",
+  "securityTitle": "Security",
+  "securityUnlock": "Unlock",
+  "securityPassword": "App password or family code",
+  "securityAppPassword": "App password (at least six letters or digits)",
+  "securityNative": "Use device authentication",
+  "securityReason": "Authenticate to open Life Chronicle",
+  "securityPrivateEvent": "Private event",
+  "securityPrivateUnlock": "Authenticate to view private content",
+  "securityFailed": "Authentication was not completed. Check your password or use another method.",
+  "securityPaused": "Too many failed attempts. Wait {seconds} seconds before trying again.",
+  "@securityPaused": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "securityAppLock": "Lock app on opening",
+  "securityProtectPrivate": "Protect private events",
+  "securityPasswordOnly": "Require app password for private events",
+  "securityHidePreview": "Hide app preview in recents",
+  "securityFamilyPrivate": "Allow family code to open private events",
+  "securityTimeout": "Automatic lock timeout",
+  "securityImmediate": "Immediately",
+  "securityMinute": "1 minute",
+  "securityFiveMinutes": "5 minutes",
+  "securitySetup": "Set up app password and backup codes",
+  "securityConsequences": "If you forget your password, use device authentication to reset it first. Use your recovery code if that is unavailable. If neither works, the app cannot recover your password. Recovery codes reset your password; family codes let family open the app. Keep external ZIP backups. App lock does not protect exported files.",
+  "securityRecovery": "Recovery code",
+  "securityFamily": "Family code",
+  "securityCopyConfirm": "I have written down and safely stored the displayed codes",
+  "securitySave": "Save security settings",
+  "securityForgot": "Forgot app password",
+  "securityReset": "Reset app password",
+  "securityRegenerateRecovery": "Generate new recovery code (invalidates old code)",
+  "securityRegenerateFamily": "Generate new family code (invalidates old code)",
+  "securityFamilyDenied": "Family mode cannot view or change security settings. Private content follows the owner’s settings.",
+  "securityFamilyName": "Family",
+  "securityLockNow": "Lock now",
+  "securityStorageError": "Security settings could not be read. Retry; content remains hidden until authentication is completed.",
+  "locationCurrent": "Use current location",
+  "locationMapPick": "Choose a point on the map",
+  "locationRadius": "Radius (meters, optional)",
+  "locationInvalid": "Enter valid coordinates and a positive radius",
+  "locationUnavailable": "Location or map is unavailable. You can continue with a text location.",
+  "locationCoordinates": "Latitude: {latitude}  Longitude: {longitude}",
+  "@locationCoordinates": {
+    "placeholders": {
+      "latitude": {
+        "type": "String"
+      },
+      "longitude": {
+        "type": "String"
+      }
+    }
+  },
+  "locationDragPin": "Drag the pin or tap the map to choose a point",
+  "locationOffline": "Map tiles require a network connection. You can still save a text location or use current location.",
+  "locationOpenMap": "Open in device map app",
+  "locationSave": "Use this location",
+  "locationOsmAttribution": "© OpenStreetMap contributors",
+  "locationOsmCopyright": "OpenStreetMap copyright information",
+  "locationPhotoSuggestion": "This photo includes capture coordinates. Use them as the event location?",
+  "locationUsePhoto": "Use photo capture location",
+  "locationAwaitGps": "Obtaining GPS location. You can continue filling other fields",
+  "mdBold": "Bold",
+  "mdItalic": "Italic",
+  "mdPreview": "Preview",
+  "mdEdit": "Edit source",
+  "mdEmptyPreview": "Write something to preview it.",
+  "mdHint": "Markdown supports bold, tables, lists, quotes and code. Use your phone keyboard for emoji.",
+  "mdAttachmentImage": "Add images as attachments",
+  "mdLinkCopied": "Link copied",
+  "mdTable": "Insert table",
+  "mdTableTemplate": "| Column one | Column two |\n| --- | --- |\n| Content | Content |",
+  "displaySettings": "Settings",
+  "timeZoneSetting": "Date, time and time zone",
+  "timeZoneHelp": "Choose the time zone for recorded, reflection, attachment and deletion times. Event dates and approximate times stay unchanged.",
+  "timestampPattern": "MMM d, y, h:mm a",
+  "zoneSystem": "Use phone time zone",
+  "zoneTaipei": "Taipei",
+  "zoneTokyo": "Tokyo",
+  "zoneShanghai": "Shanghai",
+  "zoneHongKong": "Hong Kong",
+  "zoneSingapore": "Singapore",
+  "zoneSydney": "Sydney",
+  "zoneLondon": "London",
+  "zoneParis": "Paris",
+  "zoneNewYork": "New York",
+  "zoneLosAngeles": "Los Angeles",
+  "zoneUtc": "Coordinated Universal Time (UTC)",
+  "mdHeading": "Heading level",
+  "mdHeadingLevel": "Heading {level}",
+  "@mdHeadingLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "mdBullets": "Bulleted list",
+  "mdNumbers": "Numbered list",
+  "mdIndent": "Indent (nested list)",
+  "mdOutdent": "Outdent",
+  "mdCode": "Inline code",
+  "mdLink": "Insert link",
+  "mdLinkText": "Link text",
+  "mdLinkUrl": "URL (https://)",
+  "mdLinkInvalid": "Enter link text and a valid http or https URL.",
+  "mdInsert": "Insert",
+  "pickerChooseYear": "Choose year",
+  "pickerChooseDate": "Choose date",
+  "elapsedToday": "Today",
+  "elapsedThisMonth": "This month",
+  "elapsedThisYear": "This year",
+  "elapsedIncludesToday": "Period includes today",
+  "elapsedUnknown": "Time ago unknown",
+  "elapsedRange": "{start}–{end}",
+  "elapsedApprox": "About {text}",
+  "elapsedDaysAgo": "{count} {count, select, 1{day} other{days}} ago",
+  "elapsedMonthsAgo": "{count} {count, select, 1{month} other{months}} ago",
+  "elapsedYearsAgo": "{count} {count, select, 1{year} other{years}} ago",
+  "elapsedDaysFuture": "In {count} {count, select, 1{day} other{days}}",
+  "elapsedMonthsFuture": "In {count} {count, select, 1{month} other{months}}",
+  "elapsedYearsFuture": "In {count} {count, select, 1{year} other{years}}",
+  "@elapsedRange": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "@elapsedApprox": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedMonthsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedYearsAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedDaysFuture": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedMonthsFuture": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "@elapsedYearsFuture": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }
