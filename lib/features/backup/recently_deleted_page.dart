@@ -6,6 +6,7 @@ import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../event_detail/event_detail_page.dart';
 import '../settings/time_display_settings.dart';
+import '../security/security_dialogs.dart';
 
 final recentlyDeletedProvider = StreamProvider<List<Event>>((ref) async* {
   final repository = await ref.watch(eventRepositoryProvider.future);
@@ -59,6 +60,7 @@ class RecentlyDeletedPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final canReadPrivate = ref.watch(securityProvider).canReadPrivate;
     return Scaffold(
       appBar: AppBar(title: Text(l.recycleTitle)),
       body: ref
@@ -72,6 +74,8 @@ class RecentlyDeletedPage extends ConsumerWidget {
                     itemCount: events.length,
                     itemBuilder: (context, index) {
                       final event = events[index];
+                      final protected =
+                          event.privacy == 'private' && !canReadPrivate;
                       return Card(
                         margin: const EdgeInsets.all(12),
                         child: Padding(
@@ -80,24 +84,39 @@ class RecentlyDeletedPage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                event.title,
+                                protected
+                                    ? l.securityPrivateEvent
+                                    : event.title,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(readableTimestamp(ref, l, event.deletedAt!)),
                               TextButton.icon(
                                 icon: const Icon(Icons.menu_book),
                                 label: Text(l.recycleView),
-                                onPressed: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => EventDetailPage(
-                                      eventId: event.id,
-                                      includeDeleted: true,
+                                onPressed: () async {
+                                  if (protected &&
+                                      !await authorizePrivate(context)) {
+                                    return;
+                                  }
+                                  if (!context.mounted) return;
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => EventDetailPage(
+                                        eventId: event.id,
+                                        includeDeleted: true,
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
                               ),
-                              if (event.purgedAt != null)
+                              if (protected)
+                                TextButton.icon(
+                                  icon: const Icon(Icons.lock_outline),
+                                  label: Text(l.securityPrivateUnlock),
+                                  onPressed: () => authorizePrivate(context),
+                                )
+                              else if (event.purgedAt != null)
                                 Text(l.recyclePreserve)
                               else
                                 Wrap(

@@ -17,11 +17,21 @@ class VerifiedArchive {
 
 /// 串流讀寫媒體，解壓前先檢查中央目錄，絕不使用 ZIP 內的路徑直接寫檔。
 class ArchiveZip {
-  const ArchiveZip({required this.controlPaths});
-  final Set<String> controlPaths;
+  const ArchiveZip();
 
-  static Future<String> fileHash(File file) async =>
-      (await sha256.bind(file.openRead()).first).toString();
+  static Future<String> fileHash(
+    File file, {
+    ImportCancellation? cancellation,
+  }) async =>
+      (await sha256
+              .bind(
+                file.openRead().map((bytes) {
+                  cancellation?.check();
+                  return bytes;
+                }),
+              )
+              .first)
+          .toString();
 
   Future<void> write(
     File output,
@@ -35,7 +45,7 @@ class ArchiveZip {
       var done = 0;
       for (final entry in files.entries) {
         cancellation.check();
-        if (!ArchiveIntegrity.safePath(entry.key, controlPaths: controlPaths)) {
+        if (!ArchiveIntegrity.safePath(entry.key)) {
           throw ArchiveIntegrityException([entry.key]);
         }
         final input = InputFileStream(entry.value.path);
@@ -76,7 +86,7 @@ class ArchiveZip {
         cancellation.check();
         final name = header.filename;
         final fileType = (header.externalFileAttributes >> 16) & 0xf000;
-        if (!ArchiveIntegrity.safePath(name, controlPaths: controlPaths) ||
+        if (!ArchiveIntegrity.safePath(name) ||
             !names.add(name) ||
             fileType == 0xa000 ||
             fileType == 0x4000 ||
@@ -125,7 +135,6 @@ class ArchiveZip {
       final hashes = ArchiveIntegrity.parseSums(
         await File(p.join(staging.path, ArchiveIntegrity.sumsPath))
             .readAsString(),
-        controlPaths: controlPaths,
       );
       if (await fileHash(
             File(p.join(staging.path, ArchiveIntegrity.manifestPath)),
@@ -149,7 +158,7 @@ class ArchiveZip {
       for (final item in manifest['files'] as List) {
         final row = Map<String, Object?>.from(item as Map);
         final name = row['path'] as String;
-        if (!ArchiveIntegrity.safePath(name, controlPaths: controlPaths) ||
+        if (!ArchiveIntegrity.safePath(name) ||
             name == ArchiveIntegrity.manifestPath ||
             name == ArchiveIntegrity.sumsPath ||
             listed.containsKey(name) ||

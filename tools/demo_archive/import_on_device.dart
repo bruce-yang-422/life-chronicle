@@ -52,7 +52,7 @@ Future<void> main() async {
       ctx,
       media,
       Directory(p.join(directory.path, 'demo_restore')),
-      const ArchiveZip(controlPaths: {'README.md', 'SHA256SUMS.txt'}),
+      const ArchiveZip(),
     ),
   );
   final zip = File(p.join(directory.path, 'demo_fixture.zip'));

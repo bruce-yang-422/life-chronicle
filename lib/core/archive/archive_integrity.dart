@@ -11,8 +11,9 @@ class ArchiveIntegrityException implements Exception {
 abstract final class ArchiveIntegrity {
   static const manifestPath = 'manifest.json';
   static const sumsPath = 'SHA256SUMS.txt';
+  static const controlPaths = {'README.md', sumsPath};
   static String hash(List<int> bytes) => sha256.convert(bytes).toString();
-  static bool safePath(String name, {Set<String> controlPaths = const {}}) =>
+  static bool safePath(String name) =>
       name.length <= 160 &&
       !name.startsWith('/') &&
       !name.contains('\\') &&
@@ -21,15 +22,12 @@ abstract final class ArchiveIntegrity {
           controlPaths.contains(name)) &&
       !name.split('/').any((s) => s.startsWith('.'));
 
-  static Map<String, String> parseSums(
-    String text, {
-    Set<String> controlPaths = const {},
-  }) {
+  static Map<String, String> parseSums(String text) {
     final result = <String, String>{};
     for (final line in const LineSplitter().convert(text)) {
       final match = RegExp(r'^([0-9a-f]{64})  (.+)$').firstMatch(line);
       if (match == null ||
-          !safePath(match[2]!, controlPaths: controlPaths) ||
+          !safePath(match[2]!) ||
           result.containsKey(match[2])) {
         throw const ArchiveIntegrityException([sumsPath]);
       }

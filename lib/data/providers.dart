@@ -51,7 +51,7 @@ final archiveRepositoryProvider = FutureProvider<ArchiveRepository>((
     await ref.watch(repositoryContextProvider.future),
     attachments,
     Directory(p.join(attachments.directory.parent.path, 'backups')),
-    const ArchiveZip(controlPaths: {'README.md', 'SHA256SUMS.txt'}),
+    const ArchiveZip(),
   );
 });
 

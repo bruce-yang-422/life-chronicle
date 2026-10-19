@@ -46,3 +46,4 @@ app.*.map.json
 
 # 企劃書工具
 /tools/plan_doc/node_modules/
+/tools/archive_schema/node_modules/

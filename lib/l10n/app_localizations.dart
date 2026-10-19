@@ -1813,6 +1813,246 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'{count} 年後'**
   String elapsedYearsFuture(String count);
+
+  /// No description provided for @restoreIntro.
+  ///
+  /// In zh, this message translates to:
+  /// **'選取 ZIP 後會先驗證並列出差異。確認還原前不會修改原有資料。'**
+  String get restoreIntro;
+
+  /// No description provided for @restoreSelect.
+  ///
+  /// In zh, this message translates to:
+  /// **'選取 ZIP 備份'**
+  String get restoreSelect;
+
+  /// No description provided for @restorePreview.
+  ///
+  /// In zh, this message translates to:
+  /// **'還原預覽'**
+  String get restorePreview;
+
+  /// No description provided for @restoreApply.
+  ///
+  /// In zh, this message translates to:
+  /// **'確認還原'**
+  String get restoreApply;
+
+  /// No description provided for @restoreChooseAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'有差異的項目須逐筆選擇，未選完不能還原。'**
+  String get restoreChooseAll;
+
+  /// No description provided for @restoreDifferentSubject.
+  ///
+  /// In zh, this message translates to:
+  /// **'此備份屬於不同主角。已有資料的生命檔案不能合併其他主角；請在尚未填寫資料的空白 APP 還原。原有資料未改動。'**
+  String get restoreDifferentSubject;
+
+  /// No description provided for @restoreInvalidSubject.
+  ///
+  /// In zh, this message translates to:
+  /// **'備份的主角、本人作者或典藏設定不符合單一主角格式，無法還原。'**
+  String get restoreInvalidSubject;
+
+  /// No description provided for @restoreChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'預覽後原有資料已變更。請重新選取備份、核對差異後再還原。'**
+  String get restoreChanged;
+
+  /// No description provided for @restoreCancelled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已取消還原，原有資料未改動。'**
+  String get restoreCancelled;
+
+  /// No description provided for @restoreExcluded.
+  ///
+  /// In zh, this message translates to:
+  /// **'此備份刻意排除部分影音，還原後這些附件可能無法開啟。'**
+  String get restoreExcluded;
+
+  /// No description provided for @restoreExtraFiles.
+  ///
+  /// In zh, this message translates to:
+  /// **'下列額外檔案會忽略，不會匯入：'**
+  String get restoreExtraFiles;
+
+  /// No description provided for @restoreEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'未填寫'**
+  String get restoreEmpty;
+
+  /// No description provided for @restoreYes.
+  ///
+  /// In zh, this message translates to:
+  /// **'是'**
+  String get restoreYes;
+
+  /// No description provided for @restoreNo.
+  ///
+  /// In zh, this message translates to:
+  /// **'否'**
+  String get restoreNo;
+
+  /// No description provided for @restoreLocalValue.
+  ///
+  /// In zh, this message translates to:
+  /// **'目前：{value}'**
+  String restoreLocalValue(String value);
+
+  /// No description provided for @restoreArchiveValue.
+  ///
+  /// In zh, this message translates to:
+  /// **'備份：{value}'**
+  String restoreArchiveValue(String value);
+
+  /// No description provided for @restoreCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{name}：{count} 筆'**
+  String restoreCount(String name, int count);
+
+  /// No description provided for @restoreConflictNumber.
+  ///
+  /// In zh, this message translates to:
+  /// **'差異 {count} · {name}'**
+  String restoreConflictNumber(String name, int count);
+
+  /// No description provided for @restoreTable.
+  ///
+  /// In zh, this message translates to:
+  /// **'{table, select, subjects{主角} authors{作者} archive_sessions{典藏期間} archive_settings{典藏設定} places{地點} people{人物} tags{標籤} events{事件} event_sections{記述段落} life_periods{人生階段} event_life_periods{人生階段連結} reflections{回顧} stories{篇章} story_events{篇章事件連結} blobs{影音副本} attachments{附件} event_tags{事件標籤} event_people{事件人物連結} event_links{關聯事件} change_history{修訂紀錄} other{其他資料}}'**
+  String restoreTable(String table);
+
+  /// No description provided for @restoreField.
+  ///
+  /// In zh, this message translates to:
+  /// **'{field, select, display_name{名稱} birth_date{生日} death_date{逝世日期} title{標題} content_md{內容} time_payload{發生時間} category{類別} privacy{隱私} created_at{建立時間} updated_at{更新時間} recorded_at{記錄時間} deleted_at{刪除時間} purged_at{永久刪除時間} layer{紀錄層} author_id{作者} event_id{事件} subject_id{主角} place_id{地點} person_id{人物} tag_id{標籤} life_period_id{人生階段} story_id{篇章} blob_id{影音副本} event_a_id{關聯事件} event_b_id{關聯事件} archive_session_id{典藏期間} current_session_id{目前典藏期間} role{角色／用途} is_subject_self{本人作者} mode{典藏狀態} activated_at{啟用時間} deactivated_at{結束時間} activated_by{啟用作者} deactivated_by{結束作者} sort_start{排序區間起點} sort_end{排序區間終點} manual_order{手動排序} position{排列位置} suggestion_key{段落建議類型} type{類型} start_time{開始時間} end_time{結束時間} organization{組織} provenance{來源說明} sha256{檔案校驗值} byte_size{檔案大小} media_type{媒體類型} path{副本位置} verify_status{校驗狀態} original_filename{原始檔名} captured_at{拍攝時間} captured_latitude{拍攝緯度} captured_longitude{拍攝經度} imported_at{匯入時間} storage_mode{保存方式} name{名稱} name_key{名稱比對值} latitude{緯度} longitude{經度} radius_m{範圍半徑（公尺）} label{標籤} operation{操作} timestamp{記錄時間} entity_id{修訂對象} other{其他欄位}}'**
+  String restoreField(String field);
+
+  /// No description provided for @restoreMediaTotals.
+  ///
+  /// In zh, this message translates to:
+  /// **'還原後附件：{count} 個；可用影音副本總容量：{size}（共用副本只計一次）'**
+  String restoreMediaTotals(int count, String size);
+
+  /// No description provided for @archiveCoordinates.
+  ///
+  /// In zh, this message translates to:
+  /// **'座標（緯度、經度）'**
+  String get archiveCoordinates;
+
+  /// No description provided for @archiveRadius.
+  ///
+  /// In zh, this message translates to:
+  /// **'範圍半徑（公尺）'**
+  String get archiveRadius;
+
+  /// No description provided for @archiveCaptured.
+  ///
+  /// In zh, this message translates to:
+  /// **'拍攝時間'**
+  String get archiveCaptured;
+
+  /// No description provided for @archiveImported.
+  ///
+  /// In zh, this message translates to:
+  /// **'匯入時間'**
+  String get archiveImported;
+
+  /// No description provided for @archiveFilename.
+  ///
+  /// In zh, this message translates to:
+  /// **'原始檔名'**
+  String get archiveFilename;
+
+  /// No description provided for @archiveExcludedMedia.
+  ///
+  /// In zh, this message translates to:
+  /// **'此副本未包含於備份中，無法從本封存開啟'**
+  String get archiveExcludedMedia;
+
+  /// No description provided for @archiveDeletedReference.
+  ///
+  /// In zh, this message translates to:
+  /// **'原事件已刪除'**
+  String get archiveDeletedReference;
+
+  /// No description provided for @archivePeople.
+  ///
+  /// In zh, this message translates to:
+  /// **'參與人物'**
+  String get archivePeople;
+
+  /// No description provided for @archiveTags.
+  ///
+  /// In zh, this message translates to:
+  /// **'標籤'**
+  String get archiveTags;
+
+  /// No description provided for @archivePeriods.
+  ///
+  /// In zh, this message translates to:
+  /// **'人生階段'**
+  String get archivePeriods;
+
+  /// No description provided for @restoreReuseId.
+  ///
+  /// In zh, this message translates to:
+  /// **'同名資料將重用本機 ID。封存 ID：{sourceId}；本機 ID：{localId}。請選擇保留的內容；匯入引用會連到本機資料。'**
+  String restoreReuseId(String sourceId, String localId);
+
+  /// No description provided for @backupMediaNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消勾選可排除個別影音副本。附件名稱等紀錄資料仍會保留；共用同一副本的附件會一起排除。'**
+  String get backupMediaNotice;
+
+  /// No description provided for @backupMediaSelection.
+  ///
+  /// In zh, this message translates to:
+  /// **'選擇要包含的副本'**
+  String get backupMediaSelection;
+
+  /// No description provided for @backupNoMedia.
+  ///
+  /// In zh, this message translates to:
+  /// **'目前沒有影音副本。'**
+  String get backupNoMedia;
+
+  /// No description provided for @backupMediaDetails.
+  ///
+  /// In zh, this message translates to:
+  /// **'{size} · {count} 個附件共用'**
+  String backupMediaDetails(String size, int count);
+
+  /// No description provided for @backupScopeSummary.
+  ///
+  /// In zh, this message translates to:
+  /// **'範圍：{scope}；排除 {count} 個副本'**
+  String backupScopeSummary(String scope, int count);
+
+  /// No description provided for @backupScopeFull.
+  ///
+  /// In zh, this message translates to:
+  /// **'完整備份'**
+  String get backupScopeFull;
+
+  /// No description provided for @backupScopeNoMedia.
+  ///
+  /// In zh, this message translates to:
+  /// **'不含影音'**
+  String get backupScopeNoMedia;
+
+  /// No description provided for @backupScopeCustom.
+  ///
+  /// In zh, this message translates to:
+  /// **'自訂影音範圍'**
+  String get backupScopeCustom;
 }
 
 class _AppLocalizationsDelegate

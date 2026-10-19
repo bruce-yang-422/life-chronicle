@@ -1023,4 +1023,242 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return 'In $count $_temp0';
   }
+
+  @override
+  String get restoreIntro =>
+      'Select a ZIP to verify it and review differences. Your data stays unchanged until you confirm restoration.';
+
+  @override
+  String get restoreSelect => 'Select ZIP backup';
+
+  @override
+  String get restorePreview => 'Restore preview';
+
+  @override
+  String get restoreApply => 'Confirm restore';
+
+  @override
+  String get restoreChooseAll =>
+      'Choose a version for every conflict before restoring.';
+
+  @override
+  String get restoreDifferentSubject =>
+      'This backup belongs to another person. Restore it into an empty app; existing life records cannot be merged across people. Your data is unchanged.';
+
+  @override
+  String get restoreInvalidSubject =>
+      'The backup does not contain a valid single person, self author, and archive settings.';
+
+  @override
+  String get restoreChanged =>
+      'Your data changed after the preview. Select the backup again and review the updated differences.';
+
+  @override
+  String get restoreCancelled => 'Restore cancelled. Your data is unchanged.';
+
+  @override
+  String get restoreExcluded =>
+      'Some media was intentionally excluded. Those attachments may be unavailable after restoration.';
+
+  @override
+  String get restoreExtraFiles => 'These extra files will be ignored:';
+
+  @override
+  String get restoreEmpty => 'Not set';
+
+  @override
+  String get restoreYes => 'Yes';
+
+  @override
+  String get restoreNo => 'No';
+
+  @override
+  String restoreLocalValue(String value) {
+    return 'Current: $value';
+  }
+
+  @override
+  String restoreArchiveValue(String value) {
+    return 'Backup: $value';
+  }
+
+  @override
+  String restoreCount(String name, int count) {
+    return '$name: $count records';
+  }
+
+  @override
+  String restoreConflictNumber(String name, int count) {
+    return 'Conflict $count · $name';
+  }
+
+  @override
+  String restoreTable(String table) {
+    String _temp0 = intl.Intl.selectLogic(table, {
+      'subjects': 'Person',
+      'authors': 'Authors',
+      'archive_sessions': 'Archive sessions',
+      'archive_settings': 'Archive settings',
+      'places': 'Places',
+      'people': 'People',
+      'tags': 'Tags',
+      'events': 'Events',
+      'event_sections': 'Narrative sections',
+      'life_periods': 'Life periods',
+      'event_life_periods': 'Life period links',
+      'reflections': 'Reflections',
+      'stories': 'Stories',
+      'story_events': 'Story links',
+      'blobs': 'Media copies',
+      'attachments': 'Attachments',
+      'event_tags': 'Event tags',
+      'event_people': 'Event people links',
+      'event_links': 'Related event links',
+      'change_history': 'Change history',
+      'other': 'Other records',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String restoreField(String field) {
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'display_name': 'Name',
+      'birth_date': 'Birth date',
+      'death_date': 'Death date',
+      'title': 'Title',
+      'content_md': 'Content',
+      'time_payload': 'Event time',
+      'category': 'Category',
+      'privacy': 'Privacy',
+      'created_at': 'Created',
+      'updated_at': 'Updated',
+      'recorded_at': 'Recorded',
+      'deleted_at': 'Deleted',
+      'purged_at': 'Permanently deleted',
+      'layer': 'Layer',
+      'author_id': 'Author',
+      'event_id': 'Event',
+      'subject_id': 'Person',
+      'place_id': 'Place',
+      'person_id': 'Participant',
+      'tag_id': 'Tag',
+      'life_period_id': 'Life period',
+      'story_id': 'Story',
+      'blob_id': 'Media copy',
+      'event_a_id': 'Related event',
+      'event_b_id': 'Related event',
+      'archive_session_id': 'Archive session',
+      'current_session_id': 'Current archive session',
+      'role': 'Role',
+      'is_subject_self': 'Self author',
+      'mode': 'Archive mode',
+      'activated_at': 'Activated',
+      'deactivated_at': 'Ended',
+      'activated_by': 'Activated by',
+      'deactivated_by': 'Ended by',
+      'sort_start': 'Sort range start',
+      'sort_end': 'Sort range end',
+      'manual_order': 'Manual order',
+      'position': 'Position',
+      'suggestion_key': 'Section suggestion',
+      'type': 'Type',
+      'start_time': 'Start time',
+      'end_time': 'End time',
+      'organization': 'Organization',
+      'provenance': 'Provenance',
+      'sha256': 'File checksum',
+      'byte_size': 'File size',
+      'media_type': 'Media type',
+      'path': 'Copy location',
+      'verify_status': 'Verification status',
+      'original_filename': 'Original filename',
+      'captured_at': 'Captured',
+      'captured_latitude': 'Capture latitude',
+      'captured_longitude': 'Capture longitude',
+      'imported_at': 'Imported',
+      'storage_mode': 'Storage mode',
+      'name': 'Name',
+      'name_key': 'Normalized name',
+      'latitude': 'Latitude',
+      'longitude': 'Longitude',
+      'radius_m': 'Radius (meters)',
+      'label': 'Label',
+      'operation': 'Operation',
+      'timestamp': 'Recorded',
+      'entity_id': 'Changed record',
+      'other': 'Other field',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String restoreMediaTotals(int count, String size) {
+    return 'Attachments after restoration: $count; available media: $size (shared copies counted once)';
+  }
+
+  @override
+  String get archiveCoordinates => 'Coordinates (latitude, longitude)';
+
+  @override
+  String get archiveRadius => 'Radius (meters)';
+
+  @override
+  String get archiveCaptured => 'Captured';
+
+  @override
+  String get archiveImported => 'Imported';
+
+  @override
+  String get archiveFilename => 'Original filename';
+
+  @override
+  String get archiveExcludedMedia =>
+      'This copy is not included and cannot be opened from this archive';
+
+  @override
+  String get archiveDeletedReference => 'Original event deleted';
+
+  @override
+  String get archivePeople => 'People';
+
+  @override
+  String get archiveTags => 'Tags';
+
+  @override
+  String get archivePeriods => 'Life periods';
+
+  @override
+  String restoreReuseId(String sourceId, String localId) {
+    return 'This name already exists. Archive ID: $sourceId; local ID: $localId. Choose which content to keep. Imported references will use the local ID.';
+  }
+
+  @override
+  String get backupMediaNotice =>
+      'Uncheck a file to exclude its media copy. Record data, including attachment names, is kept. All attachments sharing that copy are affected.';
+
+  @override
+  String get backupMediaSelection => 'Choose copies to include';
+
+  @override
+  String get backupNoMedia => 'There are no media copies.';
+
+  @override
+  String backupMediaDetails(String size, int count) {
+    return '$size · Shared by $count attachments';
+  }
+
+  @override
+  String backupScopeSummary(String scope, int count) {
+    return 'Scope: $scope; $count copies excluded';
+  }
+
+  @override
+  String get backupScopeFull => 'Full backup';
+
+  @override
+  String get backupScopeNoMedia => 'Without media';
+
+  @override
+  String get backupScopeCustom => 'Custom media selection';
 }

@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/archive/archive_integrity.dart';
 import '../../core/archive/archive_reading.dart';
+import '../../core/archive/archive_media_scope.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/archive_repository.dart';
 import '../../data/repositories/attachment_repository.dart';
@@ -20,6 +21,8 @@ import '../attachments/attachment_import.dart';
 import '../attachments/attachment_warehouse_page.dart';
 import '../../l10n/app_localizations.dart';
 import 'recently_deleted_page.dart';
+import 'restore_page.dart';
+import 'export_scope_dialog.dart';
 import '../security/security_page.dart';
 import '../security/security_dialogs.dart';
 import '../settings/time_display_settings.dart';
@@ -89,46 +92,50 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   Future<void> _export() async {
     if (!await authorizePrivate(context) || !mounted) return;
     final l = AppLocalizations.of(context);
-    var media = true;
-    final chosen = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setLocal) => AlertDialog(
-          title: Text(l.backupScope),
-          content: CheckboxListTile(
-            value: media,
-            onChanged: (value) => setLocal(() => media = value!),
-            title: Text(l.backupMedia),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l.timelineCancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l.backupExport),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (chosen != true || !mounted) return;
     setState(() => _busy = true);
     try {
       final repository = await ref.read(archiveRepositoryProvider.future);
-      final plan = await repository.prepare(includeMedia: media);
+      final options = await repository.mediaOptions();
+      if (!mounted) return;
+      final chosen = await showDialog<ArchiveMediaScope>(
+        context: context,
+        builder: (_) => ExportScopeDialog(options: options),
+      );
+      if (chosen == null ||
+          !mounted ||
+          !ref.read(securityProvider).canReadPrivate) {
+        return;
+      }
+      final plan = await repository.prepare(
+        includeMedia: chosen.includeMedia,
+        excludedBlobIds: chosen.excludedBlobIds,
+      );
       if (!mounted) return;
       final accepted = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
+          scrollable: true,
           title: Text(l.backupExport),
-          content: Text(
-            l.backupPlan(
-              formatBytes(plan.requiredBytes),
-              formatBytes(plan.freeBytes),
-              '${plan.data['events']!.length}',
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l.backupScopeSummary(switch (plan.scope.type) {
+                  'full' => l.backupScopeFull,
+                  'no_media' => l.backupScopeNoMedia,
+                  _ => l.backupScopeCustom,
+                }, plan.excludedMedia.length),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l.backupPlan(
+                  formatBytes(plan.requiredBytes),
+                  formatBytes(plan.freeBytes),
+                  '${plan.data['events']!.length}',
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -144,9 +151,13 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           ],
         ),
       );
-      if (accepted != true || !mounted) return;
+      if (accepted != true ||
+          !mounted ||
+          !ref.read(securityProvider).canReadPrivate) {
+        return;
+      }
       final zone = await ref.read(timeZoneProvider.future);
-      if (!mounted) return;
+      if (!mounted || !ref.read(securityProvider).canReadPrivate) return;
       final reading = ArchiveReading(
         {
           'timeline': l.navTimeline,
@@ -160,6 +171,23 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           'remembrance': l.detailRemembrance,
           'reflections': l.detailReflections,
           'attachments': l.detailMedia,
+          'privacy': l.editorPrivacy,
+          'private': l.editorPrivate,
+          'normal': l.editorNormal,
+          'place': l.editorPlace,
+          'people': l.archivePeople,
+          'tags': l.archiveTags,
+          'periods': l.archivePeriods,
+          'related': l.editorRelated,
+          'coordinates': l.archiveCoordinates,
+          'radius': l.archiveRadius,
+          'captured': l.archiveCaptured,
+          'imported': l.archiveImported,
+          'filename': l.archiveFilename,
+          'unavailable': l.archiveExcludedMedia,
+          'selfAuthor': l.detailAuthorSelf,
+          'narrative': l.editorNarrative,
+          'deletedReference': l.archiveDeletedReference,
         },
         L10nTimeTexts(l),
         timestampFormat: (value) => TimestampDisplay.format(
@@ -278,6 +306,18 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             onPressed: _busy ? null : _export,
             icon: const Icon(Icons.archive_outlined),
             label: Text(l.backupExport),
+          ),
+          OutlinedButton.icon(
+            onPressed: _busy
+                ? null
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const RestorePage(),
+                    ),
+                  ),
+            icon: const Icon(Icons.restore),
+            label: Text(l.backupImport),
           ),
           OutlinedButton.icon(
             onPressed: _busy ? null : _verify,

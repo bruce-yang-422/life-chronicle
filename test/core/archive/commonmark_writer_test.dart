@@ -40,4 +40,27 @@ void main() {
       throwsA(isA<ArchiveIntegrityException>()),
     );
   });
+  test('只有根目錄兩份標準控制檔可使用大寫', () {
+    expect(ArchiveIntegrity.safePath('README.md'), isTrue);
+    expect(ArchiveIntegrity.safePath('SHA256SUMS.txt'), isTrue);
+    for (final path in [
+      'Readme.md',
+      'README.MD',
+      'data/README.md',
+      'data/Events.json',
+      'SHA256SUMS.TXT',
+      '../README.md',
+      '/README.md',
+    ]) {
+      expect(ArchiveIntegrity.safePath(path), isFalse, reason: path);
+    }
+    final hash = ArchiveIntegrity.hash([1]);
+    expect(ArchiveIntegrity.parseSums('$hash  README.md\n'), {
+      'README.md': hash,
+    });
+    expect(
+      () => ArchiveIntegrity.parseSums('$hash  SHA256SUMS.txt\n'),
+      throwsA(isA<ArchiveIntegrityException>()),
+    );
+  });
 }

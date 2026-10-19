@@ -14,11 +14,12 @@ import 'harness.dart';
 class FakeAttachmentPlatform implements AttachmentPlatform {
   int free = 1 << 30;
   String? opened;
+  String mediaType = 'video/mp4';
   @override
   Future<int> availableBytes(String directory) async => free;
   @override
   Future<AttachmentMetadata> metadata(String path) async => AttachmentMetadata(
-    mediaType: 'video/mp4',
+    mediaType: mediaType,
     capturedAt: DateTime.utc(2003, 9, 15),
   );
   @override
@@ -104,6 +105,75 @@ void main() {
     expect(await File(stored.blob.path).length(), 200000);
     expect(await repository.unreferencedFiles(), isEmpty);
   });
+  test('追憶照片在軟刪除、復原及永久刪除後皆保留且可開啟', () async {
+    platform.mediaType = 'image/jpeg';
+    final original = await source('original.jpg', [255, 216, 1, 255, 217]);
+    final memory = await source('memory.jpg', [255, 216, 2, 255, 217]);
+    final eventId = await content.save(EventDraft(title: '海邊回憶'));
+    await repository.importBatch(
+      await repository.prepare([original]),
+      eventId: eventId,
+    );
+    final originalStored = (await repository.watch(eventId).first).single;
+
+    await h.activateArchive();
+    final remembrance = AttachmentRepository(
+      h.context(actingAuthorId: h.familyAuthorId),
+      repository.directory,
+      platform,
+    );
+    await remembrance.importBatch(
+      await remembrance.prepare([memory]),
+      eventId: eventId,
+    );
+    final memoryStored = (await remembrance.watch(eventId).first).singleWhere(
+      (stored) => stored.attachment.layer == 'remembrance',
+    );
+    await h.deactivateArchive();
+
+    await h.events().softDelete(eventId);
+    expect(await h.events().watchTimeline().first, isEmpty);
+    expect(
+      (await content.load(eventId, includeDeleted: true))!.event.title,
+      '海邊回憶',
+    );
+    expect(await repository.watch(eventId).first, hasLength(2));
+    await repository.openAttachment(memoryStored);
+    expect(platform.opened, memoryStored.blob.path);
+
+    await h.events().restore(eventId);
+    expect(await h.events().watchTimeline().first, hasLength(1));
+    expect(await repository.watch(eventId).first, hasLength(2));
+
+    await h.events().softDelete(eventId);
+    expect(await h.events().purge(eventId), isTrue);
+    final kept = (await content.load(eventId, includeDeleted: true))!.event;
+    expect(kept.title, '海邊回憶');
+    expect(kept.purgedAt, isNotNull);
+    expect(
+      (await repository.watch(eventId).first).single.attachment.id,
+      memoryStored.attachment.id,
+    );
+    await File(memory.path).delete();
+    await repository.openAttachment(memoryStored);
+    expect(await File(memoryStored.blob.path).readAsBytes(), [
+      255,
+      216,
+      2,
+      255,
+      217,
+    ]);
+    expect(await File(original.path).exists(), isTrue);
+    expect(await File(originalStored.blob.path).exists(), isTrue);
+    expect(
+      (await repository.unreferencedFiles()).map((file) => file.path),
+      contains(originalStored.blob.path),
+    );
+    await repository.cleanUnreferenced();
+    expect(await File(memoryStored.blob.path).exists(), isTrue);
+    expect(await File(original.path).exists(), isTrue);
+  });
+
   test('後面檔案被更改導致整批失敗，不留下任何引用或副本', () async {
     final a = await source('first.mp4', [1, 2, 3]);
     final b = await source('second.mp4', [4, 5, 6]);

@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/archive/archive_integrity.dart';
 import '../../core/archive/archive_reading.dart';
+import '../../core/archive/archive_subject_policy.dart';
 import 'archive_repository.dart';
 import 'archive_zip.dart';
 import 'attachment_repository.dart';
@@ -13,11 +14,20 @@ import 'attachment_repository.dart';
 enum ArchiveConflictChoice { keepLocal, useArchive }
 
 class ArchiveConflict {
-  const ArchiveConflict(this.key, this.table, this.local, this.incoming);
+  const ArchiveConflict(
+    this.key,
+    this.table,
+    this.local,
+    this.incoming, {
+    this.sourceId,
+  });
   final String key;
   final String table;
   final Map<String, Object?> local;
   final Map<String, Object?> incoming;
+
+  /// 同名參考資料原本的封存 ID；寫入及引用一律使用本機 ID。
+  final String? sourceId;
 }
 
 class ArchiveRestorePlan {
@@ -43,13 +53,17 @@ class ArchiveRestoreReport {
     this.replaced,
     this.skipped,
     this.excluded,
-    this.extraFiles,
-  );
+    this.extraFiles, {
+    this.attachmentCount = 0,
+    this.mediaBytes = 0,
+  });
   final Map<String, int> inserted;
   final int replaced;
   final int skipped;
   final int excluded;
   final List<String> extraFiles;
+  final int attachmentCount;
+  final int mediaBytes;
 }
 
 /// 還原保留原始層級與時間；所有衝突選擇及外鍵驗證均在同一交易內完成。
@@ -62,6 +76,47 @@ class ArchiveRestore {
 
   bool _same(Map<String, Object?> a, Map<String, Object?> b) =>
       a.length == b.length && a.entries.every((e) => b[e.key] == e.value);
+
+  Map<String, String> _reuseReferenceIds(ArchiveRows data, ArchiveRows local) {
+    final sources = <String, String>{};
+    for (final (name, id, unique, references) in [
+      ('places', 'place_id', 'name_key', [('events', 'place_id')]),
+      ('people', 'person_id', 'name_key', [('event_people', 'person_id')]),
+      ('tags', 'tag_id', 'label', [('event_tags', 'tag_id')]),
+    ]) {
+      final byName = {
+        for (final row in local[name]!)
+          if (row[unique] != null) row[unique]: row,
+      };
+      final localIds = {for (final row in local[name]!) row[id]};
+      final remap = <String, String>{};
+      final targets = <Object?>{};
+      for (final row in data[name]!) {
+        final previous = byName[row[unique]];
+        final sourceId = row[id] as String;
+        if (previous != null && previous[id] != sourceId) {
+          // 同一 ID 與同一名稱指向不同本機項目時，不能猜測身分或覆蓋兩筆。
+          if (localIds.contains(sourceId)) {
+            throw ArchiveIntegrityException(['data/$name.json']);
+          }
+          final targetId = previous[id] as String;
+          remap[sourceId] = targetId;
+          row[id] = targetId;
+          sources['$name:$targetId'] = sourceId;
+        }
+        // 不接受多個封存項目併入同一筆後由輸入順序決定內容。
+        if (!targets.add(row[id])) {
+          throw ArchiveIntegrityException(['data/$name.json']);
+        }
+      }
+      for (final (table, field) in references) {
+        for (final row in data[table]!) {
+          row[field] = remap[row[field]] ?? row[field];
+        }
+      }
+    }
+    return sources;
+  }
 
   Future<ArchiveRestorePlan> inspect(
     File zip, {
@@ -118,7 +173,14 @@ class ArchiveRestore {
           data[name]!.add(row);
         }
       }
-      final local = await repository.snapshot();
+      final snapshot = await repository.snapshot();
+      final replacesInitialProfile =
+          ArchiveSubjectPolicy.replacesInitialProfile(snapshot, data);
+      final local = replacesInitialProfile
+          ? <String, List<Map<String, Object?>>>{
+              for (final name in snapshot.keys) name: [],
+            }
+          : snapshot;
       final localBlobs = {
         for (final row in local['blobs']!) row['sha256'] as String: row,
       };
@@ -132,7 +194,8 @@ class ArchiveRestore {
           final file = File(existing['path'] as String);
           if (!await file.exists() ||
               await file.length() != existing['byte_size'] ||
-              await ArchiveZip.fileHash(file) != existing['sha256']) {
+              await ArchiveZip.fileHash(file, cancellation: cancellation) !=
+                  existing['sha256']) {
             throw ArchiveIntegrityException([row['path'] as String]);
           }
           blobIds[row['blob_id'] as String] = existing['blob_id'] as String;
@@ -142,6 +205,7 @@ class ArchiveRestore {
         attachment['blob_id'] =
             blobIds[attachment['blob_id']] ?? attachment['blob_id'];
       }
+      final referenceSources = _reuseReferenceIds(data, local);
       final conflicts = <ArchiveConflict>[];
       var skipped = 0;
       for (final table in repository.tables) {
@@ -160,10 +224,14 @@ class ArchiveRestore {
           if (name == 'blobs') {
             comparable['path'] = ArchiveRepository.mediaPath(previous);
           }
-          if (_same(row, comparable)) {
+          final sourceId =
+              referenceSources['$name:${row[table.$primaryKey.singleOrNull?.name]}'];
+          if (_same(row, comparable) && sourceId == null) {
             skipped++;
           } else {
-            conflicts.add(ArchiveConflict(key, name, previous, row));
+            conflicts.add(
+              ArchiveConflict(key, name, previous, row, sourceId: sourceId),
+            );
           }
         }
       }
@@ -172,7 +240,7 @@ class ArchiveRestore {
         data,
         conflicts,
         skipped,
-        ArchiveIntegrity.hash(utf8.encode(jsonEncode(local))),
+        ArchiveIntegrity.hash(utf8.encode(jsonEncode(snapshot))),
         blobIds,
       );
     } catch (_) {
@@ -208,8 +276,8 @@ class ArchiveRestore {
     Map<String, ArchiveConflictChoice> choices, {
     required ImportCancellation cancellation,
 
-    /// 第一階段的跨主角政策由畫面確認後傳入，核心不擅自選擇。
-    required Future<void> Function(ArchiveRows local, ArchiveRows incoming)
+    /// 工具可追加更嚴格的檢查，但不能繞過共同的單一主角政策。
+    Future<void> Function(ArchiveRows local, ArchiveRows incoming)?
     validateSubjects,
   }) => repository.attachments.exclusive(() async {
     final db = repository.db;
@@ -223,14 +291,40 @@ class ArchiveRestore {
       final inserted = <String, int>{};
       var replaced = 0;
       var skipped = 0;
+      var attachmentCount = 0;
+      var mediaBytes = 0;
       await db.transaction(() async {
         final local = await repository.snapshot();
         if (ArchiveIntegrity.hash(utf8.encode(jsonEncode(local))) !=
             plan.revision) {
           throw const ArchiveIntegrityException(['revision']);
         }
-        await validateSubjects(local, plan.data);
+        final replacesInitialProfile =
+            ArchiveSubjectPolicy.replacesInitialProfile(local, plan.data);
+        await validateSubjects?.call(local, plan.data);
+        // 寫入典藏設定前先檢查所有覆蓋，不能靠匯入一般模式解除唯讀限制。
+        for (final conflict in plan.conflicts) {
+          if (choices[conflict.key] != ArchiveConflictChoice.useArchive ||
+              conflict.local['layer'] == null) {
+            continue;
+          }
+          await repository.ctx.ensureCanModify(
+            conflict.local['layer'] as String,
+          );
+          if (conflict.local['layer'] != conflict.incoming['layer']) {
+            throw const ArchiveIntegrityException(['layer']);
+          }
+        }
         await db.customStatement('PRAGMA defer_foreign_keys = ON');
+        if (replacesInitialProfile) {
+          // 僅可清除自動產生且未填寫的三筆初始資料；失敗時由交易復原。
+          await db.delete(db.archiveSettings).go();
+          await db.delete(db.authors).go();
+          await db.delete(db.subjects).go();
+          for (final rows in local.values) {
+            rows.clear();
+          }
+        }
         final excluded =
             ((plan.verified.manifest['scope'] as Map)['excluded'] as List)
                 .map((e) => (e as Map)['path'])
@@ -240,6 +334,7 @@ class ArchiveRestore {
           var rows = plan.data[name]!;
           final byId = {for (final row in local[name]!) _key(table, row): row};
           if (name == 'change_history') {
+            final incomingCount = rows.length;
             rows = rows
                 .where(
                   (row) => !local[name]!.any(
@@ -249,6 +344,7 @@ class ArchiveRestore {
                   ),
                 )
                 .toList();
+            skipped += incomingCount - rows.length;
           }
           inserted[name] = 0;
           for (final original in rows) {
@@ -265,13 +361,6 @@ class ArchiveRestore {
                         choices[key] == ArchiveConflictChoice.keepLocal))) {
               skipped++;
               continue;
-            }
-            if (existing != null && existing['layer'] != null) {
-              // 權限與不可變層級使用共同規則，不能以還原繞過。
-              await repository.ctx.ensureCanModify(existing['layer'] as String);
-              if (existing['layer'] != row['layer']) {
-                throw const ArchiveIntegrityException(['layer']);
-              }
             }
             if (name == 'blobs') {
               final archivePath = row['path'] as String;
@@ -290,19 +379,47 @@ class ArchiveRestore {
                     ...archivePath.split('/'),
                   ]),
                 );
-                if (await ArchiveZip.fileHash(source) != row['sha256'] ||
+                if (await ArchiveZip.fileHash(
+                          source,
+                          cancellation: cancellation,
+                        ) !=
+                        row['sha256'] ||
                     await source.length() != row['byte_size']) {
                   throw ArchiveIntegrityException([archivePath]);
                 }
                 if (await destination.exists()) {
-                  if (await ArchiveZip.fileHash(destination) != row['sha256']) {
+                  if (await ArchiveZip.fileHash(
+                        destination,
+                        cancellation: cancellation,
+                      ) !=
+                      row['sha256']) {
                     throw ArchiveIntegrityException([archivePath]);
                   }
                 } else {
                   final temporary = File('${destination.path}.partial');
                   created.add(temporary);
-                  await source.copy(temporary.path);
-                  if (await ArchiveZip.fileHash(temporary) != row['sha256']) {
+                  final sink = temporary.openWrite();
+                  try {
+                    await sink.addStream(
+                      source.openRead().map((bytes) {
+                        cancellation.check();
+                        return bytes;
+                      }),
+                    );
+                    await sink.flush();
+                  } catch (_) {
+                    // 串流失敗可能已關閉 sink，保留原本的取消或讀取錯誤。
+                    try {
+                      await sink.close();
+                    } catch (_) {}
+                    rethrow;
+                  }
+                  await sink.close();
+                  if (await ArchiveZip.fileHash(
+                        temporary,
+                        cancellation: cancellation,
+                      ) !=
+                      row['sha256']) {
                     throw ArchiveIntegrityException([archivePath]);
                   }
                   cancellation.check();
@@ -351,6 +468,21 @@ class ArchiveRestore {
         if (invalid.isNotEmpty) {
           throw const ArchiveIntegrityException(['foreign_keys']);
         }
+        final subjectId = plan.data['subjects']!.single['subject_id'] as String;
+        final totals = await db
+            .customSelect(
+              'SELECT '
+              '(SELECT count(*) FROM attachments a JOIN events e ON e.event_id = a.event_id '
+              'WHERE e.subject_id = ?1) AS attachment_count, '
+              '(SELECT coalesce(sum(b.byte_size), 0) FROM blobs b '
+              "WHERE b.verify_status = 'verified' AND EXISTS ("
+              'SELECT 1 FROM attachments a JOIN events e ON e.event_id = a.event_id '
+              'WHERE a.blob_id = b.blob_id AND e.subject_id = ?1)) AS media_bytes',
+              variables: [Variable.withString(subjectId)],
+            )
+            .getSingle();
+        attachmentCount = totals.read<int>('attachment_count');
+        mediaBytes = totals.read<int>('media_bytes');
         cancellation.check();
       });
       committed = true;
@@ -363,6 +495,8 @@ class ArchiveRestore {
         skipped,
         excluded,
         plan.verified.extraFiles,
+        attachmentCount: attachmentCount,
+        mediaBytes: mediaBytes,
       );
     } finally {
       if (!committed) {

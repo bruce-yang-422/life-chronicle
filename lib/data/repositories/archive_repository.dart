@@ -6,6 +6,8 @@ import 'package:path/path.dart' as p;
 
 import '../../core/archive/archive_integrity.dart';
 import '../../core/archive/archive_reading.dart';
+import '../../core/archive/archive_media_scope.dart';
+import '../../core/archive/archive_schema.dart';
 import '../db/app_database.dart';
 import 'attachment_repository.dart';
 import 'archive_zip.dart';
@@ -25,13 +27,32 @@ class ArchiveExportPlan {
     this.media,
     this.requiredBytes,
     this.freeBytes,
-    this.includeMedia,
+    this.scope,
   );
   final ArchiveRows data;
   final Map<String, File> media;
   final int requiredBytes;
   final int freeBytes;
-  final bool includeMedia;
+  final ArchiveMediaScope scope;
+  bool get includeMedia => scope.includeMedia;
+  Map<String, String> get excludedMedia => {
+    for (final blob in data['blobs']!)
+      if (scope.reasonFor(blob['blob_id'] as String) case final String reason)
+        blob['path'] as String: reason,
+  };
+}
+
+class ArchiveMediaOption {
+  const ArchiveMediaOption(
+    this.blobId,
+    this.names,
+    this.byteSize,
+    this.references,
+  );
+  final String blobId;
+  final List<String> names;
+  final int byteSize;
+  final int references;
 }
 
 /// 開放 JSON 匯出；原始檔位置、SQLite 與衍生搜尋快取不進入封存包。
@@ -127,15 +148,55 @@ class ArchiveRepository {
     return 'media/${hash.substring(0, 2)}/$hash.$extension';
   }
 
-  Future<ArchiveExportPlan> prepare({bool includeMedia = true}) async {
+  Future<List<ArchiveMediaOption>> mediaOptions() async {
+    final data = await snapshot();
+    final byBlob = <Object?, List<Map<String, Object?>>>{};
+    for (final attachment in data['attachments']!) {
+      (byBlob[attachment['blob_id']] ??= []).add(attachment);
+    }
+    final options = [
+      for (final blob in data['blobs']!)
+        ArchiveMediaOption(
+          blob['blob_id'] as String,
+          {
+            if ((byBlob[blob['blob_id']] ?? []).isEmpty)
+              p.basename(mediaPath(blob)),
+            for (final attachment in byBlob[blob['blob_id']] ?? [])
+              attachment['original_filename'] as String,
+          }.toList()..sort(),
+          blob['byte_size'] as int,
+          (byBlob[blob['blob_id']] ?? []).length,
+        ),
+    ];
+    options.sort((a, b) {
+      if ((a.references == 0) != (b.references == 0)) {
+        return a.references == 0 ? 1 : -1;
+      }
+      return a.names.first.compareTo(b.names.first);
+    });
+    return options;
+  }
+
+  Future<ArchiveExportPlan> prepare({
+    bool includeMedia = true,
+    Set<String> excludedBlobIds = const {},
+  }) async {
     await outputDirectory.create(recursive: true);
     final data = await snapshot();
+    final scope = ArchiveMediaScope(
+      includeMedia: includeMedia,
+      excludedBlobIds: excludedBlobIds,
+    );
+    final knownIds = {for (final blob in data['blobs']!) blob['blob_id']};
+    if (excludedBlobIds.difference(knownIds).isNotEmpty) {
+      throw const ArchiveIntegrityException(['data/blobs.json']);
+    }
     final media = <String, File>{};
     var mediaBytes = 0;
     for (final blob in data['blobs']!) {
       final source = File(blob['path'] as String);
       final path = mediaPath(blob);
-      if (includeMedia) {
+      if (scope.reasonFor(blob['blob_id'] as String) == null) {
         if (!await source.exists()) throw ArchiveIntegrityException([path]);
         media[path] = source;
         mediaBytes += blob['byte_size'] as int;
@@ -148,43 +209,22 @@ class ArchiveRepository {
     final free = await attachments.platform.availableBytes(
       outputDirectory.path,
     );
-    return ArchiveExportPlan(data, media, required, free, includeMedia);
+    return ArchiveExportPlan(data, media, required, free, scope);
   }
 
-  Map<String, Object?> _dataSchema() => {
-    r'$schema': 'https://json-schema.org/draft/2020-12/schema',
-    'title': 'Life Chronicle data version 1',
-    'type': 'object',
-    'additionalProperties': false,
-    'required': [for (final table in tables) table.actualTableName],
-    'properties': {
-      for (final table in tables)
-        table.actualTableName: {
-          'type': 'array',
-          'items': {
-            'type': 'object',
-            'additionalProperties': false,
-            'required': [for (final column in table.$columns) column.name],
-            'properties': {
-              for (final column in table.$columns)
-                column.name: {
-                  'type': [
-                    switch (column.type) {
-                      DriftSqlType.int => 'integer',
-                      DriftSqlType.double => 'number',
-                      DriftSqlType.bool => 'boolean',
-                      _ => 'string',
-                    },
-                    if (column.$nullable) 'null',
-                  ],
-                  if (column.type == DriftSqlType.dateTime)
-                    'format': 'date-time',
-                },
-            },
-          },
-        },
-    },
-  };
+  Map<String, Map<String, Object?>> _schemas() => ArchiveSchema.generate({
+    for (final table in tables)
+      table.actualTableName: [
+        for (final column in table.$columns)
+          ArchiveSchemaColumn(column.name, switch (column.type) {
+            DriftSqlType.int => ArchiveColumnType.integer,
+            DriftSqlType.double => ArchiveColumnType.number,
+            DriftSqlType.bool => ArchiveColumnType.boolean,
+            DriftSqlType.dateTime => ArchiveColumnType.timestamp,
+            _ => ArchiveColumnType.text,
+          }, column.$nullable),
+      ],
+  });
 
   Future<ArchiveExport> export(
     ArchiveExportPlan plan,
@@ -196,6 +236,13 @@ class ArchiveRepository {
   }) async {
     final token = cancellation ?? ImportCancellation();
     token.check();
+    void ensureReadable() {
+      for (final event in plan.data['events']!) {
+        ctx.ensureCanReadPrivate(event['privacy'] as String);
+      }
+    }
+
+    ensureReadable();
     final free = await attachments.platform.availableBytes(
       outputDirectory.path,
     );
@@ -208,8 +255,7 @@ class ArchiveRepository {
         .toIso8601String()
         .replaceAll(RegExp(r'[^0-9]'), '')
         .substring(0, 14);
-    final base =
-        'LifeChronicle_${stamp}_${session}_${plan.includeMedia ? 'full' : 'no_media'}.zip';
+    final base = 'LifeChronicle_${stamp}_${session}_${plan.scope.type}.zip';
     final partial = File(p.join(outputDirectory.path, '$base.partial'));
     final finalZip = File(p.join(outputDirectory.path, base));
     final sidecar = File('${finalZip.path}.sha256');
@@ -218,24 +264,14 @@ class ArchiveRepository {
       await work.create(recursive: true);
       final text = <String, String>{
         'README.md': readme,
-        ...reading.generate(plan.data),
+        ...reading.generate(
+          plan.data,
+          excludedMedia: plan.excludedMedia.keys.toSet(),
+        ),
         for (final entry in plan.data.entries)
           'data/${entry.key}.json': '${jsonEncode(entry.value)}\n',
-        'schema/data.schema.json': '${jsonEncode(_dataSchema())}\n',
-        'schema/manifest.schema.json':
-            '${jsonEncode({
-              r'$schema': 'https://json-schema.org/draft/2020-12/schema',
-              'type': 'object',
-              'required': ['format', 'format_version', 'schema_version', 'files', 'counts', 'scope'],
-              'properties': {
-                'format': {'const': 'life-chronicle-archive'},
-                'format_version': {'const': '1.0'},
-                'schema_version': {'const': 1},
-                'files': {'type': 'array'},
-                'counts': {'type': 'object'},
-                'scope': {'type': 'object'},
-              },
-            })}\n',
+        for (final entry in _schemas().entries)
+          'schema/${entry.key}': '${jsonEncode(entry.value)}\n',
       };
       final files = <String, File>{...plan.media};
       for (final entry in text.entries) {
@@ -282,11 +318,10 @@ class ArchiveRepository {
         'subjects': plan.data['subjects'],
         'counts': counts,
         'scope': {
-          'type': plan.includeMedia ? 'full' : 'no_media',
+          'type': plan.scope.type,
           'excluded': [
-            if (!plan.includeMedia)
-              for (final blob in plan.data['blobs']!)
-                {'path': blob['path'], 'reason': 'no_media'},
+            for (final entry in plan.excludedMedia.entries)
+              {'path': entry.key, 'reason': entry.value},
           ],
         },
         'files': inventory,
@@ -333,6 +368,7 @@ class ArchiveRepository {
       await File('${sidecar.path}.partial')
           .writeAsString('$hash  $base\n', flush: true);
       token.check();
+      ensureReadable();
       await partial.rename(finalZip.path);
       await File('${sidecar.path}.partial').rename(sidecar.path);
       final record = File(p.join(outputDirectory.path, 'latest.json'));

@@ -31,7 +31,7 @@ class FixtureMediaPlatform implements AttachmentPlatform {
   Future<void> open(String path, String mediaType) async {}
 }
 
-const fixtureCodec = ArchiveZip(controlPaths: {'README.md', 'SHA256SUMS.txt'});
+const fixtureCodec = ArchiveZip();
 
 void main() {
   test('建立 50 筆擬真紀錄及 5 個 JPG，ZIP 還原、重複匯入、搜尋與媒體校驗', () async {
@@ -166,23 +166,63 @@ void main() {
         'remembrance': '後續追憶',
         'reflections': '回顧',
         'attachments': '附件',
+        'privacy': l.editorPrivacy,
+        'private': l.editorPrivate,
+        'normal': l.editorNormal,
+        'place': l.editorPlace,
+        'people': l.archivePeople,
+        'tags': l.archiveTags,
+        'related': l.editorRelated,
+        'coordinates': l.archiveCoordinates,
+        'radius': l.archiveRadius,
+        'captured': l.archiveCaptured,
+        'imported': l.archiveImported,
+        'filename': l.archiveFilename,
+        'unavailable': l.archiveExcludedMedia,
+        'selfAuthor': l.detailAuthorSelf,
+        'narrative': l.editorNarrative,
+        'deletedReference': l.archiveDeletedReference,
+        'periods': l.archivePeriods,
       }, L10nTimeTexts(l));
       final exportPlan = await repository.prepare();
-      final originalZip = File(p.join(output.path, 'v1', 'LifeChronicle_20261014080000_01m4wpss006k64hsnp9e489t2d_full.zip'));
+      final originalZip = File(
+        p.join(
+          output.path,
+          'v1',
+          'LifeChronicle_20261014080000_01m4wpss006k64hsnp9e489t2d_full.zip',
+        ),
+      );
       if (await originalZip.exists()) {
-        final verified = await fixtureCodec.verify(originalZip, Directory(p.join(work.path, 'v1_original')),
-          freeBytes: 1 << 40, cancellation: ImportCancellation());
-        final newTitles = {for (final e in exportPlan.data['events']!) e['event_id']: e['title']};
-        final formatted = {for (final s in exportPlan.data['event_sections']!)
-          '${newTitles[s['event_id']]}:${s['position']}': s['content_md']};
+        final verified = await fixtureCodec.verify(
+          originalZip,
+          Directory(p.join(work.path, 'v1_original')),
+          freeBytes: 1 << 40,
+          cancellation: ImportCancellation(),
+        );
+        final newTitles = {
+          for (final e in exportPlan.data['events']!) e['event_id']: e['title'],
+        };
+        final formatted = {
+          for (final s in exportPlan.data['event_sections']!)
+            '${newTitles[s['event_id']]}:${s['position']}': s['content_md'],
+        };
         final original = <String, List<Map<String, Object?>>>{};
         for (final name in exportPlan.data.keys) {
-          original[name] = (jsonDecode(await File(p.join(verified.directory.path, 'data', '$name.json')).readAsString()) as List)
-            .map((row) => Map<String, Object?>.from(row as Map)).toList();
+          original[name] =
+              (jsonDecode(
+                    await File(
+                      p.join(verified.directory.path, 'data', '$name.json'),
+                    ).readAsString(),
+                  ) as List)
+                  .map((row) => Map<String, Object?>.from(row as Map))
+                  .toList();
         }
-        final originalTitles = {for (final e in original['events']!) e['event_id']: e['title']};
+        final originalTitles = {
+          for (final e in original['events']!) e['event_id']: e['title'],
+        };
         for (final section in original['event_sections']!) {
-          section['content_md'] = formatted['${originalTitles[section['event_id']]}:${section['position']}']!;
+          section['content_md'] =
+              formatted['${originalTitles[section['event_id']]}:${section['position']}']!;
         }
         exportPlan.data.clear();
         exportPlan.data.addAll(original);

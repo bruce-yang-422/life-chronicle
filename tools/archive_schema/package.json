@@ -1,0 +1,12 @@
+{
+  "name": "life-chronicle-archive-schema-validation",
+  "private": true,
+  "scripts": {
+    "check": "node validate.cjs"
+  },
+  "devDependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "commonmark": "0.31.2"
+  }
+}

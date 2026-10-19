@@ -520,5 +520,111 @@
         "type": "String"
       }
     }
+  },
+  "restoreIntro": "Select a ZIP to verify it and review differences. Your data stays unchanged until you confirm restoration.",
+  "restoreSelect": "Select ZIP backup",
+  "restorePreview": "Restore preview",
+  "restoreApply": "Confirm restore",
+  "restoreChooseAll": "Choose a version for every conflict before restoring.",
+  "restoreDifferentSubject": "This backup belongs to another person. Restore it into an empty app; existing life records cannot be merged across people. Your data is unchanged.",
+  "restoreInvalidSubject": "The backup does not contain a valid single person, self author, and archive settings.",
+  "restoreChanged": "Your data changed after the preview. Select the backup again and review the updated differences.",
+  "restoreCancelled": "Restore cancelled. Your data is unchanged.",
+  "restoreExcluded": "Some media was intentionally excluded. Those attachments may be unavailable after restoration.",
+  "restoreExtraFiles": "These extra files will be ignored:",
+  "restoreEmpty": "Not set",
+  "restoreYes": "Yes",
+  "restoreNo": "No",
+  "restoreLocalValue": "Current: {value}",
+  "@restoreLocalValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreArchiveValue": "Backup: {value}",
+  "@restoreArchiveValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreCount": "{name}: {count} records",
+  "@restoreCount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreConflictNumber": "Conflict {count} · {name}",
+  "@restoreConflictNumber": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreTable": "{table, select, subjects{Person} authors{Authors} archive_sessions{Archive sessions} archive_settings{Archive settings} places{Places} people{People} tags{Tags} events{Events} event_sections{Narrative sections} life_periods{Life periods} event_life_periods{Life period links} reflections{Reflections} stories{Stories} story_events{Story links} blobs{Media copies} attachments{Attachments} event_tags{Event tags} event_people{Event people links} event_links{Related event links} change_history{Change history} other{Other records}}",
+  "@restoreTable": {
+    "placeholders": {
+      "table": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreField": "{field, select, display_name{Name} birth_date{Birth date} death_date{Death date} title{Title} content_md{Content} time_payload{Event time} category{Category} privacy{Privacy} created_at{Created} updated_at{Updated} recorded_at{Recorded} deleted_at{Deleted} purged_at{Permanently deleted} layer{Layer} author_id{Author} event_id{Event} subject_id{Person} place_id{Place} person_id{Participant} tag_id{Tag} life_period_id{Life period} story_id{Story} blob_id{Media copy} event_a_id{Related event} event_b_id{Related event} archive_session_id{Archive session} current_session_id{Current archive session} role{Role} is_subject_self{Self author} mode{Archive mode} activated_at{Activated} deactivated_at{Ended} activated_by{Activated by} deactivated_by{Ended by} sort_start{Sort range start} sort_end{Sort range end} manual_order{Manual order} position{Position} suggestion_key{Section suggestion} type{Type} start_time{Start time} end_time{End time} organization{Organization} provenance{Provenance} sha256{File checksum} byte_size{File size} media_type{Media type} path{Copy location} verify_status{Verification status} original_filename{Original filename} captured_at{Captured} captured_latitude{Capture latitude} captured_longitude{Capture longitude} imported_at{Imported} storage_mode{Storage mode} name{Name} name_key{Normalized name} latitude{Latitude} longitude{Longitude} radius_m{Radius (meters)} label{Label} operation{Operation} timestamp{Recorded} entity_id{Changed record} other{Other field}}",
+  "@restoreField": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreMediaTotals": "Attachments after restoration: {count}; available media: {size} (shared copies counted once)",
+  "@restoreMediaTotals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "archiveCoordinates": "Coordinates (latitude, longitude)",
+  "archiveRadius": "Radius (meters)",
+  "archiveCaptured": "Captured",
+  "archiveImported": "Imported",
+  "archiveFilename": "Original filename",
+  "archiveExcludedMedia": "This copy is not included and cannot be opened from this archive",
+  "archiveDeletedReference": "Original event deleted",
+  "archivePeople": "People",
+  "archiveTags": "Tags",
+  "archivePeriods": "Life periods",
+  "restoreReuseId": "This name already exists. Archive ID: {sourceId}; local ID: {localId}. Choose which content to keep. Imported references will use the local ID.",
+  "backupMediaNotice": "Uncheck a file to exclude its media copy. Record data, including attachment names, is kept. All attachments sharing that copy are affected.",
+  "backupMediaSelection": "Choose copies to include",
+  "backupNoMedia": "There are no media copies.",
+  "backupMediaDetails": "{size} · Shared by {count} attachments",
+  "backupScopeSummary": "Scope: {scope}; {count} copies excluded",
+  "backupScopeFull": "Full backup",
+  "backupScopeNoMedia": "Without media",
+  "backupScopeCustom": "Custom media selection",
+  "@backupMediaDetails": { "placeholders": { "size": { "type": "String" }, "count": { "type": "int" } } },
+  "@backupScopeSummary": { "placeholders": { "scope": { "type": "String" }, "count": { "type": "int" } } },
+  "@restoreReuseId": {
+    "placeholders": {
+      "sourceId": { "type": "String" },
+      "localId": { "type": "String" }
+    }
   }
 }

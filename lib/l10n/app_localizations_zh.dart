@@ -967,4 +967,235 @@ class AppLocalizationsZh extends AppLocalizations {
   String elapsedYearsFuture(String count) {
     return '$count 年後';
   }
+
+  @override
+  String get restoreIntro => '選取 ZIP 後會先驗證並列出差異。確認還原前不會修改原有資料。';
+
+  @override
+  String get restoreSelect => '選取 ZIP 備份';
+
+  @override
+  String get restorePreview => '還原預覽';
+
+  @override
+  String get restoreApply => '確認還原';
+
+  @override
+  String get restoreChooseAll => '有差異的項目須逐筆選擇，未選完不能還原。';
+
+  @override
+  String get restoreDifferentSubject =>
+      '此備份屬於不同主角。已有資料的生命檔案不能合併其他主角；請在尚未填寫資料的空白 APP 還原。原有資料未改動。';
+
+  @override
+  String get restoreInvalidSubject => '備份的主角、本人作者或典藏設定不符合單一主角格式，無法還原。';
+
+  @override
+  String get restoreChanged => '預覽後原有資料已變更。請重新選取備份、核對差異後再還原。';
+
+  @override
+  String get restoreCancelled => '已取消還原，原有資料未改動。';
+
+  @override
+  String get restoreExcluded => '此備份刻意排除部分影音，還原後這些附件可能無法開啟。';
+
+  @override
+  String get restoreExtraFiles => '下列額外檔案會忽略，不會匯入：';
+
+  @override
+  String get restoreEmpty => '未填寫';
+
+  @override
+  String get restoreYes => '是';
+
+  @override
+  String get restoreNo => '否';
+
+  @override
+  String restoreLocalValue(String value) {
+    return '目前：$value';
+  }
+
+  @override
+  String restoreArchiveValue(String value) {
+    return '備份：$value';
+  }
+
+  @override
+  String restoreCount(String name, int count) {
+    return '$name：$count 筆';
+  }
+
+  @override
+  String restoreConflictNumber(String name, int count) {
+    return '差異 $count · $name';
+  }
+
+  @override
+  String restoreTable(String table) {
+    String _temp0 = intl.Intl.selectLogic(table, {
+      'subjects': '主角',
+      'authors': '作者',
+      'archive_sessions': '典藏期間',
+      'archive_settings': '典藏設定',
+      'places': '地點',
+      'people': '人物',
+      'tags': '標籤',
+      'events': '事件',
+      'event_sections': '記述段落',
+      'life_periods': '人生階段',
+      'event_life_periods': '人生階段連結',
+      'reflections': '回顧',
+      'stories': '篇章',
+      'story_events': '篇章事件連結',
+      'blobs': '影音副本',
+      'attachments': '附件',
+      'event_tags': '事件標籤',
+      'event_people': '事件人物連結',
+      'event_links': '關聯事件',
+      'change_history': '修訂紀錄',
+      'other': '其他資料',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String restoreField(String field) {
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'display_name': '名稱',
+      'birth_date': '生日',
+      'death_date': '逝世日期',
+      'title': '標題',
+      'content_md': '內容',
+      'time_payload': '發生時間',
+      'category': '類別',
+      'privacy': '隱私',
+      'created_at': '建立時間',
+      'updated_at': '更新時間',
+      'recorded_at': '記錄時間',
+      'deleted_at': '刪除時間',
+      'purged_at': '永久刪除時間',
+      'layer': '紀錄層',
+      'author_id': '作者',
+      'event_id': '事件',
+      'subject_id': '主角',
+      'place_id': '地點',
+      'person_id': '人物',
+      'tag_id': '標籤',
+      'life_period_id': '人生階段',
+      'story_id': '篇章',
+      'blob_id': '影音副本',
+      'event_a_id': '關聯事件',
+      'event_b_id': '關聯事件',
+      'archive_session_id': '典藏期間',
+      'current_session_id': '目前典藏期間',
+      'role': '角色／用途',
+      'is_subject_self': '本人作者',
+      'mode': '典藏狀態',
+      'activated_at': '啟用時間',
+      'deactivated_at': '結束時間',
+      'activated_by': '啟用作者',
+      'deactivated_by': '結束作者',
+      'sort_start': '排序區間起點',
+      'sort_end': '排序區間終點',
+      'manual_order': '手動排序',
+      'position': '排列位置',
+      'suggestion_key': '段落建議類型',
+      'type': '類型',
+      'start_time': '開始時間',
+      'end_time': '結束時間',
+      'organization': '組織',
+      'provenance': '來源說明',
+      'sha256': '檔案校驗值',
+      'byte_size': '檔案大小',
+      'media_type': '媒體類型',
+      'path': '副本位置',
+      'verify_status': '校驗狀態',
+      'original_filename': '原始檔名',
+      'captured_at': '拍攝時間',
+      'captured_latitude': '拍攝緯度',
+      'captured_longitude': '拍攝經度',
+      'imported_at': '匯入時間',
+      'storage_mode': '保存方式',
+      'name': '名稱',
+      'name_key': '名稱比對值',
+      'latitude': '緯度',
+      'longitude': '經度',
+      'radius_m': '範圍半徑（公尺）',
+      'label': '標籤',
+      'operation': '操作',
+      'timestamp': '記錄時間',
+      'entity_id': '修訂對象',
+      'other': '其他欄位',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String restoreMediaTotals(int count, String size) {
+    return '還原後附件：$count 個；可用影音副本總容量：$size（共用副本只計一次）';
+  }
+
+  @override
+  String get archiveCoordinates => '座標（緯度、經度）';
+
+  @override
+  String get archiveRadius => '範圍半徑（公尺）';
+
+  @override
+  String get archiveCaptured => '拍攝時間';
+
+  @override
+  String get archiveImported => '匯入時間';
+
+  @override
+  String get archiveFilename => '原始檔名';
+
+  @override
+  String get archiveExcludedMedia => '此副本未包含於備份中，無法從本封存開啟';
+
+  @override
+  String get archiveDeletedReference => '原事件已刪除';
+
+  @override
+  String get archivePeople => '參與人物';
+
+  @override
+  String get archiveTags => '標籤';
+
+  @override
+  String get archivePeriods => '人生階段';
+
+  @override
+  String restoreReuseId(String sourceId, String localId) {
+    return '同名資料將重用本機 ID。封存 ID：$sourceId；本機 ID：$localId。請選擇保留的內容；匯入引用會連到本機資料。';
+  }
+
+  @override
+  String get backupMediaNotice => '取消勾選可排除個別影音副本。附件名稱等紀錄資料仍會保留；共用同一副本的附件會一起排除。';
+
+  @override
+  String get backupMediaSelection => '選擇要包含的副本';
+
+  @override
+  String get backupNoMedia => '目前沒有影音副本。';
+
+  @override
+  String backupMediaDetails(String size, int count) {
+    return '$size · $count 個附件共用';
+  }
+
+  @override
+  String backupScopeSummary(String scope, int count) {
+    return '範圍：$scope；排除 $count 個副本';
+  }
+
+  @override
+  String get backupScopeFull => '完整備份';
+
+  @override
+  String get backupScopeNoMedia => '不含影音';
+
+  @override
+  String get backupScopeCustom => '自訂影音範圍';
 }
