@@ -31,9 +31,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navBackup => '資料與備份';
 
   @override
-  String get placeholderComingSoon => '此功能開發中';
-
-  @override
   String timeQuarterFull(String year, String quarter) {
     return '$year 年第 $quarter 季';
   }

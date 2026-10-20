@@ -140,12 +140,6 @@ abstract class AppLocalizations {
   /// **'資料與備份'**
   String get navBackup;
 
-  /// 尚未實作功能的佔位文字
-  ///
-  /// In zh, this message translates to:
-  /// **'此功能開發中'**
-  String get placeholderComingSoon;
-
   /// 完整格式：季度
   ///
   /// In zh, this message translates to:

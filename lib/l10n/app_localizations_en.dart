@@ -32,9 +32,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navBackup => 'Backup';
 
   @override
-  String get placeholderComingSoon => 'Coming soon';
-
-  @override
   String timeQuarterFull(String year, String quarter) {
     return 'Q$quarter $year';
   }

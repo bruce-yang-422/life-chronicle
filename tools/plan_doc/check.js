@@ -7,7 +7,7 @@ const md = require('markdown-it')('commonmark').enable('table');
 const root = path.resolve(__dirname, '../..');
 const files = process.argv.length > 2
   ? process.argv.slice(2)
-  : ['人生編年史_APP_開發企劃書_v2.md', 'README.md', 'AI_AGENT_TASKS.md'].map(f => path.join(root, f));
+  : ['人生編年史_APP_開發企劃書_v3.md', 'README.md', 'AI_AGENT_TASKS.md'].map(f => path.join(root, f));
 
 let total = 0;
 for (const file of files) {

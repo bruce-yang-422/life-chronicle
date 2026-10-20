@@ -25,10 +25,6 @@
   "@navBackup": {
     "description": "主導航：資料與備份（同時用於底部導覽列，譯文需簡短以免換行）"
   },
-  "placeholderComingSoon": "此功能開發中",
-  "@placeholderComingSoon": {
-    "description": "尚未實作功能的佔位文字"
-  },
   "timeQuarterFull": "{year} 年第 {quarter} 季",
   "@timeQuarterFull": {
     "description": "完整格式：季度",

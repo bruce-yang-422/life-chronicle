@@ -7,7 +7,6 @@
   "navNewEvent": "New Entry",
   "navStories": "Topics",
   "navBackup": "Backup",
-  "placeholderComingSoon": "Coming soon",
   "timeQuarterFull": "Q{quarter} {year}",
   "timeHalfYearFull": "{half, select, first{H1} other{H2}} {year}",
   "timeYearFull": "{year}",
