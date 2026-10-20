@@ -77,6 +77,20 @@ void main() {
     expect(result!.excludedBlobIds, {'shared'});
   });
 
+  testWidgets('分包上限可見且可選，提交所選大小', (tester) async {
+    await pump(tester);
+    final dropdown = find.byType(DropdownButtonFormField<int>);
+    await tester.ensureVisible(dropdown);
+    await tester.tap(dropdown);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('每包最多 1.00 GiB').last);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('每個分包可獨立解壓'), findsOneWidget);
+    await tester.tap(find.text('匯出 ZIP 備份'));
+    await tester.pumpAndSettle();
+    expect(result!.maxPartBytes, 1024 * 1024 * 1024);
+  });
+
   testWidgets('切換不含影音後恢復選擇，取消對話框不提交', (tester) async {
     await pump(tester);
     await tester.tap(find.text('敏感影片.mp4\n共用影片.mp4'));

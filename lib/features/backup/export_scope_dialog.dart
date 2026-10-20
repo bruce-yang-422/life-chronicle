@@ -7,6 +7,10 @@ import '../../data/repositories/archive_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../attachments/attachment_import.dart';
 
+final archivePartLimitsProvider = Provider<List<int>>(
+  (ref) => [1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024, 4000 * 1024 * 1024],
+);
+
 /// 共用副本只列一列，避免選擇某個附件後仍由其他引用將檔案匯出。
 class ExportScopeDialog extends ConsumerStatefulWidget {
   const ExportScopeDialog({super.key, required this.options});
@@ -19,6 +23,7 @@ class ExportScopeDialog extends ConsumerStatefulWidget {
 class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
   bool _includeMedia = true;
   bool _excludePrivate = false;
+  int _maxPartBytes = 0;
   final _excluded = <String>{};
 
   @override
@@ -49,6 +54,25 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
                   ),
                   if (_excludePrivate) Text(l.backupExcludePrivateNotice),
                   Text(l.backupMediaNotice),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<int>(
+                    initialValue: _maxPartBytes,
+                    isExpanded: true,
+                    decoration: InputDecoration(labelText: l.backupSplit),
+                    items: [
+                      DropdownMenuItem(value: 0, child: Text(l.backupNoSplit)),
+                      for (final size in ref.watch(archivePartLimitsProvider))
+                        DropdownMenuItem(
+                          value: size,
+                          child: Text(l.backupPartLimit(formatBytes(size))),
+                        ),
+                    ],
+                    onChanged: _includeMedia
+                        ? (value) => setState(() => _maxPartBytes = value!)
+                        : null,
+                  ),
+                  if (_includeMedia && _maxPartBytes > 0)
+                    Text(l.backupSplitNotice),
                   if (_includeMedia && widget.options.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Text(l.backupMediaSelection),
@@ -114,6 +138,9 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
                   ArchiveMediaScope(
                     includeMedia: _includeMedia,
                     excludePrivateEvents: _excludePrivate,
+                    maxPartBytes: _includeMedia && _maxPartBytes > 0
+                        ? _maxPartBytes
+                        : null,
                     excludedBlobIds: _excluded,
                   ),
                 )

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:life_chronicle/core/archive/archive_part_plan.dart';
+
 import 'package:archive/archive.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -689,6 +691,209 @@ void main() {
       await db.close();
     }
   }
+
+  test('獨立分包完整校驗、反向選取還原、缺包與重複包拒絕且不改來源', () async {
+    final event = await EventContentRepository(h.context()).save(
+      EventDraft(
+        title: 'split entry',
+        sections: [DraftSection(content: 'split body')],
+      ),
+    );
+    for (var i = 0; i < 3; i++) {
+      final source = File(p.join(root.path, 'source_$i.mp4'))
+        ..writeAsBytesSync(List.filled(600 * 1024, i + 1));
+      await media.importBatch(
+        await media.prepare([AttachmentSource(source.path, 'clip_$i.mp4')]),
+        eventId: event,
+      );
+    }
+    final before = await repository.snapshot();
+    final result = await repository.export(
+      await repository.prepare(maxPartBytes: 1024 * 1024),
+      reading,
+      readme: '# Archive\n',
+      appVersion: '1.0.0',
+    );
+    expect(result.zips.length, greaterThan(1));
+    final index = jsonDecode(await result.partsIndex!.readAsString()) as Map;
+    expect(index['format'], 'life-chronicle-archive-parts');
+    for (var i = 0; i < result.zips.length; i++) {
+      expect((index['parts'] as List)[i], {
+        'filename': p.basename(result.zips[i].path),
+        'byte_size': await result.zips[i].length(),
+        'sha256': await ArchiveZip.fileHash(result.zips[i]),
+      });
+    }
+    expect(result.shareFiles.length, result.zips.length * 2 + 1);
+    final allNames = <String>{};
+    for (var i = 0; i < result.zips.length; i++) {
+      final file = result.zips[i];
+      expect(await file.length(), lessThanOrEqualTo(1024 * 1024));
+      expect(
+        p.basename(file.path),
+        contains('_part${'${i + 1}'.padLeft(2, '0')}-of-'),
+      );
+      final entries = ZipDecoder().decodeBytes(await file.readAsBytes());
+      final sums = ArchiveIntegrity.parseSums(
+        utf8.decode(entries.findFile(ArchiveIntegrity.sumsPath)!.content),
+      );
+      for (final entry in entries) {
+        if (entry.name == ArchiveIntegrity.sumsPath) continue;
+        expect(ArchiveIntegrity.hash(entry.content), sums[entry.name]);
+        expect(allNames.add(entry.name), isTrue);
+        if (i > 0) expect(entry.name, startsWith('media/'));
+      }
+      expect(
+        await result.sidecars[i].readAsString(),
+        '${await ArchiveZip.fileHash(file)}  ${p.basename(file.path)}\n',
+      );
+    }
+    final verified = await codec.verifyParts(
+      result.zips.reversed.toList(),
+      Directory(p.join(root.path, 'split-verified')),
+      freeBytes: 1 << 30,
+      cancellation: ImportCancellation(),
+    );
+    expect(verified.manifest['parts'], hasLength(result.zips.length));
+    expect(verified.manifest['counts'], result.counts);
+    // 分包內自洽的偽造 SHA 仍須被第一包的完整 manifest 拒絕。
+    final last = result.zips.last;
+    final decoded = ZipDecoder().decodeBytes(await last.readAsBytes());
+    final forged = Archive();
+    final forgedHashes = <String, String>{};
+    var changed = false;
+    for (final entry in decoded) {
+      if (entry.name == ArchiveIntegrity.sumsPath) continue;
+      final bytes = List<int>.from(entry.content);
+      if (!changed) {
+        bytes[0] ^= 1;
+        changed = true;
+      }
+      forged.add(ArchiveFile.bytes(entry.name, bytes));
+      forgedHashes[entry.name] = ArchiveIntegrity.hash(bytes);
+    }
+    forged.add(
+      ArchiveFile.string(
+        ArchiveIntegrity.sumsPath,
+        ArchiveIntegrity.sums(forgedHashes),
+      ),
+    );
+    final forgedFolder = await Directory(p.join(root.path, 'forged')).create();
+    final forgedFile = File(p.join(forgedFolder.path, p.basename(last.path)));
+    await forgedFile.writeAsBytes(ZipEncoder().encode(forged));
+    await expectLater(
+      codec.verifyParts(
+        [...result.zips.take(result.zips.length - 1), forgedFile],
+        Directory(p.join(root.path, 'forged-verified')),
+        freeBytes: 1 << 30,
+        cancellation: ImportCancellation(),
+      ),
+      throwsA(isA<ArchiveIntegrityException>()),
+    );
+    await withInitialTarget((restore, target) async {
+      final reversed = result.zips.reversed.toList();
+      final incoming = await restore.inspect(
+        reversed.first,
+        additionalParts: reversed.skip(1).toList(),
+        cancellation: ImportCancellation(),
+      );
+      final report = await restore.apply(
+        incoming,
+        {},
+        cancellation: ImportCancellation(),
+      );
+      expect(report.attachmentCount, 3);
+      expect(report.mediaBytes, 3 * 600 * 1024);
+      expect(
+        await target.db.customSelect('PRAGMA foreign_key_check').get(),
+        isEmpty,
+      );
+      expect((await target.snapshot())['events'], before['events']);
+      final localBefore = await target.snapshot();
+      await expectLater(
+        restore.inspect(result.zip, cancellation: ImportCancellation()),
+        throwsA(isA<ArchiveMissingPartsException>()),
+      );
+      expect(await target.snapshot(), localBefore);
+    });
+    await expectLater(
+      codec.verifyParts(
+        [...result.zips, result.zips.last],
+        Directory(p.join(root.path, 'duplicate-parts')),
+        freeBytes: 1 << 30,
+        cancellation: ImportCancellation(),
+      ),
+      throwsA(isA<ArchiveIntegrityException>()),
+    );
+    expect(await repository.snapshot(), before);
+    expect(
+      repository.outputDirectory.listSync().whereType<File>().where(
+        (f) => f.path.endsWith('.partial'),
+      ),
+      isEmpty,
+    );
+  });
+
+  test('分包上限太小與中途取消保留前次備份並清除所有本次暫存', () async {
+    final event = await EventContentRepository(h.context())
+        .save(EventDraft(title: 'cancel parts'));
+    for (var i = 0; i < 2; i++) {
+      final source = File(p.join(root.path, 'cancel_part_$i.mp4'))
+        ..writeAsBytesSync(List.filled(600 * 1024, i + 10));
+      await media.importBatch(
+        await media.prepare([AttachmentSource(source.path, 'clip_$i.mp4')]),
+        eventId: event,
+      );
+    }
+    final original = await export();
+    final record = await File(
+      p.join(repository.outputDirectory.path, 'latest.json'),
+    ).readAsString();
+    final names = repository.outputDirectory
+        .listSync()
+        .map((f) => f.path)
+        .toSet();
+    await expectLater(
+      repository.export(
+        await repository.prepare(maxPartBytes: 500),
+        reading,
+        readme: '# Archive\n',
+        appVersion: '1.0.0',
+      ),
+      throwsA(isA<ArchivePartSizeException>()),
+    );
+    final cancellation = ImportCancellation();
+    await expectLater(
+      repository.export(
+        await repository.prepare(maxPartBytes: 1024 * 1024),
+        reading,
+        readme: '# Archive\n',
+        appVersion: '1.0.0',
+        cancellation: cancellation,
+        onProgress: (_, _) {
+          if (repository.outputDirectory
+                  .listSync()
+                  .whereType<File>()
+                  .where((f) => f.path.endsWith('.zip.partial'))
+                  .length >=
+              2) {
+            cancellation.cancelled = true;
+          }
+        },
+      ),
+      throwsA(isA<ImportCancelled>()),
+    );
+    expect(
+      await File(p.join(repository.outputDirectory.path, 'latest.json'))
+          .readAsString(),
+      record,
+    );
+    expect(
+      repository.outputDirectory.listSync().map((f) => f.path).toSet(),
+      names,
+    );
+    expect(await original.zip.exists(), isTrue);
+  });
 
   test('排除私密事件：JSON、閱讀版、快照、共用媒體與正式還原不洩露私密內容', () async {
     final content = EventContentRepository(h.context());

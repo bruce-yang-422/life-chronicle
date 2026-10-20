@@ -8,6 +8,7 @@ import '../../core/archive/archive_integrity.dart';
 import '../../core/archive/archive_reading.dart';
 import '../../core/archive/archive_media_scope.dart';
 import '../../core/archive/archive_privacy_filter.dart';
+import '../../core/archive/archive_part_plan.dart';
 import '../../core/archive/archive_schema.dart';
 import '../db/app_database.dart';
 import 'attachment_repository.dart';
@@ -15,11 +16,32 @@ import 'archive_zip.dart';
 import 'repository_context.dart';
 
 class ArchiveExport {
-  const ArchiveExport(this.zip, this.sidecar, this.hash, this.counts);
+  const ArchiveExport(
+    this.zip,
+    this.sidecar,
+    this.hash,
+    this.counts, {
+    this.additionalZips = const [],
+    this.additionalHashes = const [],
+    this.partsIndex,
+  });
   final File zip;
   final File sidecar;
   final String hash;
   final Map<String, int> counts;
+  final List<File> additionalZips;
+  final List<String> additionalHashes;
+  final File? partsIndex;
+  List<File> get zips => [zip, ...additionalZips];
+  List<File> get sidecars => [
+    sidecar,
+    for (final file in additionalZips) File('${file.path}.sha256'),
+  ];
+  List<File> get shareFiles => [
+    ...zips,
+    ...sidecars,
+    ?partsIndex,
+  ];
 }
 
 class ArchiveExportPlan {
@@ -199,6 +221,7 @@ class ArchiveRepository {
   Future<ArchiveExportPlan> prepare({
     bool includeMedia = true,
     bool excludePrivateEvents = false,
+    int? maxPartBytes,
     Set<String> excludedBlobIds = const {},
   }) async {
     await outputDirectory.create(recursive: true);
@@ -210,6 +233,7 @@ class ArchiveRepository {
     final scope = ArchiveMediaScope(
       includeMedia: includeMedia,
       excludePrivateEvents: excludePrivateEvents,
+      maxPartBytes: maxPartBytes,
       excludedBlobIds: excludedBlobIds,
     );
     final knownIds = {
@@ -282,10 +306,9 @@ class ArchiveRepository {
         .toIso8601String()
         .replaceAll(RegExp(r'[^0-9]'), '')
         .substring(0, 14);
-    final base = 'LifeChronicle_${stamp}_${session}_${plan.scope.type}.zip';
-    final partial = File(p.join(outputDirectory.path, '$base.partial'));
-    final finalZip = File(p.join(outputDirectory.path, base));
-    final sidecar = File('${finalZip.path}.sha256');
+    final base = 'LifeChronicle_${stamp}_${session}_${plan.scope.type}';
+    final pendingFiles = <File>[];
+    final publishedFiles = <File>[];
     var completed = false;
     try {
       await work.create(recursive: true);
@@ -315,7 +338,10 @@ class ArchiveRepository {
       final inventory = <Map<String, Object?>>[];
       for (final entry in files.entries) {
         token.check();
-        final hash = await ArchiveZip.fileHash(entry.value);
+        final hash = await ArchiveZip.fileHash(
+          entry.value,
+          cancellation: token,
+        );
         hashes[entry.key] = hash;
         if (entry.key.startsWith('media/') &&
             hash != p.basename(entry.key).split('.').first) {
@@ -355,7 +381,7 @@ class ArchiveRepository {
         },
         'files': inventory,
         'parts': [
-          {'filename': base, 'files': files.keys.toList()},
+          {'filename': '$base.zip', 'files': files.keys.toList()},
         ],
         'archive_state': {
           'settings': plan.data['archive_settings'],
@@ -363,6 +389,43 @@ class ArchiveRepository {
         },
         'encryption': {'encrypted': false},
       };
+      final sizes = {
+        for (final row in inventory)
+          row['path'] as String: row['byte_size'] as int,
+      };
+      // 每個媒體各一包是 manifest 最長的情況，實際分組只會更短。
+      final mediaNames = sizes.keys
+          .where((name) => name.startsWith('media/'))
+          .toList();
+      final worstParts = [
+        {
+          'filename': ArchivePartPlan.partName(base, 1, mediaNames.length + 1),
+          'files': sizes.keys
+              .where((name) => !name.startsWith('media/'))
+              .toList(),
+        },
+        for (var i = 0; i < mediaNames.length; i++)
+          {
+            'filename': ArchivePartPlan.partName(
+              base,
+              i + 2,
+              mediaNames.length + 1,
+            ),
+            'files': [mediaNames[i]],
+          },
+      ];
+      final partPlan = ArchivePartPlan(
+        sizes: sizes,
+        base: base,
+        maxBytes: plan.scope.maxPartBytes,
+        manifestBytes:
+            utf8.encode(jsonEncode({...manifest, 'parts': worstParts})).length +
+            1,
+      );
+      manifest['parts'] = [
+        for (var i = 0; i < partPlan.files.length; i++)
+          {'filename': partPlan.names[i], 'files': partPlan.files[i]},
+      ];
       final manifestFile = File(
         p.join(work.path, ArchiveIntegrity.manifestPath),
       );
@@ -374,17 +437,42 @@ class ArchiveRepository {
       hashes[ArchiveIntegrity.manifestPath] = await ArchiveZip.fileHash(
         manifestFile,
       );
-      final sums = File(p.join(work.path, ArchiveIntegrity.sumsPath));
-      await sums.writeAsString(ArchiveIntegrity.sums(hashes), flush: true);
-      files[ArchiveIntegrity.sumsPath] = sums;
-      await zipCodec.write(
-        partial,
-        files,
-        cancellation: token,
-        onProgress: onProgress,
-      );
-      await zipCodec.verify(
-        partial,
+      final partials = <File>[];
+      final finalZips = <File>[];
+      for (var i = 0; i < partPlan.files.length; i++) {
+        token.check();
+        final partFiles = {
+          for (final name in partPlan.files[i]) name: files[name]!,
+        };
+        if (i == 0) partFiles[ArchiveIntegrity.manifestPath] = manifestFile;
+        final sums = File(p.join(work.path, 'sums_$i.txt'));
+        await sums.writeAsString(
+          ArchiveIntegrity.sums({
+            for (final name in partFiles.keys) name: hashes[name]!,
+          }),
+          flush: true,
+        );
+        partFiles[ArchiveIntegrity.sumsPath] = sums;
+        final destination = File(
+          p.join(outputDirectory.path, partPlan.names[i]),
+        );
+        final partial = File('${destination.path}.partial');
+        pendingFiles.add(partial);
+        partials.add(partial);
+        finalZips.add(destination);
+        await zipCodec.write(
+          partial,
+          partFiles,
+          cancellation: token,
+          onProgress: onProgress,
+        );
+        if (plan.scope.maxPartBytes != null &&
+            await partial.length() > plan.scope.maxPartBytes!) {
+          throw ArchivePartSizeException(partPlan.files[i]);
+        }
+      }
+      await zipCodec.verifyParts(
+        partials,
         verify,
         freeBytes: await attachments.platform.availableBytes(
           outputDirectory.path,
@@ -393,15 +481,55 @@ class ArchiveRepository {
         onProgress: onProgress,
       );
       token.check();
-      final hash = await ArchiveZip.fileHash(partial);
-      await File('${sidecar.path}.partial')
-          .writeAsString('$hash  $base\n', flush: true);
+      final zipHashes = <String>[];
+      for (var i = 0; i < partials.length; i++) {
+        final hash = await ArchiveZip.fileHash(
+          partials[i],
+          cancellation: token,
+        );
+        zipHashes.add(hash);
+        final sidePartial = File('${finalZips[i].path}.sha256.partial');
+        pendingFiles.add(sidePartial);
+        await sidePartial.writeAsString(
+          '$hash  ${partPlan.names[i]}\n',
+          flush: true,
+        );
+      }
       token.check();
       ensureReadable();
-      await partial.rename(finalZip.path);
-      await File('${sidecar.path}.partial').rename(sidecar.path);
+      for (var i = 0; i < partials.length; i++) {
+        final zip = finalZips[i];
+        await partials[i].rename(zip.path);
+        publishedFiles.add(zip);
+        final sidecar = File('${zip.path}.sha256');
+        await File('${sidecar.path}.partial').rename(sidecar.path);
+        publishedFiles.add(sidecar);
+      }
+      final finalZip = finalZips.first;
+      final hash = zipHashes.first;
+      final partRecords = [
+        for (var i = 0; i < finalZips.length; i++)
+          {
+            'filename': p.basename(finalZips[i].path),
+            'byte_size': await finalZips[i].length(),
+            'sha256': zipHashes[i],
+          },
+      ];
+      File? partsIndex;
+      if (finalZips.length > 1) {
+        partsIndex = File('${finalZip.path}.parts.json');
+        final indexPartial = File('${partsIndex.path}.partial');
+        pendingFiles.add(indexPartial);
+        await indexPartial.writeAsString(
+          '${jsonEncode({'format': 'life-chronicle-archive-parts', 'format_version': '1.0', 'parts': partRecords})}\n',
+          flush: true,
+        );
+        await indexPartial.rename(partsIndex.path);
+        publishedFiles.add(partsIndex);
+      }
       final record = File(p.join(outputDirectory.path, 'latest.json'));
       final recordPartial = File('${record.path}.partial');
+      pendingFiles.add(recordPartial);
       await recordPartial.writeAsString(
         jsonEncode({
           'exported_at': date.toIso8601String(),
@@ -411,22 +539,31 @@ class ArchiveRepository {
           'sha256': hash,
           'verified': true,
           'counts': counts,
+          if (partsIndex != null) 'parts_index': partsIndex.path,
+          'parts': [
+            for (var i = 0; i < finalZips.length; i++)
+              {'path': finalZips[i].path, ...partRecords[i]},
+          ],
         }),
         flush: true,
       );
       await recordPartial.rename(record.path);
       completed = true;
-      return ArchiveExport(finalZip, sidecar, hash, counts);
+      return ArchiveExport(
+        finalZip,
+        File('${finalZip.path}.sha256'),
+        hash,
+        counts,
+        additionalZips: finalZips.skip(1).toList(),
+        additionalHashes: zipHashes.skip(1).toList(),
+        partsIndex: partsIndex,
+      );
     } finally {
       for (final dir in [work, verify]) {
         if (await dir.exists()) await dir.delete(recursive: true);
       }
-      if (await partial.exists()) await partial.delete();
-      final sidePartial = File('${sidecar.path}.partial');
-      if (await sidePartial.exists()) await sidePartial.delete();
-      if (!completed) {
-        if (await finalZip.exists()) await finalZip.delete();
-        if (await sidecar.exists()) await sidecar.delete();
+      for (final file in [...pendingFiles, if (!completed) ...publishedFiles]) {
+        if (await file.exists()) await file.delete();
       }
     }
   }

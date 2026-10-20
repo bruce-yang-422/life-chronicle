@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/archive/archive_integrity.dart';
+import '../../core/archive/archive_part_plan.dart';
 import '../../core/archive/archive_subject_policy.dart';
 import '../../core/time/time_format.dart';
 import '../../core/time/time_value.dart';
@@ -20,13 +21,16 @@ import '../attachments/attachment_import.dart';
 import '../security/security_dialogs.dart';
 import '../settings/time_display_settings.dart';
 
-final restoreFilePickerProvider = Provider<Future<File?> Function()>(
+final restoreFilePickerProvider = Provider<Future<List<File>> Function()>(
   (ref) => () async {
-    final selected = await FilePicker.pickFile(
+    final selected = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],
     );
-    return selected?.path == null ? null : File(selected!.path!);
+    return [
+      for (final file in selected)
+        if (file.path != null) File(file.path!),
+    ];
   },
 );
 
@@ -56,6 +60,9 @@ class _RestorePageState extends ConsumerState<RestorePage> {
 
   String _failure(Object error) {
     final l = AppLocalizations.of(context);
+    if (error is ArchiveMissingPartsException) {
+      return l.backupMissingParts(error.names.join('\n'));
+    }
     if (error is ArchiveSubjectException) {
       return error.reason == ArchiveSubjectFailure.differentSubject
           ? l.restoreDifferentSubject
@@ -83,8 +90,8 @@ class _RestorePageState extends ConsumerState<RestorePage> {
     });
     try {
       if (!await authorizePrivate(context) || !mounted) return;
-      final file = await ref.read(restoreFilePickerProvider)();
-      if (file == null || !mounted) return;
+      final files = await ref.read(restoreFilePickerProvider)();
+      if (files.isEmpty || !mounted) return;
       final restore = ArchiveRestore(
         await ref.read(archiveRepositoryProvider.future),
       );
@@ -93,8 +100,12 @@ class _RestorePageState extends ConsumerState<RestorePage> {
       final inspected = await withImportProgress<ArchiveRestorePlan>(
         context,
         token,
-        (progress) =>
-            restore.inspect(file, cancellation: token, onProgress: progress),
+        (progress) => restore.inspect(
+          files.first,
+          additionalParts: files.skip(1).toList(),
+          cancellation: token,
+          onProgress: progress,
+        ),
         title: AppLocalizations.of(context).backupProgress,
       );
       if (!mounted) {
@@ -111,7 +122,7 @@ class _RestorePageState extends ConsumerState<RestorePage> {
         _plan = inspected;
         _report = null;
         _choices.clear();
-        _filename = p.basename(file.path);
+        _filename = files.map((file) => p.basename(file.path)).join('\n');
         _excludedPrivate =
             (inspected.verified.manifest['scope'] as Map)['private_events']
                 as Map?;

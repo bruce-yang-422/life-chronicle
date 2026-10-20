@@ -34,8 +34,8 @@
 | 產生 drift 程式碼 | `dart run build_runner build --delete-conflicting-outputs` |
 | 程式碼檢查 | `flutter analyze` |
 | 執行測試 | `flutter test` |
-| 5,000 筆獨立效能測試 | `flutter run -d emulator-5554 -t tools/timeline_benchmark.dart` |
-| 在模擬器執行 | `flutter run -d emulator-5554` |
+| 5,000 筆獨立效能測試入口建置 | `flutter build apk --debug --target-platform android-x64 -t tools/timeline_benchmark.dart`；備份後保留資料安裝，測後恢復一般入口 |
+| 在模擬器執行 | `adb install -r build/app/outputs/flutter-apk/app-debug.apk` 成功後開啟 APP；連線偵錯使用 `flutter attach -d emulator-5554` |
 | 檢查 Markdown 文件 | `cd tools/plan_doc && npm install && npm run check` |
 | 由企劃書 `.md` 產生 HTML | `cd tools/plan_doc && npm run build` |
 
@@ -136,17 +136,24 @@ test/                    # 與 lib/ 對應的測試結構
 
 | 任務 | 剩餘內容 |
 | --- | --- |
-| T12 匯出 | 獨立分包、>4GB ZIP64 實際往返、裝置分享、macOS／Android 外部解壓閱讀與跨裝置核對。整筆私密事件排除（含私密快照／專屬媒體）、個別媒體副本排除及一般封存的 Windows 離線閱讀驗證已完成；大型／分包跨系統與跨實體裝置仍待驗證。 |
-| T13 還原 | 損毀包僅還原完好部分、其餘版本／分包相容性、大型媒體裝置取消、跨實體裝置完整還原。v1→v2 主題規則遷移、同名標籤 ID 重連、較新次版本提示及共享同名衝突逐筆決策已實作，不重列為未實作。 |
+| T12 匯出 | 分享至外部目的地的完整落地驗證、macOS／Android 外部解壓閱讀與跨實體裝置核對。獨立分包、>4 GiB ZIP64 正式匯出／還原、Windows 獨立校驗、Android 分包選取／還原及分享面板已完成；私密／個別媒體排除維持完成。 |
+| T13 還原 | 損毀包僅還原完好部分、其餘版本相容性、大型媒體裝置取消、跨實體裝置完整還原。完整分包組合還原／缺包拒絕與 Windows >4 GiB 正式還原已完成；v1→v2 主題規則遷移、同名標籤 ID 重連、較新次版本提示及共享同名衝突逐筆決策已實作，不重列為未實作。 |
 | T14 版面／無障礙 | 全頁面最大字級、螢幕閱讀器與 48dp 逐項稽核、裝置旋轉／分割畫面；320dp 三倍字級裝置流程曾被模擬器繪圖崩潰中斷。iOS 視覺與縮小一階已完成。 |
 | T15 整體驗收 | 38 條驗收報告、中階 Android 實機、首次使用者不看教學、100 筆事件的完整裝置備份還原流程。資料層往返測試不能代替實機。 |
 | T17 GPS | Android 成功定位／逾時／離線／EXIF／地圖拖曳操作、座標驗證與私密保護、圖資連網範圍稽核；本輪取消／重試／離頁競態與錯誤恢復已補，裝置拒絕權限提示已確認。iOS 原生實作屬後續平台工作。 |
 | T18 最近刪除 | 標題快照與私密遮蔽、照片／追憶 Repository 回歸已完成；仍須裝置操作完整刪除、復原、永久刪除及參照／照片／追憶組合案例。 |
 | T19 安全性 | 全內容與參照隱私／權限稽核、復原碼與遺族密碼裝置驗收；iOS Keychain／Face ID 與預覽保護屬後續平台工作。 |
 
-本表不含已提前完成的第二階段智慧主題 T20；連同 T20 共 21 項追蹤任務、14 項完成。主介面五個分頁已無啟用中的「此功能開發中」佔位頁。下一個主要實作缺口為 T12 的獨立分包／ZIP64，及 T13 損毀包的完好部分還原；T15 實機與首次使用者驗收不能由本機測試取代。
+本表不含已提前完成的第二階段智慧主題 T20；連同 T20 共 21 項追蹤任務、14 項完成。主介面五個分頁已無啟用中的「此功能開發中」佔位頁。下一個主要實作缺口為 T13 損毀包的完好部分還原；T12 尚須完成外部分享落地及其他平台／實體裝置驗收；T15 實機與首次使用者驗收不能由本機測試取代。
 
 #### 實作與驗證紀錄（新到舊）
+
+- **一般預覽安裝修復（2026-10-20）**：最終一般 APK 更新曾遇模擬器空間不足，Android 系統快取回收不足以解決；改建 x64 精簡 APK 後成功。Flutter 的 ABI 分包曾自動將版本碼加為 4001，已以 Gradle 明確指定 `-Psplit-per-abi=true -Pforce-version-code-ignoring-abi=true` 重建，`aapt` 核對為 1 後以保留資料的 `adb install -r -d` 恢復，已驗證裝置實際版本碼 1。僅以環境變數傳遞該 Gradle 旗標未奏效，後續精簡建置須明確傳參並核對版本碼。一般入口精簡產物為 `build/app/outputs/flutter-apk/app-x86_64-debug.apk`（約 84.3 MB），日誌為 `build/split_archive_compact_version1_build.log`；原有業務表、媒體、草稿及既有備份雜湊均一致。預覽更新先備份、只用保留資料安裝，失敗停止；曾觀察到 `flutter run` 自動重新安裝造成資料遺失，常用指令已改為安全流程。
+
+- **T12 獨立 ZIP 分包與 T13 完整組合還原（2026-10-20）**：依 §8.5 新增每包 1 GiB／2 GiB／4,000 MiB 上限選擇，預設單一 ZIP64；媒體整檔分配，不切碎單一附件。第一包保存全部文字／JSON／Schema／完整 manifest，其餘包只含媒體及各自的 `SHA256SUMS.txt`，命名為 `_part01-of-02.zip`。每包預留文字膨脹／ZIP64 標頭／校驗清單預算，完成後再核對實際長度；首包文字或單檔太大時明示調高上限／排除附件／取消分包，失敗與取消清理整組暫存並保留前次備份。所有分包完整校驗後才發布並登錄最近備份；每包另有外部 `.sha256`，整組另附 `.parts.json`，以可攜的相對檔名記錄各包位元組大小及 SHA-256，分享時一併帶出。未新增套件或改變資料庫／封存資料表格式。
+- **分包安全與介面驗證（2026-10-20）**：匯入及驗證可多選 ZIP，順序不限；檢查包名與 manifest 分配、重複／跨包衝突、媒體路徑／符號連結／壓縮方式／容量、各包 SHA 及第一包的完整檔案雜湊。僅選第一包時明示缺少包名、不寫資料；分包內自行重算 SHA 的偽造媒體仍被全包 manifest 拒絕。分享及最近備份重新載入涵蓋全部 ZIP／旁檔。最終完整 **373 項測試全數通過**、分析無問題；四種既有範圍的獨立 Schema／CommonMark／HTML 核對 **352 項通過**。日誌為 `build/split_archive_full_final.log`、`split_archive_repository.log`、`split_archive_analyze_final.log`、`split_archive_schema_validation.log`。核心配置、正式往返、缺包／重複包／偽造媒體、過小上限、取消與舊備份保留均有測試。
+- **ZIP64 真實大型往返（2026-10-20）**：新增明確執行的 `tools/archive_zip64/export_test.dart`，以工作區內 **4,295,032,832 bytes（4 GiB＋64 KiB）** 的檔案經正式 Repository 匯出、重新解壓校驗、匯入與完整還原；來源／封存內／還原副本 SHA-256 一致，來源資料未變，還原完整性 `ok`、外鍵錯誤 0。大型驗收單項通過，耗時約 5 分 29 秒，與一般 373 項分開統計。Python 獨立串流核對整包 CRC 與媒體 SHA，確認 ZIP64 EOCD／locator、Store 方式及 UTF-8 旗標。證據為 `build/zip64_acceptance.log`、`build/zip64_acceptance/report.json`、`independent_report.json`；重現指令為 `flutter test tools/archive_zip64/export_test.dart --timeout 30m`。大型測試檔只在電腦的忽略目錄 build，未放入模擬器；此結果不替代中階 Android／macOS／跨實體裝置的大型驗收。
+- **分包 Android 操作與資料核對（2026-10-20）**：`tools/split_archive_acceptance.dart` 使用獨立 SQLite／媒體／草稿／備份／記憶體偏好，僅驗收入口提供 512 KiB 小型上限。實際匯出 2 包（273,587／492,273 bytes），每包獨立解壓與 SHA 清單一致，合併閱讀版通過 31 項核對。裝置先驗證缺包提示，再反向多選兩包、確認還原並顯示 0 新增／0 替換／30 略過與 3 附件；後續補齊外部索引並核對各包實際大小／SHA，最終系統分享面板確認帶出 5 個檔案（2 ZIP＋2 校驗旁檔＋1 分包索引），未傳送給他人或外部服務。測試下載檔已移除，保留資料裝回一般入口，預覽停在備份範圍；20 張業務表（含修訂紀錄）、50 事件／100 段落／5 附件引用、7 份媒體及草稿完全一致，完整性 `ok`、外鍵錯誤 0。報告為 `build/split_archive_device_report.json`、`split_archive_preservation_report.json`，畫面為 `build/demo_archive_validation/split_archive_selected.png`、`split_archive_missing.png`、`split_archive_multi_select.png`、`split_archive_restore_all.png`、`split_archive_restore_report.png`、`split_archive_index_share.png`、`split_archive_normal_preview.png`。T12／T13 仍保留上表未完成驗收。
 
 - **T12 私密事件排除（2026-10-20，使用者同意第一個方案）**：備份範圍新增可見勾選，匯出副本過濾私密事件、所有層的記述／追憶／附件引用、事件對照／篇章引用／雙向關聯及相關修訂；移除私密標題快照，保留相對參照 ID、最後排序區間、保留列的作者／層級／時間。共用副本與未引用倉庫副本保留，私密專屬 blob／媒體排除；人物／地點／標籤等獨立資料仍保留並在介面說明。來源資料不回寫；無可用參照時以「參照事件未提供」顯示，避免誤判為已刪除。企劃書 §4.1／§5.1／§8.6 與 HTML 已同步，未新增套件或修改資料庫 schema。
 - **私密封存／還原驗證（2026-10-20）**：啟用排除時使用格式 1.2／schema 2，manifest 只記規則與排除總數，不列私密標題、檔名、ID 或雜湊；未啟用保持 1.1。還原預覽及報告明示刻意排除，不重建空白事件；較新次版本提示門檻更新。新增純 Dart 過濾、範圍組合、UI 專屬副本停用／共用保留、私密快照、原始／追憶內容、正式 ZIP 往返與還原預覽測試。最終完整 **366 項測試通過**、分析無問題，四種範圍的獨立 Schema／CommonMark／HTML 核對 **352 項通過**。日誌為 `build/private_export_full_final.log`、`private_export_analyze_final.log`、`private_export_schema_validation.log`，驗收／一般入口 APK 均建置成功。

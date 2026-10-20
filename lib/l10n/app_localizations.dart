@@ -2240,6 +2240,54 @@ abstract class AppLocalizations {
   /// **'這是舊版手動篇章。設定標籤條件並儲存後，會改為智慧主題；原事件保留。'**
   String get themesLegacy;
 
+  /// No description provided for @backupSplit.
+  ///
+  /// In zh, this message translates to:
+  /// **'分包方式'**
+  String get backupSplit;
+
+  /// No description provided for @backupNoSplit.
+  ///
+  /// In zh, this message translates to:
+  /// **'單一 ZIP（支援 ZIP64）'**
+  String get backupNoSplit;
+
+  /// No description provided for @backupPartLimit.
+  ///
+  /// In zh, this message translates to:
+  /// **'每包最多 {size}'**
+  String backupPartLimit(String size);
+
+  /// No description provided for @backupSplitNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'每個分包可獨立解壓。還原時請一次選取全部 ZIP；閱讀時請解壓到同一資料夾。單一附件不會切碎，超過上限時請調高上限或取消分包。'**
+  String get backupSplitNotice;
+
+  /// No description provided for @backupPartTooSmall.
+  ///
+  /// In zh, this message translates to:
+  /// **'單一附件或第一包的文字資料超過分包上限。請調高每包上限、排除過大的附件，或改用單一 ZIP。'**
+  String get backupPartTooSmall;
+
+  /// No description provided for @backupMissingParts.
+  ///
+  /// In zh, this message translates to:
+  /// **'分包不完整，尚缺：\n{names}\n請一次選取同一備份的全部 ZIP。原有資料未變更。'**
+  String backupMissingParts(String names);
+
+  /// No description provided for @backupPartCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'共 {count} 個 ZIP 分包；分享包含全部分包、校驗旁檔與大小／雜湊索引。'**
+  String backupPartCount(int count);
+
+  /// No description provided for @backupSplitReadme.
+  ///
+  /// In zh, this message translates to:
+  /// **'\n## 分包使用方式\n\n若此備份包含多個 ZIP，每包都可獨立解壓；第一包包含全部文字、JSON 與 manifest，其餘包包含媒體。請保留全部 ZIP 與各自的 .sha256 旁檔；.parts.json 索引另記錄各包檔名、位元組大小與 SHA-256。離線閱讀時將各包解壓到同一資料夾，各包的 SHA256SUMS.txt 請分別驗證。APP 還原或驗證時一次選取全部 ZIP，順序不限；缺包時不會寫入資料。\n'**
+  String get backupSplitReadme;
+
   /// No description provided for @backupExcludePrivate.
   ///
   /// In zh, this message translates to:

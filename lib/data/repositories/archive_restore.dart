@@ -131,6 +131,7 @@ class ArchiveRestore {
 
   Future<ArchiveRestorePlan> inspect(
     File zip, {
+    List<File> additionalParts = const [],
     required ImportCancellation cancellation,
     void Function(int done, int total)? onProgress,
   }) async {
@@ -143,8 +144,8 @@ class ArchiveRestore {
       ),
     );
     try {
-      final verified = await repository.zipCodec.verify(
-        zip,
+      final verified = await repository.zipCodec.verifyParts(
+        [zip, ...additionalParts],
         staging,
         freeBytes: await repository.attachments.platform.availableBytes(
           repository.outputDirectory.path,

@@ -12,6 +12,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/archive/archive_integrity.dart';
 import '../../core/archive/archive_reading.dart';
+import '../../core/archive/archive_part_plan.dart';
 import '../../core/archive/archive_media_scope.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/archive_repository.dart';
@@ -58,6 +59,20 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           jsonDecode(await record.readAsString()) as Map<String, dynamic>;
       final zip = File(row['path'] as String);
       final sidecar = File('${zip.path}.sha256');
+      final parts = (row['parts'] as List?)?.cast<Map>() ?? [];
+      final partsIndex = row['parts_index'] == null
+          ? null
+          : File(row['parts_index'] as String);
+      if (partsIndex != null && !await partsIndex.exists()) return;
+      final other = [
+        for (final item in parts.skip(1)) File(item['path'] as String),
+      ];
+      for (final file in other) {
+        if (!await file.exists() ||
+            !await File('${file.path}.sha256').exists()) {
+          return;
+        }
+      }
       if (mounted &&
           row['verified'] == true &&
           await zip.exists() &&
@@ -68,6 +83,11 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             sidecar,
             row['sha256'] as String,
             Map<String, int>.from(row['counts'] as Map),
+            additionalZips: other,
+            partsIndex: partsIndex,
+            additionalHashes: [
+              for (final item in parts.skip(1)) item['sha256'] as String,
+            ],
           ),
         );
       }
@@ -79,6 +99,21 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   void _failure(Object error) {
     if (!mounted || error is ImportCancelled) return;
     final l = AppLocalizations.of(context);
+    if (error is ArchivePartSizeException ||
+        error is ArchiveMissingPartsException) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error is ArchivePartSizeException
+                ? l.backupPartTooSmall
+                : l.backupMissingParts(
+                    (error as ArchiveMissingPartsException).names.join('\n'),
+                  ),
+          ),
+        ),
+      );
+      return;
+    }
     final detail = error is ArchiveIntegrityException
         ? error.paths.join('\n')
         : '';
@@ -111,6 +146,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       final plan = await repository.prepare(
         includeMedia: chosen.includeMedia,
         excludePrivateEvents: chosen.excludePrivateEvents,
+        maxPartBytes: chosen.maxPartBytes,
         excludedBlobIds: chosen.excludedBlobIds,
       );
       if (!mounted) return;
@@ -123,6 +159,8 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (plan.scope.maxPartBytes != null)
+                Text(l.backupPartLimit(formatBytes(plan.scope.maxPartBytes!))),
               if (plan.privacyFilter != null)
                 Text(
                   l.backupPrivateExcluded(
@@ -223,7 +261,11 @@ class _BackupPageState extends ConsumerState<BackupPage> {
         (progress) => repository.export(
           plan,
           reading,
-          readme: AppLocalizationsZh().backupReadme,
+          readme:
+              AppLocalizationsZh().backupReadme +
+              (plan.scope.maxPartBytes == null
+                  ? ''
+                  : AppLocalizationsZh().backupSplitReadme),
           appVersion: '1.0.0+1',
           cancellation: token,
           onProgress: progress,
@@ -243,11 +285,15 @@ class _BackupPageState extends ConsumerState<BackupPage> {
   }
 
   Future<void> _verify() async {
-    final selected = await FilePicker.pickFile(
+    final selected = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['zip'],
     );
-    if (selected?.path == null || !mounted) return;
+    if (selected.isEmpty ||
+        selected.any((file) => file.path == null) ||
+        !mounted) {
+      return;
+    }
     setState(() => _busy = true);
     Directory? staging;
     try {
@@ -263,8 +309,8 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       await withImportProgress(
         context,
         token,
-        (progress) async => repository.zipCodec.verify(
-          File(selected!.path!),
+        (progress) async => repository.zipCodec.verifyParts(
+          [for (final file in selected) File(file.path!)],
           staging!,
           freeBytes: await repository.attachments.platform.availableBytes(
             repository.outputDirectory.path,
@@ -364,6 +410,8 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                     ),
                     const SizedBox(height: 8),
                     SelectableText(p.basename(_last!.zip.path)),
+                    if (_last!.additionalZips.isNotEmpty)
+                      Text(l.backupPartCount(_last!.zips.length)),
                     const SizedBox(height: 8),
                     SelectableText(
                       _last!.hash,
@@ -377,14 +425,15 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                                 await SharePlus.instance.share(
                                   ShareParams(
                                     files: [
-                                      XFile(
-                                        _last!.zip.path,
-                                        mimeType: 'application/zip',
-                                      ),
-                                      XFile(
-                                        _last!.sidecar.path,
-                                        mimeType: 'text/plain',
-                                      ),
+                                      for (final file in _last!.shareFiles)
+                                        XFile(
+                                          file.path,
+                                          mimeType: file.path.endsWith('.zip')
+                                              ? 'application/zip'
+                                              : file.path.endsWith('.json')
+                                              ? 'application/json'
+                                              : 'text/plain',
+                                        ),
                                     ],
                                     sharePositionOrigin:
                                         context.findRenderObject() is RenderBox

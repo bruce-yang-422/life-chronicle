@@ -3,11 +3,13 @@ class ArchiveMediaScope {
   ArchiveMediaScope({
     this.includeMedia = true,
     this.excludePrivateEvents = false,
+    this.maxPartBytes,
     Set<String> excludedBlobIds = const {},
   }) : excludedBlobIds = Set.unmodifiable(excludedBlobIds);
 
   final bool includeMedia;
   final bool excludePrivateEvents;
+  final int? maxPartBytes;
   final Set<String> excludedBlobIds;
 
   String get type => excludePrivateEvents

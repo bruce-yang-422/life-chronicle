@@ -60,6 +60,7 @@ void main() {
   Future<void> pump(
     WidgetTester tester, {
     File? selected,
+    List<File>? parts,
     bool cancelPicker = false,
     String locale = 'zh',
   }) async {
@@ -74,7 +75,7 @@ void main() {
           appDatabaseProvider.overrideWithValue(h.db),
           archiveRepositoryProvider.overrideWith((ref) async => repository),
           restoreFilePickerProvider.overrideWithValue(
-            () async => cancelPicker ? null : selected ?? zip,
+            () async => cancelPicker ? [] : parts ?? [selected ?? zip],
           ),
         ],
         child: MaterialApp(
@@ -324,6 +325,42 @@ void main() {
     expect(find.textContaining('Archive processing failed'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Confirm restore'), findsNothing);
     expect((await tester.runAsync(() => h.events().find(id)))!.title, '目前標題');
+    await unmount(tester);
+  });
+
+  testWidgets('多包反向選取可預覽，僅選第一包顯示缺包且不寫入', (tester) async {
+    late List<File> parts;
+    await tester.runAsync(() async {
+      for (var i = 0; i < 2; i++) {
+        final file = File('${root.path}/part_$i.mp4');
+        await file.writeAsBytes(List.filled(600 * 1024, i + 1));
+        await repository.attachments.importBatch(
+          await repository.attachments.prepare([
+            AttachmentSource(file.path, 'clip_$i.mp4'),
+          ]),
+          eventId: id,
+        );
+      }
+      parts = (await repository.export(
+        await repository.prepare(maxPartBytes: 1024 * 1024),
+        reading,
+        readme: '# Archive\n',
+        appVersion: '1.0.0',
+      )).zips;
+      expect(parts.length, greaterThan(1));
+    });
+    final before = await tester.runAsync(() async => repository.snapshot());
+    await pump(tester, parts: parts.reversed.toList());
+    await select(tester);
+    expect(find.text('還原預覽'), findsOneWidget);
+    await unmount(tester);
+    await pump(tester, parts: [parts.first]);
+    await select(tester);
+    expect(find.textContaining('分包不完整，尚缺：'), findsOneWidget);
+    expect(find.text('確認還原'), findsNothing);
+    await tester.runAsync(
+      () async => expect(await repository.snapshot(), before),
+    );
     await unmount(tester);
   });
 

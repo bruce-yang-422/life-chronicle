@@ -1366,6 +1366,39 @@ class AppLocalizationsEn extends AppLocalizations {
       'This is a legacy manual story. Saving tag conditions converts it to a smart topic and keeps the original entries.';
 
   @override
+  String get backupSplit => 'Archive parts';
+
+  @override
+  String get backupNoSplit => 'Single ZIP (ZIP64 supported)';
+
+  @override
+  String backupPartLimit(String size) {
+    return 'At most $size per part';
+  }
+
+  @override
+  String get backupSplitNotice =>
+      'Each part is an independent ZIP. Select all ZIPs together to restore; extract them into the same folder to read. Attachments stay whole. Increase the limit or use a single ZIP if one attachment is too large.';
+
+  @override
+  String get backupPartTooSmall =>
+      'An attachment or the first part\'s text exceeds the part limit. Increase the limit, exclude oversized attachments, or use a single ZIP.';
+
+  @override
+  String backupMissingParts(String names) {
+    return 'Incomplete archive. Missing:\n$names\nSelect all ZIPs from the same backup together. Existing data is unchanged.';
+  }
+
+  @override
+  String backupPartCount(int count) {
+    return '$count ZIP parts. Sharing includes all parts, checksum sidecars and a size/hash index.';
+  }
+
+  @override
+  String get backupSplitReadme =>
+      '\n## Using archive parts\n\nEach part is an independent ZIP. The first holds all text, JSON and the manifest; later parts hold media. Keep every ZIP and its .sha256 sidecar. The .parts.json index records each filename, byte size and SHA-256. Extract all parts into the same folder for offline reading, verifying each part\'s SHA256SUMS.txt separately. Select all ZIPs together, in any order, to restore or verify in the app. Missing parts prevent any database writes.\n';
+
+  @override
   String get backupExcludePrivate => 'Exclude private entries';
 
   @override
