@@ -11,27 +11,31 @@ class TimelineMasthead extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
+    final largeText = MediaQuery.textScalerOf(context).scale(14) > 21;
     return SizedBox(
       width: double.infinity,
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+            padding: const EdgeInsets.fromLTRB(16, 12, 48, 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.appTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: largeText
+                      ? Theme.of(context).textTheme.titleLarge
+                      : Theme.of(context).textTheme.headlineLarge,
                 ),
-                if (l10n.appTitle != l10n.timelineBrandEnglish) ...[
+                if (!largeText &&
+                    l10n.appTitle != l10n.timelineBrandEnglish) ...[
                   const SizedBox(height: 3),
                   Text(
                     l10n.timelineBrandEnglish,
                     style: TextStyle(
-                      fontSize: 10,
-                      letterSpacing: 3.2,
+                      fontSize: 11,
+                      letterSpacing: .2,
                       color: colors.onSurfaceVariant,
                     ),
                   ),

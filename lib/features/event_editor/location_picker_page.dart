@@ -146,7 +146,7 @@ class _LocationPickerPageState extends ConsumerState<LocationPickerPage> {
               flex: 0,
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,

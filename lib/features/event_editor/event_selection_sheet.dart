@@ -10,6 +10,7 @@ Future<List<String>?> chooseEvents(
   List<String> selected = const [],
   String? excludeId,
   bool multiple = true,
+  String? confirmLabel,
 }) => showModalBottomSheet<List<String>>(
   context: context,
   isScrollControlled: true,
@@ -17,6 +18,7 @@ Future<List<String>?> chooseEvents(
     selected: selected,
     excludeId: excludeId,
     multiple: multiple,
+    confirmLabel: confirmLabel,
   ),
 );
 
@@ -25,10 +27,12 @@ class _EventSelection extends ConsumerStatefulWidget {
     required this.selected,
     required this.multiple,
     this.excludeId,
+    this.confirmLabel,
   });
   final List<String> selected;
   final String? excludeId;
   final bool multiple;
+  final String? confirmLabel;
   @override
   ConsumerState<_EventSelection> createState() => _EventSelectionState();
 }
@@ -45,7 +49,7 @@ class _EventSelectionState extends ConsumerState<_EventSelection> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: TextField(
                 decoration: InputDecoration(labelText: l.searchQuery),
                 onChanged: (value) =>
@@ -105,10 +109,10 @@ class _EventSelectionState extends ConsumerState<_EventSelection> {
                   ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: FilledButton(
                 onPressed: () => Navigator.pop(context, _selected.toList()),
-                child: Text(l.editorRelated),
+                child: Text(widget.confirmLabel ?? l.editorRelated),
               ),
             ),
           ],

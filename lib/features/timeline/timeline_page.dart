@@ -57,7 +57,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
   }
 
   double get _rowExtent =>
-      (_cards ? 184 : 80) * MediaQuery.textScalerOf(context).scale(14) / 14;
+      (_cards ? 160 : 72) * MediaQuery.textScalerOf(context).scale(14) / 14;
   bool _cards = false;
   bool _preferencesLoaded = false;
   final _collapsed = <int?>{};
@@ -318,7 +318,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Text(
                     l10n.timelineChooseYear,
                     style: Theme.of(context).textTheme.titleLarge,
@@ -403,6 +403,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
                   width: 125,
                   child: TextButton.icon(
                     style: TextButton.styleFrom(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      iconSize: 20,
                       backgroundColor: Theme.of(context).colorScheme.primary
                           .withValues(alpha: .08),
                     ),
@@ -691,6 +697,9 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
       side: BorderSide(color: colors.outlineVariant.withValues(alpha: .75)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       minimumSize: const Size(48, 48),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+      iconSize: 20,
     );
   }
 
@@ -738,7 +747,13 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
       relatedEventTitle: time is RelativeTime
           ? data.deletedReferenceIds.contains(time.eventId)
                 ? l10n.recycleDeletedTitle(data.referenceTitles[time.eventId]!)
-                : data.referenceTitles[time.eventId]
+                : data.referenceTitles[time.eventId] ??
+                      L10nTimeTexts(l10n).deletedReferenceTitle(
+                        time,
+                        canReadPrivate: ref
+                            .watch(securityProvider)
+                            .canReadPrivate,
+                      )
           : null,
     );
     final preview = privacyLocked
@@ -766,7 +781,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
           );
     final contents = _cards
         ? Card(
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
@@ -829,11 +844,11 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
             ),
           )
         : Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outlineVariant
                     .withValues(alpha: .35),
@@ -849,7 +864,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
             child: Row(
               children: [
                 SizedBox(
-                  width: 76,
+                  width: 68,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -859,7 +874,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           height: 1.4,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -985,13 +1000,13 @@ class _TimelineThumbnailState extends State<_TimelineThumbnail> {
   @override
   Widget build(BuildContext context) => Image(
     image: _image,
-    width: 80,
-    height: 80,
+    width: 64,
+    height: 64,
     fit: BoxFit.cover,
     semanticLabel: widget.label,
     errorBuilder: (context, error, stack) => const SizedBox(
-      width: 80,
-      height: 80,
+      width: 64,
+      height: 64,
       child: Icon(Icons.image_not_supported_outlined),
     ),
   );
@@ -1019,7 +1034,7 @@ class _YearHeader extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) => SizedBox.expand(
     child: Material(
-      color: Theme.of(context).colorScheme.surfaceContainer,
+      color: Theme.of(context).colorScheme.surface,
       child: InkWell(
         onTap: onTap,
         child: Semantics(

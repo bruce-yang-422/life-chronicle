@@ -33,7 +33,7 @@ class _TimelineFilterSheetState extends ConsumerState<TimelineFilterSheet> {
             ),
           ),
           data: (options) => ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             children: [
               Text(
                 l10n.timelineFilter,

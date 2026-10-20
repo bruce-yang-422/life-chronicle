@@ -42,6 +42,7 @@ final labels = {
     'narrative',
     'deletedReference',
     'periods',
+    'stories',
   ])
     name: name,
 };
@@ -120,6 +121,68 @@ void main() {
       labels,
       L10nTimeTexts(AppLocalizationsEn()),
       timestampFormat: (time) => 'display:${time.toUtc().toIso8601String()}',
+    );
+  });
+
+  test('篇章閱讀版依使用者順序連結原事件，區分追憶並跳脫標題', () {
+    data['events']!.add(event(2));
+    data['stories'] = [
+      for (final layer in ['original', 'remembrance'])
+        {
+          'story_id': id(layer == 'original' ? 30 : 31),
+          'title': '<Story> *title*',
+          'layer': layer,
+          'author_id': id(91),
+          'created_at': stamp,
+        },
+    ];
+    data['story_events'] = [
+      {'story_id': id(30), 'event_id': id(1), 'position': 1},
+      {'story_id': id(30), 'event_id': id(2), 'position': 0},
+      {'story_id': id(31), 'event_id': id(1), 'position': 0},
+    ];
+    final files = reading.generate(data);
+    final original = 'markdown/stories/${id(30)}.md';
+    final memory = 'markdown/remembrance/story_${id(31)}.md';
+    expect(files, contains(original));
+    expect(files, contains(memory));
+    expect(
+      files[original]!.indexOf('event \\<2'),
+      lessThan(files[original]!.indexOf('event \\<1')),
+    );
+    expect(files['index.html'], contains('&lt;Story&gt; *title*'));
+    expect(files['index.html'], isNot(contains('<Story>')));
+    for (final path in [original, memory]) {
+      for (final match in RegExp(r'\]\(([^)]+)\)').allMatches(files[path]!)) {
+        final target = p.posix.normalize(
+          p.posix.join(p.posix.dirname(path), match[1]!),
+        );
+        expect(files, contains(target));
+      }
+    }
+    expect(
+      files.keys.where((k) => k.startsWith('markdown/events/')),
+      hasLength(2),
+    );
+  });
+
+  test('原事件完整移除後閱讀版使用標題快照並跳脫內容', () {
+    data['events']!.single['time_payload'] = jsonEncode(
+      RelativeTime(
+        id(99),
+        RelativeRelation.after,
+        deletedReference: const DeletedTimeReference('<原標題>', private: true),
+      ).toJson(),
+    );
+    final files = reading.generate(data);
+    expect(files['index.html'], contains('&lt;原標題&gt; (deletedReference)'));
+    expect(files['index.html'], isNot(contains('<原標題>')));
+    expect(
+      files.entries
+          .where((e) => e.key.startsWith('markdown/'))
+          .map((e) => e.value)
+          .join(),
+      contains('deletedReference'),
     );
   });
 

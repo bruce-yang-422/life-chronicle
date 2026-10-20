@@ -1,3 +1,5 @@
+import '../shared/ios_group.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -143,7 +145,7 @@ class _SecurityPageState extends ConsumerState<SecurityPage> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           children: [
             if (!service.configured) ...[
               Text(l.securityConsequences),
@@ -155,48 +157,60 @@ class _SecurityPageState extends ConsumerState<SecurityPage> {
                 decoration: InputDecoration(labelText: l.securityAppPassword),
               ),
             ],
-            SwitchListTile(
-              value: appLock,
-              onChanged: busy ? null : (v) => setState(() => appLock = v),
-              title: Text(l.securityAppLock),
-            ),
-            SwitchListTile(
-              value: privateProtection,
-              onChanged: busy
-                  ? null
-                  : (v) => setState(() => privateProtection = v),
-              title: Text(l.securityProtectPrivate),
-            ),
-            if (privateProtection)
-              SwitchListTile(
-                value: passwordOnly,
-                onChanged: busy
-                    ? null
-                    : (v) => setState(() => passwordOnly = v),
-                title: Text(l.securityPasswordOnly),
-              ),
-            SwitchListTile(
-              value: hidePreview,
-              onChanged: busy ? null : (v) => setState(() => hidePreview = v),
-              title: Text(l.securityHidePreview),
-            ),
-            DropdownButtonFormField<int>(
-              initialValue: timeout,
-              decoration: InputDecoration(labelText: l.securityTimeout),
-              items: [
-                DropdownMenuItem(value: 0, child: Text(l.securityImmediate)),
-                DropdownMenuItem(value: 60, child: Text(l.securityMinute)),
-                DropdownMenuItem(
-                  value: 300,
-                  child: Text(l.securityFiveMinutes),
+            const SizedBox(height: 16),
+            IosGroup(
+              children: [
+                SwitchListTile.adaptive(
+                  value: appLock,
+                  onChanged: busy ? null : (v) => setState(() => appLock = v),
+                  title: Text(l.securityAppLock),
+                ),
+                SwitchListTile.adaptive(
+                  value: privateProtection,
+                  onChanged: busy
+                      ? null
+                      : (v) => setState(() => privateProtection = v),
+                  title: Text(l.securityProtectPrivate),
+                ),
+                if (privateProtection)
+                  SwitchListTile.adaptive(
+                    value: passwordOnly,
+                    onChanged: busy
+                        ? null
+                        : (v) => setState(() => passwordOnly = v),
+                    title: Text(l.securityPasswordOnly),
+                  ),
+                SwitchListTile.adaptive(
+                  value: hidePreview,
+                  onChanged: busy
+                      ? null
+                      : (v) => setState(() => hidePreview = v),
+                  title: Text(l.securityHidePreview),
+                ),
+                DropdownButtonFormField<int>(
+                  initialValue: timeout,
+                  decoration: InputDecoration(labelText: l.securityTimeout),
+                  items: [
+                    DropdownMenuItem(
+                      value: 0,
+                      child: Text(l.securityImmediate),
+                    ),
+                    DropdownMenuItem(value: 60, child: Text(l.securityMinute)),
+                    DropdownMenuItem(
+                      value: 300,
+                      child: Text(l.securityFiveMinutes),
+                    ),
+                  ],
+                  onChanged: busy ? null : (v) => setState(() => timeout = v!),
+                ),
+                SwitchListTile.adaptive(
+                  value: familyPrivate,
+                  onChanged: busy
+                      ? null
+                      : (v) => setState(() => familyPrivate = v),
+                  title: Text(l.securityFamilyPrivate),
                 ),
               ],
-              onChanged: busy ? null : (v) => setState(() => timeout = v!),
-            ),
-            SwitchListTile(
-              value: familyPrivate,
-              onChanged: busy ? null : (v) => setState(() => familyPrivate = v),
-              title: Text(l.securityFamilyPrivate),
             ),
             FilledButton(
               onPressed: busy ? null : _save,

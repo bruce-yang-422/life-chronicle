@@ -6,6 +6,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:life_chronicle/core/archive/archive_integrity.dart';
+import 'package:life_chronicle/core/archive/commonmark_writer.dart';
 import 'package:life_chronicle/core/archive/archive_reading.dart';
 import 'package:life_chronicle/core/archive/archive_subject_policy.dart';
 import 'package:life_chronicle/core/editor/event_draft.dart';
@@ -26,6 +27,9 @@ import 'package:life_chronicle/l10n/app_localizations_en.dart';
 import 'package:life_chronicle/l10n/l10n_time_texts.dart';
 
 import 'harness.dart';
+
+import 'package:life_chronicle/data/repositories/story_repository.dart';
+import 'package:life_chronicle/core/stories/theme_rule.dart';
 
 class ArchiveTestPlatform implements AttachmentPlatform {
   int free = 1 << 40;
@@ -88,6 +92,11 @@ final reading = ArchiveReading({
     'narrative',
     'deletedReference',
     'periods',
+    'stories',
+    'themeAll',
+    'themeAny',
+    'themeExclude',
+    'themeMissing',
   ])
     key: key,
 }, L10nTimeTexts(AppLocalizationsEn()));
@@ -129,6 +138,291 @@ void main() {
         appVersion: '1.0.0',
       );
 
+  test('篇章與引用順序透過正式 ZIP 還原，不複製事件且含閱讀版', () async {
+    final a = await h.events().create(
+      EventInput(title: '事件甲', time: YearTime(2003)),
+    );
+    final b = await h.events().create(
+      EventInput(title: '事件乙', time: YearTime(2004)),
+    );
+    final id = await StoryRepository(h.context())
+        .save(title: '大學生活', eventIds: [b, a]);
+    await EventContentRepository(h.context()).save(
+      EventDraft(eventId: a, title: '事件甲', time: YearTime(2003), tags: ['旅行']),
+    );
+    final tag = (await h.db.select(h.db.tags).get()).single.id;
+    final smart = await StoryRepository(h.context()).save(
+      title: '旅行主題',
+      rule: ThemeRule(mode: TagMatchMode.any, include: [tag]),
+    );
+    final result = await export();
+    final target = AppDatabase(NativeDatabase.memory());
+    try {
+      final ctx = RepositoryContext(
+        target,
+        subjectId: h.profile.subjectId,
+        actingAuthorId: h.profile.selfAuthorId,
+      );
+      final restore = ArchiveRestore(
+        ArchiveRepository(
+          ctx,
+          AttachmentRepository(
+            ctx,
+            await Directory(p.join(root.path, 'story-media')).create(),
+            platform,
+          ),
+          Directory(p.join(root.path, 'story-backups')),
+          codec,
+        ),
+      );
+      final plan = await restore.inspect(
+        result.zip,
+        cancellation: ImportCancellation(),
+      );
+      await restore.apply(
+        plan,
+        {},
+        cancellation: ImportCancellation(),
+        validateSubjects: (_, _) async {},
+      );
+      final content = (await StoryRepository(ctx).load(id))!;
+      expect(content.summary.story.title, '大學生活');
+      expect(content.entries.map((e) => e.eventId), [b, a]);
+      final smartContent = (await StoryRepository(ctx).load(smart))!;
+      expect(ThemeRule.decode(smartContent.summary.story.rulesJson!).include, {
+        tag,
+      });
+      expect(smartContent.entries.single.eventId, a);
+      expect((await target.select(target.events).get()).length, 2);
+      final zipped = ZipDecoder().decodeBytes(await result.zip.readAsBytes());
+      expect(
+        zipped.files.map((f) => f.name),
+        contains('markdown/stories/${id.toLowerCase()}.md'),
+      );
+    } finally {
+      await target.close();
+    }
+  });
+
+  test('T09 未命名、自訂調序、空段落與追加回顧的 ZIP 閱讀版及還原一致', () async {
+    final content = EventContentRepository(h.context());
+    final single = await content.save(
+      EventDraft(
+        title: 'Single acceptance',
+        time: YearTime(2003),
+        sections: [DraftSection(content: 'single_body_marker')],
+      ),
+    );
+    final id = await content.save(
+      EventDraft(
+        title: 'Sections acceptance',
+        time: YearTime(2004),
+        sections: [
+          DraftSection(title: 'Start marker', content: 'start_body_marker'),
+          DraftSection(title: '想對你說的話', content: 'message_body_marker'),
+          DraftSection(title: 'empty_section_marker', content: '  '),
+        ],
+      ),
+    );
+    final draft = (await content.load(id))!.toDraft();
+    final moved = draft.sections.removeAt(1);
+    draft.sections.insert(0, moved);
+    await content.save(draft);
+    await content.appendReflection(id, 'old_reflection_marker');
+    await content.appendReflection(id, 'new_reflection_marker');
+    final before = (await content.load(id))!;
+    final exported = await export();
+    final verified = await codec.verify(
+      exported.zip,
+      Directory(p.join(root.path, 't09-verify')),
+      freeBytes: 1 << 30,
+      cancellation: ImportCancellation(),
+    );
+    final documents = verified.directory
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.md'));
+    final singleMd = await documents
+        .firstWhere((f) => f.path.contains(single.toLowerCase()))
+        .readAsString();
+    expect(singleMd, contains(CommonMarkWriter.text('single_body_marker')));
+    expect(singleMd, isNot(contains('## narrative')));
+    final md = await documents
+        .firstWhere((f) => f.path.contains(id.toLowerCase()))
+        .readAsString();
+    expect(md.indexOf('想對你說的話'), lessThan(md.indexOf('Start marker')));
+    expect(md, isNot(contains(CommonMarkWriter.text('empty_section_marker'))));
+    expect(
+      md.indexOf(CommonMarkWriter.text('old_reflection_marker')),
+      lessThan(md.indexOf(CommonMarkWriter.text('new_reflection_marker'))),
+    );
+    final html = await File(p.join(verified.directory.path, 'index.html'))
+        .readAsString();
+    expect(html.indexOf('想對你說的話'), lessThan(html.indexOf('Start marker')));
+    expect(html, isNot(contains('empty_section_marker')));
+    final target = AppDatabase(NativeDatabase.memory());
+    try {
+      final ctx = RepositoryContext(
+        target,
+        subjectId: h.profile.subjectId,
+        actingAuthorId: h.profile.selfAuthorId,
+      );
+      final restore = ArchiveRestore(
+        ArchiveRepository(
+          ctx,
+          AttachmentRepository(
+            ctx,
+            await Directory(p.join(root.path, 't09-media')).create(),
+            platform,
+          ),
+          Directory(p.join(root.path, 't09-backups')),
+          codec,
+        ),
+      );
+      final plan = await restore.inspect(
+        exported.zip,
+        cancellation: ImportCancellation(),
+      );
+      await restore.apply(
+        plan,
+        {},
+        cancellation: ImportCancellation(),
+        validateSubjects: (_, _) async {},
+      );
+      final after = (await EventContentRepository(ctx).load(id))!;
+      expect(after.sections, before.sections);
+      expect(after.reflections, before.reflections);
+      expect(after.reflections.map((r) => r.contentMd), [
+        'old_reflection_marker',
+        'new_reflection_marker',
+      ]);
+    } finally {
+      await target.close();
+    }
+  });
+
+  test('v1 封存的手動篇章缺少規則欄位仍可預覽並保留引用', () async {
+    final a = await h.events().create(
+      EventInput(title: '舊事件', time: YearTime(2003)),
+    );
+    final id = await StoryRepository(h.context())
+        .save(title: '舊篇章', eventIds: [a]);
+    final result = await export();
+    final verified = await codec.verify(
+      result.zip,
+      Directory(p.join(root.path, 'v1-source')),
+      freeBytes: 1 << 30,
+      cancellation: ImportCancellation(),
+    );
+    final data = File(p.join(verified.directory.path, 'data/stories.json'));
+    final rows = (jsonDecode(await data.readAsString()) as List)
+        .map(
+          (row) => Map<String, dynamic>.from(row as Map)..remove('rules_json'),
+        )
+        .toList();
+    await data.writeAsString(jsonEncode(rows));
+    final schemaFile = File(
+      p.join(verified.directory.path, 'schema/stories.schema.json'),
+    );
+    final schema = jsonDecode(await schemaFile.readAsString()) as Map;
+    (schema['items']['required'] as List).remove('rules_json');
+    (schema['items']['properties'] as Map).remove('rules_json');
+    await schemaFile.writeAsString(jsonEncode(schema));
+    final manifest = verified.manifest
+      ..['format_version'] = '1.0'
+      ..['schema_version'] = 1;
+    final files = <String, File>{};
+    for (final entity
+        in verified.directory.listSync(recursive: true).whereType<File>()) {
+      files[p
+              .relative(entity.path, from: verified.directory.path)
+              .replaceAll('\\', '/')] =
+          entity;
+    }
+    final hashes = <String, String>{};
+    for (final entry in manifest['files'] as List) {
+      final path = entry['path'] as String;
+      entry['byte_size'] = await files[path]!.length();
+      entry['sha256'] = await ArchiveZip.fileHash(files[path]!);
+      hashes[path] = entry['sha256'] as String;
+    }
+    await files['manifest.json']!.writeAsString(jsonEncode(manifest));
+    hashes['manifest.json'] = await ArchiveZip.fileHash(
+      files['manifest.json']!,
+    );
+    await files['SHA256SUMS.txt']!.writeAsString(ArchiveIntegrity.sums(hashes));
+    final v1 = File(p.join(root.path, 'legacy.zip'));
+    await codec.write(v1, files, cancellation: ImportCancellation());
+    final restore = ArchiveRestore(repository);
+    final plan = await restore.inspect(v1, cancellation: ImportCancellation());
+    expect(plan.data['stories']!.single['rules_json'], isNull);
+    expect(plan.data['story_events']!.single['story_id'], id);
+    await restore.apply(plan, {
+      for (final c in plan.conflicts) c.key: ArchiveConflictChoice.useArchive,
+    }, cancellation: ImportCancellation());
+    expect(
+      (await StoryRepository(h.context()).load(id))!.entries.single.eventId,
+      a,
+    );
+  });
+
+  test('永久刪除參照快照隨正式 ZIP 跨資料庫還原且保留最後區間', () async {
+    final source = await h.events().create(
+      EventInput(title: '原畢業標題', time: YearTime(2003), privacy: 'private'),
+    );
+    final dependent = await h.events().create(
+      EventInput(
+        title: '畢業之後',
+        time: RelativeTime(source, RelativeRelation.after),
+      ),
+    );
+    await h.events().softDelete(source);
+    await h.events().purge(source);
+    final before = (await h.events().find(dependent))!;
+    final result = await export();
+    final target = AppDatabase(NativeDatabase.memory());
+    try {
+      final ctx = RepositoryContext(
+        target,
+        subjectId: h.profile.subjectId,
+        actingAuthorId: h.profile.selfAuthorId,
+      );
+      final targetMedia = AttachmentRepository(
+        ctx,
+        await Directory(p.join(root.path, 'snapshot-media')).create(),
+        platform,
+      );
+      final restore = ArchiveRestore(
+        ArchiveRepository(
+          ctx,
+          targetMedia,
+          Directory(p.join(root.path, 'snapshot-backups')),
+          codec,
+        ),
+      );
+      final plan = await restore.inspect(
+        result.zip,
+        cancellation: ImportCancellation(),
+      );
+      await restore.apply(
+        plan,
+        {},
+        cancellation: ImportCancellation(),
+        validateSubjects: (_, _) async {},
+      );
+      final row = await target.select(target.events).getSingle();
+      expect(row.timePayload, before.timePayload);
+      expect(row.sortStart, before.sortStart);
+      expect(row.sortEnd, before.sortEnd);
+      expect(
+        (decodeTime(row.timePayload) as RelativeTime).deletedReference,
+        const DeletedTimeReference('原畢業標題', private: true),
+      );
+    } finally {
+      await target.close();
+    }
+  });
+
   for (final choice in ArchiveConflictChoice.values) {
     test('同名不同 ID 逐筆決策 $choice，引用重用本機 ID 且重複匯入穩定', () async {
       final eventId = await EventContentRepository(h.context()).save(
@@ -137,6 +431,10 @@ void main() {
       final sourcePlace = (await h.db.select(h.db.places).get()).single.id;
       final sourcePerson = (await h.db.select(h.db.people).get()).single.id;
       final sourceTag = (await h.db.select(h.db.tags).get()).single.id;
+      final theme = await StoryRepository(h.context()).save(
+        title: '相聚主題',
+        rule: ThemeRule(mode: TagMatchMode.all, include: [sourceTag]),
+      );
       final result = await export();
       final place = h.context().newId();
       final person = h.context().newId();
@@ -157,6 +455,13 @@ void main() {
           person,
         ]);
         await h.db.customStatement('UPDATE event_tags SET tag_id = ?', [tag]);
+        await h.db.customStatement(
+          'UPDATE stories SET rules_json = ? WHERE story_id = ?',
+          [
+            ThemeRule(mode: TagMatchMode.all, include: [tag]).encode(),
+            theme,
+          ],
+        );
       });
       final restore = ArchiveRestore(repository);
       for (var run = 0; run < 2; run++) {
@@ -197,6 +502,12 @@ void main() {
           choice == ArchiveConflictChoice.keepLocal ? 'abc' : 'ＡＢＣ',
         );
         expect((await h.db.select(h.db.tags).get()).single.id, tag);
+        final themeContent = (await StoryRepository(h.context()).load(theme))!;
+        expect(
+          ThemeRule.decode(themeContent.summary.story.rulesJson!).include,
+          {tag},
+        );
+        expect(themeContent.entries.single.eventId, eventId);
         expect((await h.events().find(eventId))!.placeId, place);
         expect(
           await h.db.customSelect('PRAGMA foreign_key_check').get(),
@@ -378,6 +689,155 @@ void main() {
       await db.close();
     }
   }
+
+  test('排除私密事件：JSON、閱讀版、快照、共用媒體與正式還原不洩露私密內容', () async {
+    final content = EventContentRepository(h.context());
+    final private = await content.save(
+      EventDraft(
+        title: 'PRIVATE_TITLE_MARKER',
+        privacy: 'private',
+        time: YearTime(2001),
+        sections: [DraftSection(content: 'PRIVATE_BODY_MARKER')],
+      ),
+    );
+    await content.appendReflection(private, 'PRIVATE_REFLECTION_MARKER');
+    final public = await content.save(
+      EventDraft(
+        title: 'public entry',
+        time: RelativeTime(private, RelativeRelation.after),
+        relatedIds: [private],
+      ),
+    );
+    final purged = await h.events().create(
+      EventInput(
+        title: 'PRIVATE_SNAPSHOT_MARKER',
+        privacy: 'private',
+        time: YearTime(2002),
+      ),
+    );
+    final reference = await h.events().create(
+      EventInput(
+        title: 'snapshot ref',
+        time: RelativeTime(purged, RelativeRelation.after),
+      ),
+    );
+    await h.events().softDelete(purged);
+    await h.events().purge(purged);
+    final story = await StoryRepository(h.context())
+        .save(title: 'legacy', eventIds: [private, public]);
+    final shared = File(p.join(root.path, 'shared-private.mp4'))
+      ..writeAsBytesSync([11, 22, 33]);
+    final exclusive = File(p.join(root.path, 'exclusive-private.mp4'))
+      ..writeAsBytesSync([44, 55]);
+    final warehouse = File(p.join(root.path, 'warehouse.mp4'))
+      ..writeAsBytesSync([66, 77]);
+    await media.importBatch(
+      await media.prepare([
+        AttachmentSource(shared.path, 'PRIVATE_FILENAME_MARKER.mp4'),
+        AttachmentSource(exclusive.path, 'PRIVATE_EXCLUSIVE_MARKER.mp4'),
+        AttachmentSource(warehouse.path, 'warehouse.mp4'),
+      ]),
+      eventId: private,
+    );
+    final unused = (await h.db.select(h.db.attachments).get()).singleWhere(
+      (a) => a.originalFilename == 'warehouse.mp4',
+    );
+    await media.removeReference(unused.id);
+    await media.importBatch(
+      await media.prepare([AttachmentSource(shared.path, 'public.mp4')]),
+      eventId: public,
+    );
+    // 典藏後追加的追憶亦隨所屬私密事件排除。
+    await ProfileRepository(h.db).activateLifeArchive(
+      h.profile.subjectId,
+      byAuthorId: h.profile.selfAuthorId,
+    );
+    await EventContentRepository(h.context(actingAuthorId: h.familyAuthorId))
+        .appendReflection(private, 'PRIVATE_FAMILY_MARKER');
+    final before = await repository.snapshot();
+    final plan = await repository.prepare(excludePrivateEvents: true);
+    expect(plan.scope.type, 'custom');
+    expect(plan.data['events']!.map((e) => e['event_id']), [public, reference]);
+    expect(plan.data['reflections'], isEmpty);
+    expect(plan.data['event_links'], isEmpty);
+    expect(plan.data['story_events'], [
+      {'story_id': story, 'event_id': public, 'position': 1},
+    ]);
+    expect(plan.data['attachments'], hasLength(1));
+    expect(plan.media, hasLength(2)); // 共用與未引用倉庫副本。
+    expect(plan.privacyFilter!.excludedEvents, 1);
+    expect(plan.privacyFilter!.excludedMedia, 1);
+    expect(plan.privacyFilter!.excludedSnapshots, 1);
+    final result = await repository.export(
+      plan,
+      reading,
+      readme: '# Archive\n',
+      appVersion: '1.0.0',
+    );
+    final verified = await codec.verify(
+      result.zip,
+      Directory(p.join(root.path, 'private-verified')),
+      freeBytes: 1 << 30,
+      cancellation: ImportCancellation(),
+    );
+    expect(verified.manifest['format_version'], '1.2');
+    expect(
+      (verified.manifest['scope'] as Map)['private_events'],
+      plan.privacyFilter!.manifest,
+    );
+    for (final file
+        in verified.directory.listSync(recursive: true).whereType<File>()) {
+      if (file.path.endsWith('.mp4')) continue;
+      expect(
+        await file.readAsString(),
+        isNot(contains('PRIVATE_')),
+        reason: file.path,
+      );
+    }
+    await withInitialTarget((restore, target) async {
+      final incoming = await restore.inspect(
+        result.zip,
+        cancellation: ImportCancellation(),
+      );
+      final report = await restore.apply(
+        incoming,
+        {},
+        cancellation: ImportCancellation(),
+      );
+      expect(report.excluded, 2);
+      expect(report.attachmentCount, 1);
+      expect(
+        await target.db.customSelect('PRAGMA foreign_key_check').get(),
+        isEmpty,
+      );
+      final restored = await target.snapshot();
+      for (final event in restored['events']!) {
+        final original = before['events']!.singleWhere(
+          (e) => e['event_id'] == event['event_id'],
+        );
+        for (final field in [
+          'layer',
+          'author_id',
+          'created_at',
+          'updated_at',
+          'sort_start',
+          'sort_end',
+        ]) {
+          expect(event[field], original[field], reason: field);
+        }
+      }
+      expect(restored['reflections'], isEmpty);
+      expect(jsonEncode(restored), isNot(contains('PRIVATE_')));
+    });
+    expect(await repository.snapshot(), before);
+    expect(await exclusive.exists(), isTrue);
+    final noMedia = await repository.prepare(
+      excludePrivateEvents: true,
+      includeMedia: false,
+    );
+    expect(noMedia.media, isEmpty);
+    expect(noMedia.excludedMedia, hasLength(2));
+  });
 
   test('個別排除共用副本：自訂 manifest、閱讀連結與另一資料庫還原皆一致', () async {
     final event = await EventContentRepository(h.context())

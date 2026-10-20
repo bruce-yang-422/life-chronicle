@@ -361,6 +361,32 @@ class EventRepository {
         ),
       );
     } else {
+      // 刪除衍生快照與原事件同一交易保存；不改層級、作者、內容時間或修訂時間。
+      final dependents = await (db.select(
+        db.events,
+      )..where((e) => e.subjectId.equals(ctx.subjectId))).get();
+      for (final dependent in dependents) {
+        final time = decodeTime(dependent.timePayload);
+        if (time is! RelativeTime || time.eventId != id) continue;
+        await (db.update(
+          db.events,
+        )..where((e) => e.id.equals(dependent.id))).write(
+          EventsCompanion(
+            timePayload: Value(
+              encodeTime(
+                RelativeTime(
+                  time.eventId,
+                  time.relation,
+                  deletedReference: DeletedTimeReference(
+                    row.title,
+                    private: row.privacy == Privacy.private,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
       await (db.delete(db.events)..where((e) => e.id.equals(id))).go();
     }
     await ctx.recordChange(id, ChangeOperation.purge);

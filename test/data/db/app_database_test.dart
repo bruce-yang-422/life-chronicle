@@ -74,8 +74,8 @@ void main() {
     ),
   );
 
-  test('資料庫可從空白建立並開啟，schema_version = 1', () async {
-    expect(db.schemaVersion, 1);
+  test('資料庫可從空白建立並開啟，schema_version = 2', () async {
+    expect(db.schemaVersion, 2);
     final rows = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
         .get();
@@ -143,7 +143,7 @@ void main() {
       (await db.customSelect('PRAGMA user_version').getSingle()).read<int>(
         'user_version',
       ),
-      1,
+      2,
     );
   });
 

@@ -59,7 +59,15 @@ class _TimePickerState extends State<_TimePicker> {
     try {
       final TimeValue value = switch (_type) {
         'unknown' => const UnknownTime(),
-        'relative' => RelativeTime(_reference ?? '', _relation),
+        'relative' => RelativeTime(
+          _reference ?? '',
+          _relation,
+          deletedReference:
+              widget.value is RelativeTime &&
+                  (widget.value as RelativeTime).eventId == _reference
+              ? (widget.value as RelativeTime).deletedReference
+              : null,
+        ),
         'age_estimate' => AgeEstimateTime(int.parse(_age)),
         'range' => RangeTime(
           TimeValue.fromJson(_start) as CalendarTime,

@@ -18,6 +18,27 @@ final _samples = <TimeValue>[
 ];
 
 void main() {
+  test('刪除參照快照可來回轉換，舊格式相容並拒絕無私密標記的快照', () {
+    final time = RelativeTime(
+      'event',
+      RelativeRelation.after,
+      deletedReference: const DeletedTimeReference('原標題', private: true),
+    );
+    expect(TimeValue.fromJson(time.toJson()), time);
+    expect(
+      TimeValue.fromJson(
+        RelativeTime('event', RelativeRelation.after).toJson(),
+      ),
+      RelativeTime('event', RelativeRelation.after),
+    );
+    expect(
+      () => TimeValue.fromJson({
+        ...time.toJson(),
+        'deleted_reference': {'title': '不可猜測私密狀態'},
+      }),
+      throwsFormatException,
+    );
+  });
   group('CalendarDate', () {
     test('驗證月份與日期，含閏年 2 月', () {
       expect(CalendarDate(2024, 2, 29).day, 29);

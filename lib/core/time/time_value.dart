@@ -32,6 +32,9 @@ sealed class TimeValue {
       'relative' => RelativeTime(
         _string(json, 'event_id'),
         RelativeRelation.fromCode(_string(json, 'relation')),
+        deletedReference: json['deleted_reference'] == null
+            ? null
+            : DeletedTimeReference.fromJson(json['deleted_reference']),
       ),
       'age_estimate' => AgeEstimateTime(_int(json, 'age')),
       'unknown' => const UnknownTime(),
@@ -348,9 +351,38 @@ enum RelativeRelation {
   );
 }
 
+/// 原事件完整移除後的標題快照；私密狀態不可省略或推測。
+final class DeletedTimeReference {
+  const DeletedTimeReference(this.title, {required this.private});
+
+  factory DeletedTimeReference.fromJson(Object? value) {
+    if (value is! Map<String, Object?> ||
+        value['title'] is! String ||
+        value['private'] is! bool) {
+      throw const FormatException('已刪除參照必須包含標題與私密標記');
+    }
+    return DeletedTimeReference(
+      value['title'] as String,
+      private: value['private'] as bool,
+    );
+  }
+
+  final String title;
+  final bool private;
+  Map<String, Object?> toJson() => {'title': title, 'private': private};
+
+  @override
+  bool operator ==(Object other) =>
+      other is DeletedTimeReference &&
+      title == other.title &&
+      private == other.private;
+  @override
+  int get hashCode => Object.hash(title, private);
+}
+
 /// 相對事件，例如「大學畢業後」。
 final class RelativeTime extends TimeValue {
-  RelativeTime(this.eventId, this.relation) {
+  RelativeTime(this.eventId, this.relation, {this.deletedReference}) {
     if (eventId.isEmpty) {
       throw ArgumentError.value(eventId, 'eventId', '必須指定參照事件');
     }
@@ -359,6 +391,7 @@ final class RelativeTime extends TimeValue {
   /// 參照事件的 ID。
   final String eventId;
   final RelativeRelation relation;
+  final DeletedTimeReference? deletedReference;
 
   @override
   String get type => 'relative';
@@ -368,16 +401,19 @@ final class RelativeTime extends TimeValue {
     'type': type,
     'event_id': eventId,
     'relation': relation.code,
+    if (deletedReference != null)
+      'deleted_reference': deletedReference!.toJson(),
   };
 
   @override
   bool operator ==(Object other) =>
       other is RelativeTime &&
       other.eventId == eventId &&
-      other.relation == relation;
+      other.relation == relation &&
+      other.deletedReference == deletedReference;
 
   @override
-  int get hashCode => Object.hash(type, eventId, relation);
+  int get hashCode => Object.hash(type, eventId, relation, deletedReference);
 
   @override
   String toString() => 'RelativeTime(${relation.code} $eventId)';

@@ -100,7 +100,7 @@ void main() {
     await pump(tester);
     await tester.tap(find.text('敏感影片.mp4'));
     await accept(tester);
-    expect(find.text('範圍：自訂影音範圍；排除 1 個副本'), findsOneWidget);
+    expect(find.text('範圍：自訂匯出範圍；排除 1 個副本'), findsOneWidget);
     await accept(tester);
     for (var i = 0; i < 100; i++) {
       await settle(tester);

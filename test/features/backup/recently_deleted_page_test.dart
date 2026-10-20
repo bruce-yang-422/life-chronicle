@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,21 +7,26 @@ import 'package:life_chronicle/core/time/time_value.dart';
 import 'package:life_chronicle/data/providers.dart';
 import 'package:life_chronicle/data/platform/security_platform.dart';
 import 'package:life_chronicle/data/repositories/event_repository.dart';
+import 'package:life_chronicle/data/repositories/attachment_repository.dart';
 import 'package:life_chronicle/data/repositories/security_service.dart';
 import 'package:life_chronicle/features/backup/recently_deleted_page.dart';
+import 'package:life_chronicle/features/event_detail/event_detail_page.dart';
 import 'package:life_chronicle/l10n/app_localizations.dart';
 
 import '../../data/repositories/harness.dart';
-import '../event_editor/event_editor_test.dart' show settle;
+import '../event_editor/event_editor_test.dart'
+    show settle, StubAttachmentPlatform;
 import '../../support/security_stub.dart';
 
 void main() {
   late Harness h;
   late SecurityService security;
   late SecurityStub platform;
+  late Directory mediaDirectory;
 
   setUp(() async {
     h = await Harness.create();
+    mediaDirectory = await Directory.systemTemp.createTemp('deleted-test-');
     platform = SecurityStub();
     security = SecurityService(
       MemorySecurityStorage(),
@@ -35,6 +42,7 @@ void main() {
   });
   tearDown(() async {
     await h.close();
+    await mediaDirectory.delete(recursive: true);
   });
 
   Future<String> deleted({bool private = false}) async {
@@ -49,19 +57,26 @@ void main() {
     return id;
   }
 
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(WidgetTester tester, {Widget? home}) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           ...securityTestOverrides,
           appDatabaseProvider.overrideWithValue(h.db),
           securityProvider.overrideWith((ref) => security),
+          attachmentRepositoryProvider.overrideWith(
+            (ref) async => AttachmentRepository(
+              h.context(),
+              mediaDirectory,
+              StubAttachmentPlatform(),
+            ),
+          ),
         ],
         child: MaterialApp(
           locale: const Locale('zh', 'TW'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const RecentlyDeletedPage(),
+          home: home ?? const RecentlyDeletedPage(),
         ),
       ),
     );
@@ -71,6 +86,38 @@ void main() {
   Future<void> unmount(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 2));
+  }
+
+  for (final private in [false, true]) {
+    testWidgets('永久刪除後詳情保留參照標題，私密快照依驗證遮蔽：$private', (tester) async {
+      final source = await tester.runAsync(() => deleted(private: private));
+      final dependent = await tester.runAsync(() async {
+        final id = await h.events().create(
+          EventInput(
+            title: '後續事件',
+            time: RelativeTime(source!, RelativeRelation.after),
+          ),
+        );
+        await h.events().purge(source);
+        return id;
+      });
+      await pump(tester, home: EventDetailPage(eventId: dependent!));
+      expect(
+        find.textContaining('不可洩漏的標題'),
+        private ? findsNothing : findsOneWidget,
+      );
+      if (private) {
+        await tester.runAsync(
+          () => security.authenticatePassword('abc123', privateAccess: true),
+        );
+        await settle(tester);
+        expect(find.textContaining('不可洩漏的標題'), findsOneWidget);
+        security.lock();
+        await settle(tester);
+        expect(find.textContaining('不可洩漏的標題'), findsNothing);
+      }
+      await unmount(tester);
+    });
   }
 
   testWidgets('未驗證私密刪除事件隱藏標題與修改入口，取消查看不洩漏', (tester) async {
@@ -109,6 +156,37 @@ void main() {
     await settle(tester);
     expect(find.text('不可洩漏的標題'), findsNothing);
     expect(find.byIcon(Icons.restore), findsNothing);
+    await unmount(tester);
+  });
+
+  testWidgets('私密永久刪除確認視窗在重新鎖定後遮蔽標題並停用提交', (tester) async {
+    final id = await tester.runAsync(() => deleted(private: true));
+    await pump(tester);
+    platform.succeeds = true;
+    await tester.tap(find.byIcon(Icons.lock_outline));
+    await settle(tester);
+    await tester.tap(find.byIcon(Icons.fingerprint));
+    await settle(tester);
+    await tester.tap(find.byIcon(Icons.delete_forever));
+    await settle(tester);
+    final dialog = find.byType(AlertDialog);
+    final confirm = find.descendant(
+      of: dialog,
+      matching: find.byType(FilledButton),
+    );
+    expect(find.textContaining('不可洩漏的標題'), findsWidgets);
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+
+    security.lock();
+    await settle(tester);
+    expect(find.textContaining('不可洩漏的標題'), findsNothing);
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+    await tester.tap(confirm);
+    await settle(tester);
+    expect(await tester.runAsync(() => h.events().find(id!)), isNotNull);
+    await tester.tap(find.text('取消'));
+    await settle(tester);
+    expect(find.byType(AlertDialog), findsNothing);
     await unmount(tester);
   });
 

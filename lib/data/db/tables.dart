@@ -235,6 +235,9 @@ class Stories extends Table with LayerColumns {
   TextColumn get id => text().named('story_id')();
   TextColumn get title => text()();
 
+  /// null 表示舊版手動篇章；智慧主題保存標籤 ID 條件，不存事件快取。
+  TextColumn get rulesJson => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 

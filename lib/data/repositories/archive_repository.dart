@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../../core/archive/archive_integrity.dart';
 import '../../core/archive/archive_reading.dart';
 import '../../core/archive/archive_media_scope.dart';
+import '../../core/archive/archive_privacy_filter.dart';
 import '../../core/archive/archive_schema.dart';
 import '../db/app_database.dart';
 import 'attachment_repository.dart';
@@ -27,13 +28,15 @@ class ArchiveExportPlan {
     this.media,
     this.requiredBytes,
     this.freeBytes,
-    this.scope,
-  );
+    this.scope, [
+    this.privacyFilter,
+  ]);
   final ArchiveRows data;
   final Map<String, File> media;
   final int requiredBytes;
   final int freeBytes;
   final ArchiveMediaScope scope;
+  final ArchivePrivacyFilter? privacyFilter;
   bool get includeMedia => scope.includeMedia;
   Map<String, String> get excludedMedia => {
     for (final blob in data['blobs']!)
@@ -47,12 +50,16 @@ class ArchiveMediaOption {
     this.blobId,
     this.names,
     this.byteSize,
-    this.references,
-  );
+    this.references, {
+    this.normalNames,
+    this.normalReferences,
+  });
   final String blobId;
   final List<String> names;
   final int byteSize;
   final int references;
+  final List<String>? normalNames;
+  final int? normalReferences;
 }
 
 /// 開放 JSON 匯出；原始檔位置、SQLite 與衍生搜尋快取不進入封存包。
@@ -150,6 +157,10 @@ class ArchiveRepository {
 
   Future<List<ArchiveMediaOption>> mediaOptions() async {
     final data = await snapshot();
+    final normalEvents = {
+      for (final event in data['events']!)
+        if (event['privacy'] != 'private') event['event_id'],
+    };
     final byBlob = <Object?, List<Map<String, Object?>>>{};
     for (final attachment in data['attachments']!) {
       (byBlob[attachment['blob_id']] ??= []).add(attachment);
@@ -166,6 +177,14 @@ class ArchiveRepository {
           }.toList()..sort(),
           blob['byte_size'] as int,
           (byBlob[blob['blob_id']] ?? []).length,
+          normalNames: {
+            for (final attachment in byBlob[blob['blob_id']] ?? [])
+              if (normalEvents.contains(attachment['event_id']))
+                attachment['original_filename'] as String,
+          }.toList()..sort(),
+          normalReferences: (byBlob[blob['blob_id']] ?? [])
+              .where((a) => normalEvents.contains(a['event_id']))
+              .length,
         ),
     ];
     options.sort((a, b) {
@@ -179,15 +198,23 @@ class ArchiveRepository {
 
   Future<ArchiveExportPlan> prepare({
     bool includeMedia = true,
+    bool excludePrivateEvents = false,
     Set<String> excludedBlobIds = const {},
   }) async {
     await outputDirectory.create(recursive: true);
-    final data = await snapshot();
+    final snapshotData = await snapshot();
+    final privacyFilter = excludePrivateEvents
+        ? ArchivePrivacyFilter(snapshotData)
+        : null;
+    final data = privacyFilter?.data ?? snapshotData;
     final scope = ArchiveMediaScope(
       includeMedia: includeMedia,
+      excludePrivateEvents: excludePrivateEvents,
       excludedBlobIds: excludedBlobIds,
     );
-    final knownIds = {for (final blob in data['blobs']!) blob['blob_id']};
+    final knownIds = {
+      for (final blob in snapshotData['blobs']!) blob['blob_id'],
+    };
     if (excludedBlobIds.difference(knownIds).isNotEmpty) {
       throw const ArchiveIntegrityException(['data/blobs.json']);
     }
@@ -209,7 +236,7 @@ class ArchiveRepository {
     final free = await attachments.platform.availableBytes(
       outputDirectory.path,
     );
-    return ArchiveExportPlan(data, media, required, free, scope);
+    return ArchiveExportPlan(data, media, required, free, scope, privacyFilter);
   }
 
   Map<String, Map<String, Object?>> _schemas() => ArchiveSchema.generate({
@@ -310,8 +337,8 @@ class ArchiveRepository {
       };
       final manifest = {
         'format': 'life-chronicle-archive',
-        'format_version': '1.0',
-        'schema_version': 1,
+        'format_version': plan.scope.excludePrivateEvents ? '1.2' : '1.1',
+        'schema_version': 2,
         'app_version': appVersion,
         'exported_at': date.toIso8601String(),
         'exported_by': ctx.actingAuthorId,
@@ -319,6 +346,8 @@ class ArchiveRepository {
         'counts': counts,
         'scope': {
           'type': plan.scope.type,
+          if (plan.privacyFilter != null)
+            'private_events': plan.privacyFilter!.manifest,
           'excluded': [
             for (final entry in plan.excludedMedia.entries)
               {'path': entry.key, 'reason': entry.value},

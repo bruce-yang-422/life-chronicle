@@ -67,7 +67,7 @@ void main() {
 
   testWidgets('共用副本只列一列，取消勾選後回傳精確範圍', (tester) async {
     await pump(tester);
-    expect(find.byType(CheckboxListTile), findsNWidgets(3));
+    expect(find.byType(CheckboxListTile), findsNWidgets(4));
     expect(find.text('1.0 KiB · 2 個附件共用'), findsOneWidget);
     await tester.tap(find.text('敏感影片.mp4\n共用影片.mp4'));
     await tester.pump();
@@ -98,7 +98,7 @@ void main() {
   testWidgets('無副本時英文介面仍可選擇不含影音', (tester) async {
     await pump(tester, items: [], locale: 'en');
     expect(find.text('There are no media copies.'), findsOneWidget);
-    await tester.tap(find.byType(CheckboxListTile));
+    await tester.tap(find.text('Include original media copies'));
     await tester.tap(find.widgetWithText(FilledButton, 'Export ZIP backup'));
     await tester.pumpAndSettle();
     expect(result!.type, 'no_media');
@@ -147,5 +147,56 @@ void main() {
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
     expect(result, isNull);
+  });
+
+  testWidgets('排除私密事件時專屬副本停用，共用副本保留一般事件名稱', (tester) async {
+    await pump(
+      tester,
+      items: const [
+        ArchiveMediaOption(
+          'shared',
+          ['一般.pdf', '私密.pdf'],
+          10,
+          2,
+          normalNames: ['一般.pdf'],
+          normalReferences: 1,
+        ),
+        ArchiveMediaOption(
+          'private',
+          ['私密專屬.pdf'],
+          10,
+          1,
+          normalNames: [],
+          normalReferences: 0,
+        ),
+        ArchiveMediaOption(
+          'unused',
+          ['倉庫.pdf'],
+          10,
+          0,
+          normalNames: [],
+          normalReferences: 0,
+        ),
+      ],
+    );
+    await tester.tap(find.text('排除私密事件'));
+    await tester.pump();
+    expect(find.text('一般.pdf'), findsOneWidget);
+    expect(find.text('一般.pdf\n私密.pdf'), findsNothing);
+    final privateTile = find.ancestor(
+      of: find.text('私密專屬.pdf'),
+      matching: find.byType(CheckboxListTile),
+    );
+    expect(tester.widget<CheckboxListTile>(privateTile).value, isFalse);
+    expect(tester.widget<CheckboxListTile>(privateTile).onChanged, isNull);
+    final unused = find.ancestor(
+      of: find.text('倉庫.pdf'),
+      matching: find.byType(CheckboxListTile),
+    );
+    expect(tester.widget<CheckboxListTile>(unused).value, isTrue);
+    await tester.tap(find.text('匯出 ZIP 備份'));
+    await tester.pumpAndSettle();
+    expect(result!.excludePrivateEvents, isTrue);
+    expect(result!.excludedBlobIds, isEmpty);
   });
 }

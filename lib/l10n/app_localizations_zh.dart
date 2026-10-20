@@ -25,7 +25,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navNewEvent => '新增節點';
 
   @override
-  String get navStories => '故事篇章';
+  String get navStories => '主題瀏覽';
 
   @override
   String get navBackup => '資料與備份';
@@ -88,7 +88,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get timeDeletedReference => '（參照事件已刪除）';
+  String get timeDeletedReference => '（參照事件未提供）';
 
   @override
   String timeAgeEstimate(String age) {
@@ -1197,5 +1197,132 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupScopeNoMedia => '不含影音';
 
   @override
-  String get backupScopeCustom => '自訂影音範圍';
+  String get backupScopeCustom => '自訂匯出範圍';
+
+  @override
+  String get editorGroupBasics => '事件資訊';
+
+  @override
+  String get editorGroupPeople => '人物與標籤';
+
+  @override
+  String get editorGroupOptions => '隱私與關聯';
+
+  @override
+  String get editorGroupNarrative => '記述與附件';
+
+  @override
+  String get storiesCreate => '新增智慧主題';
+
+  @override
+  String get storiesEdit => '編輯主題';
+
+  @override
+  String get storiesTitle => '主題名稱';
+
+  @override
+  String get storiesEmpty => '設定標籤組合，自動瀏覽相關事件。';
+
+  @override
+  String get storiesEmptyEvents => '目前沒有符合條件的事件。新增或調整事件標籤後，這裡會自動更新。';
+
+  @override
+  String get storiesEvents => '符合條件的事件';
+
+  @override
+  String get storiesAddEvents => '選擇事件';
+
+  @override
+  String get storiesRemoveEvent => '移出篇章';
+
+  @override
+  String get storiesSave => '儲存主題';
+
+  @override
+  String get storiesDelete => '刪除主題';
+
+  @override
+  String get storiesDeleteConfirm => '刪除此主題？事件、標籤及附件都會保留。';
+
+  @override
+  String get storiesError => '無法儲存主題。請確認標籤仍存在，或目前是否允許修改。';
+
+  @override
+  String get storiesMissing => '此主題已不存在。';
+
+  @override
+  String get storiesReadOnly => '生命典藏期間，原始生命紀錄的主題設定唯讀。';
+
+  @override
+  String get storiesDeletedEvent => '事件已移到最近刪除';
+
+  @override
+  String storiesCount(int count) {
+    return '符合 $count 個事件';
+  }
+
+  @override
+  String get themesMode => '納入條件';
+
+  @override
+  String get themesAll => '全部符合（AND）';
+
+  @override
+  String get themesAny => '任一符合（OR）';
+
+  @override
+  String get themesInclude => '納入標籤（至少一個）';
+
+  @override
+  String get themesExclude => '排除標籤（選填）';
+
+  @override
+  String get themesAutoUpdate => '符合標籤條件的事件會自動更新。排除條件優先生效；私密及最近刪除事件不納入。';
+
+  @override
+  String get themesChooseTag => '請至少選一個納入標籤。';
+
+  @override
+  String get themesMissingTag => '已移除的標籤';
+
+  @override
+  String get themesSearchTags => '搜尋標籤';
+
+  @override
+  String get themesNoTags => '先在事件加入標籤，再建立智慧主題。';
+
+  @override
+  String get themesLegacy => '這是舊版手動篇章。設定標籤條件並儲存後，會改為智慧主題；原事件保留。';
+
+  @override
+  String get backupExcludePrivate => '排除私密事件';
+
+  @override
+  String get backupExcludePrivateNotice =>
+      '不匯出私密事件、記述、追憶、標題快照及專屬附件。共用附件、獨立人物／地點／標籤與未引用的倉庫副本仍依原選擇保留；不會修改手機資料。';
+
+  @override
+  String get backupPrivateMediaExcluded => '僅供私密事件使用，會自動排除';
+
+  @override
+  String backupPrivateExcluded(int events, int media) {
+    return '已刻意排除 $events 筆私密事件及 $media 份專屬媒體副本；不會還原這些內容。';
+  }
+
+  @override
+  String get editorBodyLabel => '內文';
+
+  @override
+  String get editorBodyHint => '從這裡開始寫下發生的事、當時的感受或想留下的話……';
+
+  @override
+  String get editorSectionHint => '例如：第一次見面的那一天（可以留空）';
+
+  @override
+  String get editorDragSection => '拖曳調整段落順序';
+
+  @override
+  String editorDragSectionNumber(int number) {
+    return '拖曳第 $number 段以調整順序';
+  }
 }

@@ -14,6 +14,15 @@ void main() {
     expect(none.type, 'no_media');
     expect(none.reasonFor('a'), 'no_media');
     expect(none.reasonFor('b'), 'no_media');
+    final private = ArchiveMediaScope(excludePrivateEvents: true);
+    expect(private.type, 'custom');
+    expect(private.reasonFor('shared'), isNull);
+    final privateNoMedia = ArchiveMediaScope(
+      excludePrivateEvents: true,
+      includeMedia: false,
+    );
+    expect(privateNoMedia.type, 'custom');
+    expect(privateNoMedia.reasonFor('shared'), 'no_media');
   });
 
   test('提交選擇後不受外部集合變動影響', () {

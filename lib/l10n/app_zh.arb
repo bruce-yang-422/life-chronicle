@@ -17,7 +17,7 @@
   "@navNewEvent": {
     "description": "主導航：新增節點"
   },
-  "navStories": "故事篇章",
+  "navStories": "主題瀏覽",
   "@navStories": {
     "description": "主導航：故事篇章"
   },
@@ -134,9 +134,9 @@
       }
     }
   },
-  "timeDeletedReference": "（參照事件已刪除）",
+  "timeDeletedReference": "（參照事件未提供）",
   "@timeDeletedReference": {
-    "description": "相對事件的參照事件已刪除時代替標題"
+    "description": "相對參照不存在且沒有可讀快照時代替標題，可能已刪除或未匯出"
   },
   "timeAgeEstimate": "約 {age} 歲",
   "@timeAgeEstimate": {
@@ -786,7 +786,7 @@
   "backupScopeSummary": "範圍：{scope}；排除 {count} 個副本",
   "backupScopeFull": "完整備份",
   "backupScopeNoMedia": "不含影音",
-  "backupScopeCustom": "自訂影音範圍",
+  "backupScopeCustom": "自訂匯出範圍",
   "@backupMediaDetails": { "placeholders": { "size": { "type": "String" }, "count": { "type": "int" } } },
   "@backupScopeSummary": { "placeholders": { "scope": { "type": "String" }, "count": { "type": "int" } } },
   "@restoreReuseId": {
@@ -794,5 +794,48 @@
       "sourceId": { "type": "String" },
       "localId": { "type": "String" }
     }
-  }
+  },
+  "editorGroupBasics": "事件資訊",
+  "editorGroupPeople": "人物與標籤",
+  "editorGroupOptions": "隱私與關聯",
+  "editorGroupNarrative": "記述與附件",
+  "storiesCreate": "新增智慧主題",
+  "storiesEdit": "編輯主題",
+  "storiesTitle": "主題名稱",
+  "storiesEmpty": "設定標籤組合，自動瀏覽相關事件。",
+  "storiesEmptyEvents": "目前沒有符合條件的事件。新增或調整事件標籤後，這裡會自動更新。",
+  "storiesEvents": "符合條件的事件",
+  "storiesAddEvents": "選擇事件",
+  "storiesRemoveEvent": "移出篇章",
+  "storiesSave": "儲存主題",
+  "storiesDelete": "刪除主題",
+  "storiesDeleteConfirm": "刪除此主題？事件、標籤及附件都會保留。",
+  "storiesError": "無法儲存主題。請確認標籤仍存在，或目前是否允許修改。",
+  "storiesMissing": "此主題已不存在。",
+  "storiesReadOnly": "生命典藏期間，原始生命紀錄的主題設定唯讀。",
+  "storiesDeletedEvent": "事件已移到最近刪除",
+  "storiesCount": "符合 {count} 個事件",
+  "@storiesCount": {"placeholders": {"count": {"type": "int"}}},
+  "themesMode": "納入條件",
+  "themesAll": "全部符合（AND）",
+  "themesAny": "任一符合（OR）",
+  "themesInclude": "納入標籤（至少一個）",
+  "themesExclude": "排除標籤（選填）",
+  "themesAutoUpdate": "符合標籤條件的事件會自動更新。排除條件優先生效；私密及最近刪除事件不納入。",
+  "themesChooseTag": "請至少選一個納入標籤。",
+  "themesMissingTag": "已移除的標籤",
+  "themesSearchTags": "搜尋標籤",
+  "themesNoTags": "先在事件加入標籤，再建立智慧主題。",
+  "themesLegacy": "這是舊版手動篇章。設定標籤條件並儲存後，會改為智慧主題；原事件保留。",
+  "backupExcludePrivate": "排除私密事件",
+  "backupExcludePrivateNotice": "不匯出私密事件、記述、追憶、標題快照及專屬附件。共用附件、獨立人物／地點／標籤與未引用的倉庫副本仍依原選擇保留；不會修改手機資料。",
+  "backupPrivateMediaExcluded": "僅供私密事件使用，會自動排除",
+  "backupPrivateExcluded": "已刻意排除 {events} 筆私密事件及 {media} 份專屬媒體副本；不會還原這些內容。",
+  "@backupPrivateExcluded": {"placeholders": {"events": {"type": "int"}, "media": {"type": "int"}}},
+  "editorBodyLabel": "內文",
+  "editorBodyHint": "從這裡開始寫下發生的事、當時的感受或想留下的話……",
+  "editorSectionHint": "例如：第一次見面的那一天（可以留空）",
+  "editorDragSection": "拖曳調整段落順序",
+  "editorDragSectionNumber": "拖曳第 {number} 段以調整順序",
+  "@editorDragSectionNumber": {"placeholders": {"number": {"type": "int"}}}
 }

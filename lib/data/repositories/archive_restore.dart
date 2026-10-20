@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../../core/archive/archive_integrity.dart';
 import '../../core/archive/archive_reading.dart';
 import '../../core/archive/archive_subject_policy.dart';
+import '../../core/stories/theme_rule.dart';
 import 'archive_repository.dart';
 import 'archive_zip.dart';
 import 'attachment_repository.dart';
@@ -114,6 +115,16 @@ class ArchiveRestore {
           row[field] = remap[row[field]] ?? row[field];
         }
       }
+      if (name == 'tags' && remap.isNotEmpty) {
+        for (final story in data['stories']!) {
+          final payload = story['rules_json'] as String?;
+          if (payload != null) {
+            story['rules_json'] = ThemeRule.decode(payload)
+                .remap(remap)
+                .encode();
+          }
+        }
+      }
     }
     return sources;
   }
@@ -156,6 +167,9 @@ class ArchiveRestore {
         data[name] = [];
         for (final raw in rows) {
           final row = Map<String, Object?>.from(raw as Map);
+          if (name == 'stories' && verified.manifest['schema_version'] == 1) {
+            row.putIfAbsent('rules_json', () => null);
+          }
           // 未知次版本欄位保留在原包，只有已知且型別正確的欄位可寫入。
           for (final column in table.$columns) {
             if (!row.containsKey(column.name) ||
@@ -171,6 +185,18 @@ class ArchiveRestore {
             throw ArchiveIntegrityException(['data/$name.json']);
           }
           data[name]!.add(row);
+        }
+      }
+      final tagIds = data['tags']!.map((t) => t['tag_id']).toSet();
+      for (final story in data['stories']!) {
+        if (story['rules_json'] == null) continue;
+        try {
+          final rule = ThemeRule.decode(story['rules_json'] as String);
+          if (!tagIds.containsAll({...rule.include, ...rule.exclude})) {
+            throw const FormatException('invalid_theme_tag_reference');
+          }
+        } catch (_) {
+          throw const ArchiveIntegrityException(['data/stories.json']);
         }
       }
       final snapshot = await repository.snapshot();
@@ -487,8 +513,12 @@ class ArchiveRestore {
       });
       committed = true;
       db.markTablesUpdated(repository.tables.toSet());
+      final scope = plan.verified.manifest['scope'] as Map;
+      final privacy = scope['private_events'] as Map?;
       final excluded =
-          ((plan.verified.manifest['scope'] as Map)['excluded'] as List).length;
+          (scope['excluded'] as List).length +
+          (privacy?['events'] as int? ?? 0) +
+          (privacy?['media'] as int? ?? 0);
       return ArchiveRestoreReport(
         inserted,
         replaced,

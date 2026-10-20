@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../core/text/search_tokens.dart';
 import '../../core/time/timeline_sort.dart';
+import '../../core/stories/theme_rule.dart';
 import '../db/app_database.dart';
 import 'event_repository.dart';
 import 'repository_context.dart';
@@ -28,7 +29,7 @@ class SearchRepository {
     }
     return ctx.db
         .customSelect(
-          "SELECT e.event_id AS id, e.title || char(10) || coalesce(e.category, '') || char(10) || "
+          "SELECT e.event_id AS id, e.privacy AS privacy, e.title || char(10) || coalesce(e.category, '') || char(10) || "
           "coalesce(p.name, '') || char(10) || "
           "coalesce((SELECT group_concat(content_md, char(10)) FROM event_sections s WHERE s.event_id=e.event_id), '') || char(10) || "
           "coalesce((SELECT group_concat(content_md, char(10)) FROM reflections r WHERE r.event_id=e.event_id), '') || char(10) || "
@@ -57,10 +58,21 @@ class SearchRepository {
         )
         .watch()
         .asyncMap((rows) async {
+          final rules = [
+            for (final story in await ctx.db.select(ctx.db.stories).get())
+              if (story.rulesJson != null)
+                MapEntry(story.title, ThemeRule.decode(story.rulesJson!)),
+          ];
+          final tags = <String, Set<String>>{};
+          if (rules.isNotEmpty) {
+            for (final link in await ctx.db.select(ctx.db.eventTags).get()) {
+              (tags[link.eventId] ??= {}).add(link.tagId);
+            }
+          }
           final documents = {
             for (final row in rows)
               row.read<String>('id'): SearchTokens.normalize(
-                row.read<String>('document'),
+                '${row.read<String>('document')}\n${row.read<String>('privacy') == 'private' ? '' : rules.where((e) => e.value.matches(tags[row.read<String>('id')] ?? {})).map((e) => e.key).join('\n')}',
               ),
           };
           final operation = _indexWrites.then((_) => _updateIndex(documents));

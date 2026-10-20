@@ -26,7 +26,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navNewEvent => 'New Entry';
 
   @override
-  String get navStories => 'Stories';
+  String get navStories => 'Topics';
 
   @override
   String get navBackup => 'Backup';
@@ -86,7 +86,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get timeDeletedReference => '(deleted event)';
+  String get timeDeletedReference => '(reference entry unavailable)';
 
   @override
   String timeAgeEstimate(String age) {
@@ -1260,5 +1260,143 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupScopeNoMedia => 'Without media';
 
   @override
-  String get backupScopeCustom => 'Custom media selection';
+  String get backupScopeCustom => 'Custom export selection';
+
+  @override
+  String get editorGroupBasics => 'Event details';
+
+  @override
+  String get editorGroupPeople => 'People and tags';
+
+  @override
+  String get editorGroupOptions => 'Privacy and connections';
+
+  @override
+  String get editorGroupNarrative => 'Notes and attachments';
+
+  @override
+  String get storiesCreate => 'New Smart Topic';
+
+  @override
+  String get storiesEdit => 'Edit Topic';
+
+  @override
+  String get storiesTitle => 'Topic name';
+
+  @override
+  String get storiesEmpty =>
+      'Combine tags to browse related entries automatically.';
+
+  @override
+  String get storiesEmptyEvents =>
+      'No matching entries yet. Results update as entries and tags change.';
+
+  @override
+  String get storiesEvents => 'Matching entries';
+
+  @override
+  String get storiesAddEvents => 'Choose entries';
+
+  @override
+  String get storiesRemoveEvent => 'Remove from story';
+
+  @override
+  String get storiesSave => 'Save Topic';
+
+  @override
+  String get storiesDelete => 'Delete Topic';
+
+  @override
+  String get storiesDeleteConfirm =>
+      'Delete this topic? Entries, tags, and attachments will be kept.';
+
+  @override
+  String get storiesError =>
+      'Unable to save the topic. Check that its tags exist and editing is allowed.';
+
+  @override
+  String get storiesMissing => 'This topic no longer exists.';
+
+  @override
+  String get storiesReadOnly =>
+      'Original topic settings are read-only while Life Archive is active.';
+
+  @override
+  String get storiesDeletedEvent => 'Entry is in Recently Deleted';
+
+  @override
+  String storiesCount(int count) {
+    return '$count matching entries';
+  }
+
+  @override
+  String get themesMode => 'Include condition';
+
+  @override
+  String get themesAll => 'Match all (AND)';
+
+  @override
+  String get themesAny => 'Match any (OR)';
+
+  @override
+  String get themesInclude => 'Include tags (choose at least one)';
+
+  @override
+  String get themesExclude => 'Exclude tags (optional)';
+
+  @override
+  String get themesAutoUpdate =>
+      'Matches update automatically. Exclusions take priority. Private entries and Recently Deleted are excluded.';
+
+  @override
+  String get themesChooseTag => 'Choose at least one tag to include.';
+
+  @override
+  String get themesMissingTag => 'Removed tag';
+
+  @override
+  String get themesSearchTags => 'Search tags';
+
+  @override
+  String get themesNoTags =>
+      'Add tags to entries before creating a smart topic.';
+
+  @override
+  String get themesLegacy =>
+      'This is a legacy manual story. Saving tag conditions converts it to a smart topic and keeps the original entries.';
+
+  @override
+  String get backupExcludePrivate => 'Exclude private entries';
+
+  @override
+  String get backupExcludePrivateNotice =>
+      'Omit private entries, sections, reflections, title snapshots and exclusive attachments. Shared attachments, independent people/places/tags and unreferenced warehouse copies follow your other selections. Device data stays intact.';
+
+  @override
+  String get backupPrivateMediaExcluded =>
+      'Used only by private entries; automatically excluded';
+
+  @override
+  String backupPrivateExcluded(int events, int media) {
+    return 'Intentionally excluded $events private entries and $media exclusive media copies. These contents will not be restored.';
+  }
+
+  @override
+  String get editorBodyLabel => 'Body';
+
+  @override
+  String get editorBodyHint =>
+      'Start writing what happened, how you felt, or what you want to remember…';
+
+  @override
+  String get editorSectionHint =>
+      'For example: The day we first met (optional)';
+
+  @override
+  String get editorDragSection => 'Drag to reorder sections';
+
+  @override
+  String editorDragSectionNumber(int number) {
+    return 'Drag section $number to reorder';
+  }
 }

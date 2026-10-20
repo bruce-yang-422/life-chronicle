@@ -32,8 +32,10 @@ class MainActivity : FlutterFragmentActivity() {
     private var locationListener: LocationListener? = null
     private val locationHandler = Handler(Looper.getMainLooper())
 
-    private fun finishLocation(location: Location? = null, error: String? = null) {
+    private fun finishLocation(location: Location? = null, error: String? = null, expected: MethodChannel.Result? = null) {
         val pending = locationResult ?: return
+        // 已取消的原生回呼不得完成後續另一筆定位請求。
+        if (expected != null && pending !== expected) return
         locationResult = null
         locationHandler.removeCallbacksAndMessages(null)
         locationCancellation?.cancel()
@@ -50,19 +52,20 @@ class MainActivity : FlutterFragmentActivity() {
         ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
     private fun requestCurrentLocation() {
+        val pending = locationResult ?: return
         try {
             val manager = getSystemService(LOCATION_SERVICE) as LocationManager
             if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) { finishLocation(error = "location_disabled"); return }
-            locationHandler.postDelayed({ finishLocation(error = "location_timeout") }, 30000)
+            locationHandler.postDelayed({ finishLocation(error = "location_timeout", expected = pending) }, 30000)
             if (Build.VERSION.SDK_INT >= 30) {
                 val cancellation = CancellationSignal()
                 locationCancellation = cancellation
-                manager.getCurrentLocation(LocationManager.GPS_PROVIDER, cancellation, mainExecutor) { location -> finishLocation(location) }
+                manager.getCurrentLocation(LocationManager.GPS_PROVIDER, cancellation, mainExecutor) { location -> finishLocation(location, expected = pending) }
             } else {
                 val listener = object : LocationListener {
-                    override fun onLocationChanged(location: Location) { finishLocation(location) }
+                    override fun onLocationChanged(location: Location) { finishLocation(location, expected = pending) }
                     override fun onProviderEnabled(provider: String) {}
-                    override fun onProviderDisabled(provider: String) { finishLocation(error = "location_disabled") }
+                    override fun onProviderDisabled(provider: String) { finishLocation(error = "location_disabled", expected = pending) }
                     @Deprecated("舊版系統相容")
                     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
                 }

@@ -1,14 +1,18 @@
-/// 僅決定是否納入媒體副本；附件與其他結構化資料仍保留。
+/// 匯出選擇；私密事件過濾與個別媒體副本排除分別處理。
 class ArchiveMediaScope {
   ArchiveMediaScope({
     this.includeMedia = true,
+    this.excludePrivateEvents = false,
     Set<String> excludedBlobIds = const {},
   }) : excludedBlobIds = Set.unmodifiable(excludedBlobIds);
 
   final bool includeMedia;
+  final bool excludePrivateEvents;
   final Set<String> excludedBlobIds;
 
-  String get type => !includeMedia
+  String get type => excludePrivateEvents
+      ? 'custom'
+      : !includeMedia
       ? 'no_media'
       : excludedBlobIds.isEmpty
       ? 'full'

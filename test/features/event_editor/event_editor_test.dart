@@ -96,11 +96,34 @@ void main() {
     await settle(tester);
     expect(find.text('何時發生: 時間未定'), findsOneWidget);
     expect(find.text('進階編輯'), findsNothing);
-    expect(find.byType(ReorderableListView), findsOneWidget);
-    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byIcon(Icons.person_add),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.byIcon(Icons.person_add), findsOneWidget);
     expect(find.byIcon(Icons.map_outlined), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byType(DropdownButtonFormField<String>),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byType(ReorderableListView),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.byType(ReorderableListView), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('event-title-field')),
+      -300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.enterText(find.byType(TextFormField).first, '我的大學');
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byIcon(Icons.calendar_month));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.calendar_month));
     await tester.pumpAndSettle();
     await tester.tap(
@@ -235,7 +258,17 @@ void main() {
     await settle(tester);
     expect(find.text('已恢復尚未儲存的草稿'), findsOneWidget);
     expect(find.text('草稿標題'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('保留內容'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('保留內容'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('event-title-field')),
+      -300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.enterText(find.byType(TextFormField).first, '更新草稿');
     await settle(tester);
     await tester.pumpWidget(const SizedBox());
@@ -249,6 +282,11 @@ void main() {
     );
     await settle(tester);
     expect(find.text('更新草稿'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('保留內容'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('保留內容'), findsOneWidget);
   });
   ui('時間軸詳情顯示段落，新增回顧不覆寫，搜尋可開啟同一事件', (tester) async {

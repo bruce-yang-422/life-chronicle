@@ -1,4 +1,5 @@
 import '../core/time/time_texts.dart';
+import '../core/time/time_value.dart';
 import 'app_localizations.dart';
 
 /// 以 ARB 介面文字實作時間格式的文字來源（企劃書 4.7）。
@@ -8,6 +9,17 @@ class L10nTimeTexts implements TimeTexts {
   const L10nTimeTexts(this.l10n);
 
   final AppLocalizations l10n;
+
+  String? deletedReferenceTitle(
+    TimeValue time, {
+    required bool canReadPrivate,
+  }) {
+    final snapshot = time is RelativeTime ? time.deletedReference : null;
+    if (snapshot == null) return null;
+    return snapshot.private && !canReadPrivate
+        ? l10n.securityPrivateEvent
+        : l10n.recycleDeletedTitle(snapshot.title);
+  }
 
   static String _half(bool firstHalf) => firstHalf ? 'first' : 'second';
 

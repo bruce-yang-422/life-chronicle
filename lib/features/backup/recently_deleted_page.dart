@@ -25,30 +25,43 @@ class RecentlyDeletedPage extends ConsumerWidget {
       if (!context.mounted) return;
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(l.recyclePurge),
-          content: SingleChildScrollView(
-            child: Text(
-              [
-                event.title,
-                l.recyclePurgeConfirm,
-                if (preserves) l.recyclePreserve,
-              ].join('\n\n'),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l.timelineCancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l.recyclePurge),
-            ),
-          ],
+        builder: (context) => Consumer(
+          builder: (context, dialogRef, _) {
+            final protected =
+                event.privacy == 'private' &&
+                !dialogRef.watch(securityProvider).canReadPrivate;
+            return AlertDialog(
+              title: Text(l.recyclePurge),
+              content: SingleChildScrollView(
+                child: Text(
+                  [
+                    protected ? l.securityPrivateEvent : event.title,
+                    l.recyclePurgeConfirm,
+                    if (preserves) l.recyclePreserve,
+                  ].join('\n\n'),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(l.timelineCancel),
+                ),
+                FilledButton(
+                  onPressed: protected
+                      ? null
+                      : () => Navigator.pop(context, true),
+                  child: Text(l.recyclePurge),
+                ),
+              ],
+            );
+          },
         ),
       );
-      if (confirmed == true) await repository.purge(event.id);
+      if (confirmed == true &&
+          (event.privacy != 'private' ||
+              ref.read(securityProvider).canReadPrivate)) {
+        await repository.purge(event.id);
+      }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
@@ -79,7 +92,7 @@ class RecentlyDeletedPage extends ConsumerWidget {
                       return Card(
                         margin: const EdgeInsets.all(12),
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

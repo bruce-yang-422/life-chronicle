@@ -9,6 +9,7 @@ import 'db/app_database.dart';
 import 'repositories/event_relations_repository.dart';
 import 'repositories/event_repository.dart';
 import 'repositories/person_repository.dart';
+import 'repositories/story_repository.dart';
 import 'repositories/place_repository.dart';
 import 'repositories/profile_repository.dart';
 import 'repositories/repository_context.dart';
@@ -117,6 +118,21 @@ final eventRepositoryProvider = FutureProvider<EventRepository>(
   (ref) async =>
       EventRepository(await ref.watch(repositoryContextProvider.future)),
 );
+final storyRepositoryProvider = FutureProvider<StoryRepository>(
+  (ref) async =>
+      StoryRepository(await ref.watch(repositoryContextProvider.future)),
+);
+final storiesProvider = StreamProvider<List<StorySummary>>((ref) async* {
+  yield* (await ref.watch(storyRepositoryProvider.future)).watch();
+});
+final storyTagsProvider = StreamProvider<List<Tag>>((ref) async* {
+  yield* (await ref.watch(storyRepositoryProvider.future)).watchTags();
+});
+final storyContentProvider = StreamProvider.autoDispose
+    .family<StoryContent?, String>((ref, id) async* {
+      yield* (await ref.watch(storyRepositoryProvider.future))
+          .watchContent(id, direction: ref.watch(timelineDirectionProvider));
+    });
 final eventReferencesProvider = StreamProvider<List<Event>>((ref) async* {
   yield* (await ref.watch(eventRepositoryProvider.future)).watchReferences();
 });

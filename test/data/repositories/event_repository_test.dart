@@ -22,6 +22,41 @@ void main() {
   Future<String> create(String title, TimeValue time, {String? as}) =>
       h.events(as: as).create(EventInput(title: title, time: time));
 
+  test('永久移除原事件前交易保存直接參照的標題與私密快照，不改層級時間', () async {
+    final source = await h.events().create(
+      EventInput(title: '私密畢業', time: YearTime(2003), privacy: 'private'),
+    );
+    final dependent = await create(
+      '畢業後',
+      RelativeTime(source, RelativeRelation.after),
+    );
+    await h.activateArchive();
+    final remembrance = await create(
+      '家人的追記',
+      RelativeTime(source, RelativeRelation.after),
+      as: h.familyAuthorId,
+    );
+    await h.deactivateArchive();
+    final before = (await h.events().find(dependent))!;
+    final rememberedBefore = (await h.events().find(remembrance))!;
+    await h.events().softDelete(source);
+    expect(await h.events().purge(source), isFalse);
+    expect(await h.events().find(source), isNull);
+    for (final rowBefore in [before, rememberedBefore]) {
+      final row = (await h.events().find(rowBefore.id))!;
+      final time = decodeTime(row.timePayload) as RelativeTime;
+      expect(
+        time.deletedReference,
+        const DeletedTimeReference('私密畢業', private: true),
+      );
+      expect(row.sortStart, rowBefore.sortStart);
+      expect(row.sortEnd, rowBefore.sortEnd);
+      expect(row.layer, rowBefore.layer);
+      expect(row.authorId, rowBefore.authorId);
+      expect(row.updatedAt, rowBefore.updatedAt);
+    }
+  });
+
   group('新增：層級由資料存取層決定', () {
     test('一般模式新增為 original，不帶典藏期間', () async {
       final id = await create('進入大學', YearTime(2003));

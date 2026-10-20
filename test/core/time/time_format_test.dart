@@ -59,7 +59,7 @@ void main() {
       final during = RelativeTime('id', RelativeRelation.during);
       expect(TimeFormat.full(before, zh, relatedEventTitle: '入伍'), '入伍前');
       expect(TimeFormat.full(during, zh, relatedEventTitle: '留學'), '留學期間');
-      expect(TimeFormat.full(before, zh), '（參照事件已刪除）前');
+      expect(TimeFormat.full(before, zh), '（參照事件未提供）前');
     });
 
     test('年份不加千分位', () {

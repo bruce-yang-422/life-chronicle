@@ -25,7 +25,7 @@ class AttachmentWarehousePage extends ConsumerWidget {
             error: (error, stack) =>
                 Center(child: Text(l.attachmentUnavailable)),
             data: (files) => ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               children: [
                 Text(
                   l.attachmentUnreferenced,

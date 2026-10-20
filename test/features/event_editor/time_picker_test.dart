@@ -16,9 +16,14 @@ void main() {
     RangeTime(YearTime(2002), MonthTime(2004, 6)),
     AgeEstimateTime(20),
     RelativeTime('reference', RelativeRelation.after),
+    RelativeTime(
+      'reference',
+      RelativeRelation.after,
+      deletedReference: const DeletedTimeReference('保留原標題', private: true),
+    ),
   ];
   for (final value in times) {
-    testWidgets('時間選擇器完整保留 ${value.type} 原有精確度', (tester) async {
+    testWidgets('時間選擇器完整保留 ${value.toJson()} 原有精確度', (tester) async {
       TimeValue? selected;
       await tester.pumpWidget(
         MaterialApp(

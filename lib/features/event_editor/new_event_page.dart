@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +9,7 @@ import '../../core/editor/event_draft.dart';
 import '../../core/time/time_format.dart';
 import '../../core/time/time_value.dart';
 import '../../data/providers.dart';
+import '../../data/platform/location_platform.dart';
 import '../../data/repositories/attachment_repository.dart';
 import '../../data/repositories/event_draft_store.dart';
 import '../../l10n/app_localizations.dart';
@@ -18,6 +22,8 @@ import 'location_picker_page.dart';
 import '../../core/location/location_anchor.dart';
 import '../security/security_dialogs.dart';
 import '../shared/markdown_content.dart';
+import '../shared/ios_group.dart';
+import '../shared/writing_field.dart';
 
 class NewEventPage extends ConsumerStatefulWidget {
   const NewEventPage({super.key, this.eventId});
@@ -32,6 +38,28 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
   bool _loading = true, _busy = false, _restored = false;
   bool _draftError = false, _titleError = false;
   bool _locating = false, _locationError = false;
+  int _locationRequest = 0;
+  LocationPlatform? _pendingLocation;
+
+  Future<void> _cancelLocation({bool rebuild = true}) async {
+    // 先使舊結果失效，平台取消失敗或稍後回呼都不能改寫草稿。
+    _locationRequest++;
+    final platform = _pendingLocation;
+    _pendingLocation = null;
+    _locating = false;
+    if (rebuild && mounted) setState(() {});
+    try {
+      await platform?.cancel();
+    } catch (_) {
+      // 已使結果失效，取消錯誤不應阻擋文字地點或手動選點。
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_cancelLocation(rebuild: false));
+    super.dispose();
+  }
 
   void _setLocation(LocationAnchor anchor) {
     setState(() {
@@ -44,12 +72,16 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
   }
 
   Future<void> _currentLocation() async {
+    final request = ++_locationRequest;
+    final platform = ref.read(locationPlatformProvider);
+    _pendingLocation = platform;
     setState(() => _locating = true);
     try {
-      final anchor = await ref.read(locationPlatformProvider).current();
-      if (mounted) _setLocation(anchor);
+      final anchor = await platform.current();
+      if (mounted && request == _locationRequest) _setLocation(anchor);
     } catch (error) {
       if (mounted &&
+          request == _locationRequest &&
           !(error is PlatformException && error.code == 'location_cancelled')) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -58,11 +90,16 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _locating = false);
+      if (mounted && request == _locationRequest) {
+        _pendingLocation = null;
+        setState(() => _locating = false);
+      }
     }
   }
 
   Future<void> _chooseLocation() async {
+    await _cancelLocation();
+    if (!mounted) return;
     final chosen = await Navigator.push<LocationAnchor>(
       context,
       MaterialPageRoute(
@@ -334,6 +371,8 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
       ),
     );
     if (confirmed != true || _store == null) return;
+    await _cancelLocation();
+    if (!mounted) return;
     final sources = _sources;
     await _store!.remove(_key);
     if (sources.isNotEmpty) {
@@ -409,21 +448,62 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
     final section = _draft.sections[index];
     return Card(
       key: ObjectKey(section),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l.editorSectionTitle,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                ),
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Semantics(
+                    container: true,
+                    label: l.editorDragSectionNumber(index + 1),
+                    customSemanticsActions: {
+                      if (index > 0)
+                        CustomSemanticsAction(label: l.editorMoveUp): () =>
+                            _move(index, index - 1),
+                      if (index < _draft.sections.length - 1)
+                        CustomSemanticsAction(label: l.editorMoveDown): () =>
+                            _move(index, index + 1),
+                    },
+                    child: Tooltip(
+                      message: l.editorDragSectionNumber(index + 1),
+                      excludeFromSemantics: true,
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(
+                          Icons.drag_indicator,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             TextFormField(
               initialValue: section.title,
-              decoration: InputDecoration(labelText: l.editorSectionTitle),
+              decoration: writingDecoration(context, l.editorSectionHint),
               onChanged: (value) {
                 section.title = value;
                 _changed();
               },
             ),
+            const SizedBox(height: 16),
             MarkdownEditor(
               initialValue: section.content,
-              label: l.editorNarrative,
+              label: l.editorBodyLabel,
               onChanged: (value) {
                 section.content = value;
                 _changed();
@@ -501,7 +581,10 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
               .firstOrNull
         : null;
     final referenceTitle = referenceEvent == null
-        ? null
+        ? L10nTimeTexts(l).deletedReferenceTitle(
+            time,
+            canReadPrivate: ref.watch(securityProvider).canReadPrivate,
+          )
         : referenceEvent.privacy == 'private' &&
               !ref.watch(securityProvider).canReadPrivate
         ? l.securityPrivateEvent
@@ -521,11 +604,10 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
             absorbing: _busy,
             child: ListView(
               key: ValueKey(_version),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               children: [
-                Text(
+                IosPageTitle(
                   widget.eventId == null ? l.navNewEvent : l.editorEdit,
-                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 if (_restored) Text(l.editorRestored),
                 if (_draftError)
@@ -538,199 +620,225 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
                       ),
                     ],
                   ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  initialValue: _draft.title,
-                  decoration: InputDecoration(
-                    labelText: l.editorName,
-                    errorText: _titleError ? l.editorRequired : null,
-                  ),
-                  onChanged: (value) {
-                    _draft.title = value;
-                    if (_titleError && value.trim().isNotEmpty) {
-                      setState(() => _titleError = false);
-                    }
-                    _changed();
-                  },
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.calendar_month),
-                  onPressed: () async {
-                    final value = await chooseTime(
-                      context,
-                      _draft.time,
-                      excludeId: widget.eventId,
-                    );
-                    if (value != null && mounted) {
-                      setState(() => _draft.time = value);
-                      _changed();
-                    }
-                  },
-                  label: Text(l.editorTimeValue(timeLabel)),
-                ),
-                ...[
-                  TextFormField(
-                    initialValue: _draft.category,
-                    decoration: InputDecoration(labelText: l.editorCategory),
-                    onChanged: (value) {
-                      _draft.category = value;
-                      _changed();
-                    },
-                  ),
-                  _nameSuggestions(
-                    label: l.editorPlace,
-                    initial: _draft.place,
-                    suggestions: (text) async =>
-                        (await (await ref.read(placeRepositoryProvider.future))
-                                .suggest(text))
-                            .map((place) => place.name!)
-                            .toList(),
-                    onChanged: (value) {
-                      _draft.place = value;
-                      _changed();
-                    },
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      TextButton.icon(
-                        onPressed: _locating ? null : _currentLocation,
-                        icon: const Icon(Icons.my_location),
-                        label: Text(l.locationCurrent),
-                      ),
-                      TextButton.icon(
-                        onPressed: _chooseLocation,
-                        icon: const Icon(Icons.map_outlined),
-                        label: Text(l.locationMapPick),
-                      ),
-                    ],
-                  ),
-                  if (_locating) ...[
-                    Text(l.locationAwaitGps),
-                    TextButton(
-                      onPressed: () =>
-                          ref.read(locationPlatformProvider).cancel(),
-                      child: Text(l.timelineCancel),
-                    ),
-                  ],
-                  if (_draft.latitude != null) ...[
-                    Text(
-                      l.locationCoordinates(
-                        _draft.latitude!.toStringAsFixed(6),
-                        _draft.longitude!.toStringAsFixed(6),
-                      ),
-                    ),
+                IosGroup(
+                  title: l.editorGroupBasics,
+                  children: [
                     TextFormField(
-                      key: ValueKey(
-                        'radius-${_draft.latitude}-${_draft.longitude}',
-                      ),
-                      initialValue: _draft.radiusM?.toString() ?? '',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      key: const ValueKey('event-title-field'),
+                      initialValue: _draft.title,
                       decoration: InputDecoration(
-                        labelText: l.locationRadius,
-                        errorText: _locationError ? l.locationInvalid : null,
+                        labelText: l.editorName,
+                        errorText: _titleError ? l.editorRequired : null,
                       ),
                       onChanged: (value) {
-                        final number = double.tryParse(value);
-                        setState(() {
-                          _locationError =
-                              value.trim().isNotEmpty &&
-                              (number == null ||
-                                  !number.isFinite ||
-                                  number <= 0);
-                          _draft.radiusM = number;
-                        });
+                        _draft.title = value;
+                        if (_titleError && value.trim().isNotEmpty) {
+                          setState(() => _titleError = false);
+                        }
+                        _changed();
+                      },
+                    ),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.calendar_month),
+                      onPressed: () async {
+                        final value = await chooseTime(
+                          context,
+                          _draft.time,
+                          excludeId: widget.eventId,
+                        );
+                        if (value != null && mounted) {
+                          setState(() => _draft.time = value);
+                          _changed();
+                        }
+                      },
+                      label: Text(l.editorTimeValue(timeLabel)),
+                    ),
+                    TextFormField(
+                      initialValue: _draft.category,
+                      decoration: InputDecoration(labelText: l.editorCategory),
+                      onChanged: (value) {
+                        _draft.category = value;
                         _changed();
                       },
                     ),
                   ],
-                  _nameSuggestions(
-                    label: l.editorPeople,
-                    initial: '',
-                    suggestions: (text) async =>
-                        (await (await ref.read(personRepositoryProvider.future))
-                                .suggest(text))
-                            .map((person) => person.displayName)
-                            .toList(),
-                    onChanged: (value) => _pendingPerson = value,
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      if (_pendingPerson.trim().isNotEmpty) {
-                        setState(() {
-                          _draft.people.add(_pendingPerson.trim());
-                          _pendingPerson = '';
-                        });
+                ),
+                IosGroup(
+                  title: l.editorPlace,
+                  children: [
+                    _nameSuggestions(
+                      label: l.editorPlace,
+                      initial: _draft.place,
+                      suggestions: (text) async => (await (await ref.read(
+                        placeRepositoryProvider.future,
+                      )).suggest(text)).map((place) => place.name!).toList(),
+                      onChanged: (value) {
+                        _draft.place = value;
                         _changed();
-                      }
-                    },
-                    icon: const Icon(Icons.person_add),
-                    label: Text(l.editorAddPerson),
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final person in _draft.people.toSet())
-                        InputChip(
-                          label: Text(person),
-                          onDeleted: () {
-                            setState(() => _draft.people.remove(person));
-                            _changed();
-                          },
+                      },
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        TextButton.icon(
+                          onPressed: _locating ? null : _currentLocation,
+                          icon: const Icon(Icons.my_location),
+                          label: Text(l.locationCurrent),
                         ),
-                    ],
-                  ),
-                  TextFormField(
-                    initialValue: _draft.tags.join(', '),
-                    decoration: InputDecoration(labelText: l.editorTags),
-                    onChanged: (value) {
-                      _draft.tags = value
-                          .split(RegExp('[,，]'))
-                          .map((v) => v.trim())
-                          .where((v) => v.isNotEmpty)
-                          .toList();
-                      _changed();
-                    },
-                  ),
-                  DropdownButtonFormField<String>(
-                    initialValue: _draft.privacy,
-                    decoration: InputDecoration(labelText: l.editorPrivacy),
-                    items: [
-                      DropdownMenuItem(
-                        value: 'normal',
-                        child: Text(l.editorNormal),
-                      ),
-                      DropdownMenuItem(
-                        value: 'private',
-                        child: Text(l.editorPrivate),
+                        TextButton.icon(
+                          onPressed: _chooseLocation,
+                          icon: const Icon(Icons.map_outlined),
+                          label: Text(l.locationMapPick),
+                        ),
+                      ],
+                    ),
+                    if (_locating) ...[
+                      Text(l.locationAwaitGps),
+                      TextButton(
+                        onPressed: _cancelLocation,
+                        child: Text(l.timelineCancel),
                       ),
                     ],
-                    onChanged: (value) {
-                      _draft.privacy = value!;
-                      _changed();
-                    },
-                  ),
-                  OutlinedButton(
-                    onPressed: () async {
-                      final ids = await chooseEvents(
-                        context,
-                        selected: _draft.relatedIds,
-                        excludeId: widget.eventId,
-                      );
-                      if (ids != null && mounted) {
-                        setState(() => _draft.relatedIds = ids);
+                    if (_draft.latitude != null) ...[
+                      Text(
+                        l.locationCoordinates(
+                          _draft.latitude!.toStringAsFixed(6),
+                          _draft.longitude!.toStringAsFixed(6),
+                        ),
+                      ),
+                      TextFormField(
+                        key: ValueKey(
+                          'radius-${_draft.latitude}-${_draft.longitude}',
+                        ),
+                        initialValue: _draft.radiusM?.toString() ?? '',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: l.locationRadius,
+                          errorText: _locationError ? l.locationInvalid : null,
+                        ),
+                        onChanged: (value) {
+                          final number = double.tryParse(value);
+                          setState(() {
+                            _locationError =
+                                value.trim().isNotEmpty &&
+                                (number == null ||
+                                    !number.isFinite ||
+                                    number <= 0);
+                            _draft.radiusM = number;
+                          });
+                          _changed();
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+                IosGroup(
+                  title: l.editorGroupPeople,
+                  children: [
+                    _nameSuggestions(
+                      label: l.editorPeople,
+                      initial: '',
+                      suggestions: (text) async =>
+                          (await (await ref.read(
+                                personRepositoryProvider.future,
+                              )).suggest(text))
+                              .map((person) => person.displayName)
+                              .toList(),
+                      onChanged: (value) => _pendingPerson = value,
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        if (_pendingPerson.trim().isNotEmpty) {
+                          setState(() {
+                            _draft.people.add(_pendingPerson.trim());
+                            _pendingPerson = '';
+                          });
+                          _changed();
+                        }
+                      },
+                      icon: const Icon(Icons.person_add),
+                      label: Text(l.editorAddPerson),
+                    ),
+                    if (_draft.people.isNotEmpty)
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final person in _draft.people.toSet())
+                            InputChip(
+                              label: Text(person),
+                              onDeleted: () {
+                                setState(() => _draft.people.remove(person));
+                                _changed();
+                              },
+                            ),
+                        ],
+                      ),
+                    TextFormField(
+                      initialValue: _draft.tags.join(', '),
+                      decoration: InputDecoration(labelText: l.editorTags),
+                      onChanged: (value) {
+                        _draft.tags = value
+                            .split(RegExp('[,，]'))
+                            .map((v) => v.trim())
+                            .where((v) => v.isNotEmpty)
+                            .toList();
                         _changed();
-                      }
-                    },
-                    child: Text(
-                      '${l.editorRelated} (${_draft.relatedIds.length})',
+                      },
+                    ),
+                  ],
+                ),
+                IosGroup(
+                  title: l.editorGroupOptions,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: _draft.privacy,
+                      decoration: InputDecoration(labelText: l.editorPrivacy),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'normal',
+                          child: Text(l.editorNormal),
+                        ),
+                        DropdownMenuItem(
+                          value: 'private',
+                          child: Text(l.editorPrivate),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        _draft.privacy = value!;
+                        _changed();
+                      },
+                    ),
+                    OutlinedButton(
+                      onPressed: () async {
+                        final ids = await chooseEvents(
+                          context,
+                          selected: _draft.relatedIds,
+                          excludeId: widget.eventId,
+                        );
+                        if (ids != null && mounted) {
+                          setState(() => _draft.relatedIds = ids);
+                          _changed();
+                        }
+                      },
+                      child: Text(
+                        '${l.editorRelated} (${_draft.relatedIds.length})',
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    l.editorGroupNarrative,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                ],
+                ),
                 ReorderableListView(
+                  buildDefaultDragHandles: false,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   onReorderItem: _move,

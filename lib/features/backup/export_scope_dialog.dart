@@ -18,6 +18,7 @@ class ExportScopeDialog extends ConsumerStatefulWidget {
 
 class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
   bool _includeMedia = true;
+  bool _excludePrivate = false;
   final _excluded = <String>{};
 
   @override
@@ -35,11 +36,18 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CheckboxListTile(
+                    value: _excludePrivate,
+                    onChanged: (value) =>
+                        setState(() => _excludePrivate = value!),
+                    title: Text(l.backupExcludePrivate),
+                  ),
+                  CheckboxListTile(
                     value: _includeMedia,
                     onChanged: (value) =>
                         setState(() => _includeMedia = value!),
                     title: Text(l.backupMedia),
                   ),
+                  if (_excludePrivate) Text(l.backupExcludePrivateNotice),
                   Text(l.backupMediaNotice),
                   if (_includeMedia && widget.options.isNotEmpty) ...[
                     const SizedBox(height: 12),
@@ -50,21 +58,39 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
                         itemCount: widget.options.length,
                         itemBuilder: (context, index) {
                           final option = widget.options[index];
+                          final privateOnly =
+                              _excludePrivate &&
+                              option.references > 0 &&
+                              option.normalReferences == 0;
+                          final names =
+                              _excludePrivate &&
+                                  option.normalNames?.isNotEmpty == true
+                              ? option.normalNames!
+                              : option.names;
                           return CheckboxListTile(
-                            value: !_excluded.contains(option.blobId),
-                            onChanged: (value) => setState(() {
-                              if (value == true) {
-                                _excluded.remove(option.blobId);
-                              } else {
-                                _excluded.add(option.blobId);
-                              }
-                            }),
-                            title: Text(option.names.join('\n')),
+                            value:
+                                !privateOnly &&
+                                !_excluded.contains(option.blobId),
+                            onChanged: privateOnly
+                                ? null
+                                : (value) => setState(() {
+                                    if (value == true) {
+                                      _excluded.remove(option.blobId);
+                                    } else {
+                                      _excluded.add(option.blobId);
+                                    }
+                                  }),
+                            title: Text(names.join('\n')),
                             subtitle: Text(
-                              l.backupMediaDetails(
-                                formatBytes(option.byteSize),
-                                option.references,
-                              ),
+                              privateOnly
+                                  ? l.backupPrivateMediaExcluded
+                                  : l.backupMediaDetails(
+                                      formatBytes(option.byteSize),
+                                      _excludePrivate
+                                          ? option.normalReferences ??
+                                                option.references
+                                          : option.references,
+                                    ),
                             ),
                           );
                         },
@@ -87,6 +113,7 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
                   context,
                   ArchiveMediaScope(
                     includeMedia: _includeMedia,
+                    excludePrivateEvents: _excludePrivate,
                     excludedBlobIds: _excluded,
                   ),
                 )

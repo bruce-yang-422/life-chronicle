@@ -114,9 +114,9 @@ test/                    # 與 lib/ 對應的測試結構
 | T04 | 排序比較器（雙向） | T03 | §5.1 | 完成 |
 | T05 | 資料庫結構與約束 | T01、T03 | §10、§9.2 | 完成 |
 | T06 | Repository 與權限檢查 | T04、T05 | §9.3、§5.1 | 完成 |
-| T07 | 時間軸首頁 | T06 | §4.6 | 進行中 |
+| T07 | 時間軸首頁 | T06 | §4.6 | 完成 |
 | T08 | 完整新增與時間選擇器 | T06 | §4.1、§5 | 完成 |
-| T09 | 紀事本末詳情與回顧 | T08 | §4.2、§5 | 進行中 |
+| T09 | 紀事本末詳情與回顧 | T08 | §4.2、§5 | 完成 |
 | T10 | 附件匯入與倉庫 | T06 | §7 | 完成 |
 | T11 | 簡易搜尋 | T06 | §6 | 完成 |
 | T12 | 匯出 ZIP 封存 | T09、T10 | §8.1–§8.7 | 進行中 |
@@ -128,7 +128,72 @@ test/                    # 與 lib/ 對應的測試結構
 | T18 | 最近刪除 | T06、T09 | §9.3 | 進行中 |
 | T19 | APP 鎖定與私密事件保護 | T00、T06 | §4.8 | 進行中 |
 
-### 目前進度（2026-10-19）
+### 目前進度（2026-10-20）
+
+#### 最新剩餘工作清點（接續實作時優先看本表）
+
+第一階段共 **20 項任務：13 項完成、7 項進行中、0 項未開始**。以下 7 項包含功能缺口與尚缺驗收，不能以任務數換算開發完成百分比。第一階段須驗收的範圍為 §13 的 **38 條**（#1–#6、#8、#11–#22、#25–#43）；目前尚無完整逐條通過報告，不能將測試案例數當成驗收通過數。
+
+| 任務 | 剩餘內容 |
+| --- | --- |
+| T12 匯出 | 獨立分包、>4GB ZIP64 實際往返、裝置分享、macOS／Android 外部解壓閱讀與跨裝置核對。整筆私密事件排除（含私密快照／專屬媒體）、個別媒體副本排除及一般封存的 Windows 離線閱讀驗證已完成；大型／分包跨系統與跨實體裝置仍待驗證。 |
+| T13 還原 | 損毀包僅還原完好部分、其餘版本／分包相容性、大型媒體裝置取消、跨實體裝置完整還原。v1→v2 主題規則遷移、同名標籤 ID 重連、較新次版本提示及共享同名衝突逐筆決策已實作，不重列為未實作。 |
+| T14 版面／無障礙 | 全頁面最大字級、螢幕閱讀器與 48dp 逐項稽核、裝置旋轉／分割畫面；320dp 三倍字級裝置流程曾被模擬器繪圖崩潰中斷。iOS 視覺與縮小一階已完成。 |
+| T15 整體驗收 | 38 條驗收報告、中階 Android 實機、首次使用者不看教學、100 筆事件的完整裝置備份還原流程。資料層往返測試不能代替實機。 |
+| T17 GPS | Android 成功定位／逾時／離線／EXIF／地圖拖曳操作、座標驗證與私密保護、圖資連網範圍稽核；本輪取消／重試／離頁競態與錯誤恢復已補，裝置拒絕權限提示已確認。iOS 原生實作屬後續平台工作。 |
+| T18 最近刪除 | 標題快照與私密遮蔽、照片／追憶 Repository 回歸已完成；仍須裝置操作完整刪除、復原、永久刪除及參照／照片／追憶組合案例。 |
+| T19 安全性 | 全內容與參照隱私／權限稽核、復原碼與遺族密碼裝置驗收；iOS Keychain／Face ID 與預覽保護屬後續平台工作。 |
+
+本表不含已提前完成的第二階段智慧主題 T20；連同 T20 共 21 項追蹤任務、14 項完成。主介面五個分頁已無啟用中的「此功能開發中」佔位頁。下一個主要實作缺口為 T12 的獨立分包／ZIP64，及 T13 損毀包的完好部分還原；T15 實機與首次使用者驗收不能由本機測試取代。
+
+#### 實作與驗證紀錄（新到舊）
+
+- **T12 私密事件排除（2026-10-20，使用者同意第一個方案）**：備份範圍新增可見勾選，匯出副本過濾私密事件、所有層的記述／追憶／附件引用、事件對照／篇章引用／雙向關聯及相關修訂；移除私密標題快照，保留相對參照 ID、最後排序區間、保留列的作者／層級／時間。共用副本與未引用倉庫副本保留，私密專屬 blob／媒體排除；人物／地點／標籤等獨立資料仍保留並在介面說明。來源資料不回寫；無可用參照時以「參照事件未提供」顯示，避免誤判為已刪除。企劃書 §4.1／§5.1／§8.6 與 HTML 已同步，未新增套件或修改資料庫 schema。
+- **私密封存／還原驗證（2026-10-20）**：啟用排除時使用格式 1.2／schema 2，manifest 只記規則與排除總數，不列私密標題、檔名、ID 或雜湊；未啟用保持 1.1。還原預覽及報告明示刻意排除，不重建空白事件；較新次版本提示門檻更新。新增純 Dart 過濾、範圍組合、UI 專屬副本停用／共用保留、私密快照、原始／追憶內容、正式 ZIP 往返與還原預覽測試。最終完整 **366 項測試通過**、分析無問題，四種範圍的獨立 Schema／CommonMark／HTML 核對 **352 項通過**。日誌為 `build/private_export_full_final.log`、`private_export_analyze_final.log`、`private_export_schema_validation.log`，驗收／一般入口 APK 均建置成功。
+- **私密排除 Android 預覽（2026-10-20）**：`tools/private_export_acceptance.dart` 使用獨立資料庫、草稿、媒體、備份與記憶體偏好。已實際勾選、確認並匯出，留下 2 一般事件／1 附件引用／2 blob（共用及倉庫），刻意排除 1 私密事件／1 專屬 blob／1 私密標題快照；整包私密測試標記缺席，裝置 ZIP 再通過 29 項獨立核對。系統檔案選取器開啟後，還原預覽明示排除筆數；未向原資料庫匯入。測後已保留資料裝回一般入口，Android Studio 預覽停在新備份範圍選項；50 事件／100 段落／5 附件引用、20 張業務表（含修訂紀錄）、7 份媒體與草稿一致，完整性 `ok`、外鍵錯誤 0。報告為 `build/private_export_device_report.json`、`private_export_preservation_report.json`；畫面為 `build/demo_archive_validation/private_export_scope_selected.png`、`private_export_restore_preview_exact.png`、`private_export_final_preview.png`。T12 其餘分包／ZIP64／分享與跨實體裝置驗收缺口仍保留。
+- **T07 效能驗收完成（2026-10-20）**：先前引擎下載阻礙已解除，現有程式以獨立 5,000 筆資料庫建置 debug／profile，在 Android Studio 內嵌模擬器重新量測。從 `TimelinePage` 建立到第一批事件完成繪製（含資料庫開啟／查詢，不含首次造資料及引擎啟動），profile 三次為 **613／688／671ms**，均低於 1 秒；debug 為 890／1,309／1,280ms，不宣稱 debug 全數達標或代表中階實機效能。先前年份／排序／篩選等驗收證據保留，T07 改為完成；T15 實機效能仍待驗收。測後恢復一般入口，20 張業務表、媒體與草稿一致。報告為 `build/timeline_remeasure_report.json`，建置為 `timeline_profile_retry.log`，量測為 `timeline_profile_1.log`～`timeline_profile_3.log`；該階段完整 361 項測試通過，最終本輪回歸為上述 366 項。
+
+- **T09 詳情與回顧完成（2026-10-20）**：書寫卡片頂部新增 48dp 可見拖曳把手，以段落編號標示操作對象，補上獨立朗讀標籤與上移／下移無障礙動作，保留既有可見排序按鈕。新增真實拖曳回歸，驗證自訂標題與正文一起移動並保存草稿；另以正式 ZIP 完整核對未命名記述直接為內文、自訂段落排序、空段落不出現在閱讀版、追加回顧不覆寫及還原後作者／層級／時間一致。最終完整 **361 項測試全數通過**，分析無問題，驗收／一般入口 APK 均建置通過；日誌為 `build/detail_full_numbered.log`、`detail_analyze_final.log`、`detail_drag_numbered.log`、`detail_roundtrip_final.log`、`detail_normal_numbered_build.log`。
+- **T09 Android 驗收 #2／#30（2026-10-20）**：新增禁止 release 的 `tools/detail_acceptance.dart`，所有測試使用獨立 SQLite、草稿、媒體、備份及偏好，未向使用者資料建立事件。裝置實際閱讀一段未命名記述、以編號把手拖曳「想對你說的話」至第一段、保存後追加第二則回顧並確認第一則保留，再透過正式備份頁匯出 ZIP。裝置封存與讀取順序一致、空段落未出現在 Markdown／HTML；獨立 Schema／CommonMark／HTML 連結驗證 **29 項通過**。驗收資料為 2 事件／4 段落（含供隱藏驗證的空段落）／2 回顧，報告為 `build/detail_device_report.json`、封存解壓在 `build/detail_device_archive/`，畫面為 `build/demo_archive_validation/detail_single_device.png`、`detail_dragged.png`、`detail_reflections_device.png`、`detail_export_device.png`。已以 `lib/main.dart` 一般入口裝回正常預覽，T09 狀態改為完成；不代表 T12／T13 全部封存功能或 T15 整體驗收完成。
+- **一般入口恢復與資料核對（2026-10-20）**：已裝回一般入口，Android Studio 預覽停在原本資料的新增書寫區。最初驗收前至最終恢復後，20 張使用者業務表（含原修訂紀錄）、7 份媒體雜湊及草稿完全一致，維持 50 事件／100 段落／5 附件引用，完整性 `ok`、外鍵錯誤 0，沒有向原資料庫寫入測試事件或歷史。核對為 `build/detail_preservation_report.json`，一般入口安裝日誌為 `build/detail_restore_install.log`，畫面為 `build/demo_archive_validation/detail_final_preview.png`。獨立驗收資料保留於專用 `detail_acceptance` 目錄供重現，不作為一般 APP 啟動入口。
+
+
+- **書寫欄位辨識改善（2026-10-20，使用者回報）**：段落標題改為固定外部標籤，搭配獨立圓角外框及可留空的範例提示；正文使用固定「內文」標籤、六行起跳的明確輸入框與書寫提示。外框／底色／聚焦狀態自行定義，避免 iOS 分組的無框欄位主題使書寫區與說明文字混淆。格式工具列移至正文下方，Markdown 提示獨立顯示；新增、編輯及共用 Markdown 書寫／回顧入口同步套用，保留原先縮小後字級。新提示同步繁中／英文 ARB，未變更資料結構或書寫儲存方式。
+- **書寫回歸（2026-10-20）**：新增操作案例驗證固定標題／內文標籤、輸入兩個欄位與預覽後草稿分開保存；窄畫面三倍字級、格式工具列、emoji、草稿恢復與段落操作相關回歸通過。最終完整 **359 項測試全數通過**，分析無問題，Android x64 debug APK 建置成功。日誌為 `build/writing_editor_tests.log`、`writing_layout_tests.log`、`writing_full.log`、`writing_analyze_final.log`、`writing_build.log`。T14 全站無障礙與 T15 整體驗收仍維持原缺口。
+- **書寫裝置預覽（2026-10-20）**：完整備份後保留資料安裝 APK，Android Studio 模擬器已捲至書寫區，實際確認標題／內文框、正文聚焦藍框及鍵盤入口；預覽停在新版書寫區，未輸入或清除使用者草稿。前後 20 張業務表、7 份媒體雜湊及草稿一致，保留 50 事件／100 段落／5 附件引用，完整性 `ok`、外鍵錯誤 0。報告為 `build/writing_device_report.json`，畫面為 `build/demo_archive_validation/writing_preview_final.png`、`writing_keyboard.png`，安裝日誌為 `build/writing_install.log`。
+
+- **T20 需求修訂：標籤智慧主題（使用者已確認）**：原本手動選事件的篇章改為「主題瀏覽」；主題保存名稱及標籤 ID 條件，可選全部符合（AND）／任一符合（OR），加上可選排除標籤。排除優先、至少一個納入標籤、同標籤不能同時納入與排除。結果隨事件／標籤／最近刪除狀態即時更新，沿用唯一時間排序器，不保存固定事件快取。私密與最近刪除事件不納入。主題設定沿用層級／典藏權限，刪除主題不修改事件或標籤。原手動篇章保留閱讀，使用者設定條件並儲存後才轉換；後文手動篇章紀錄僅為歷史。
+- **智慧主題資料與封存相容**：SQLite schema 升為 v2，v1 僅新增可空的 `stories.rules_json` 欄位並保留資料與觸發器；新封存格式 1.1／schema 2，接受舊版 schema 1 篇章缺少規則欄位。規則內標籤 ID 隨同名標籤還原重連，JSON 保存條件，Markdown／HTML 保存匯出當下的符合結果與條件。主題名稱的全文搜尋亦依規則即時計算；智慧結果不修改原始層事件或其時間。企劃書 §4.2、§10 與 HTML 已依使用者確認同步。
+- **智慧主題最終驗證（2026-10-20）**：最終完整 **358 項測試全數通過**、分析無問題、Android x64 debug APK 建置成功。涵蓋 AND／OR／排除優先、空條件與交錯標籤驗證、規則保存／ID 重連、事件與標籤異動的串流更新、刪除／復原、私密排除、舊版篇章轉換不改事件、典藏唯讀、英文 320dp 三倍字級與鍵盤／寬度切換、v1 SQLite 升級保留層級／作者／觸發器、v1 封存缺欄相容、v2 規則往返及同名標籤重用。獨立 Schema／CommonMark **270 項檢查通過**。日誌為 `build/themes_target_tests.log`、`themes_ui_migration_tests.log`、`themes_archive_tests.log`、`themes_full_final_pass.log`、`themes_analyze_final.log`、`themes_build.log`；`themes_target_tests.log` 為修正前的中途紀錄，最終結果以後述完整回歸為準。
+- **智慧主題裝置驗收（2026-10-20）**：完整備份後以 `adb install -r` 保留資料更新 Android Studio 模擬器，確認 SQLite 已升至 v2。實際建立臨時主題、搜尋標籤、設定納入 16 歲／排除 17 歲（AND 符合 3 筆），編輯為 OR 並納入 18 歲（符合 6 筆），開啟原事件詳情並確認刪除主題。測試主題已移除，預覽停在新版「主題瀏覽」。前後 19 張非修訂紀錄業務表、7 份媒體雜湊及草稿一致，保留 50 事件／100 段落／5 附件引用；只追加本次主題建立／修改／刪除 3 筆歷史，完整性 `ok`、外鍵錯誤 0。報告為 `build/themes_device_report.json`，畫面為 `build/demo_archive_validation/themes_editor_and.png`、`themes_detail_and.png`、`themes_editor_or.png`、`themes_detail_or.png`、`themes_preview_final.png`。T20 本次修訂範圍完成；T13 其他版本／分包與 T14／T15 的整體驗收缺口仍保留。
+
+以下為按日期累積的實作證據；較早紀錄中的測試總數與缺口保留作歷史，不覆蓋上表的最新清點。
+
+- **故事篇章提前實作（T20，2026-10-20，使用者指定）**：原列第二階段的篇章改為優先交付，第一階段 20 項的原始統計維持不變。已接上篇章清單／空狀態、建立與改名、多選既有事件、可見的上移／下移／移出按鈕、依自訂順序閱讀及開啟原事件完整詳情、刪除確認。篇章只保存事件 ID 與順序，同一事件可屬於多篇章，移出或刪除篇章不修改事件、記述、附件或最近刪除。沿用 iOS 風格與縮小一階字級，全部新文字同步繁中／英文 ARB，未新增套件或變更資料庫 schema。
+- **篇章權限與備份（2026-10-20）**：新增 Repository 使用共用建立層級與修改權限檢查；典藏中的原始篇章唯讀，家人建立的後續追憶篇章保留原作者、建立時間、層級與典藏期間。私密引用未驗證時僅顯示佔位並在開啟前驗證，新加入私密引用須有權限；既有未授權引用可保留但不揭露內容。已刪除事件在篇章標示且不可新選，永久刪除同步移除引用。篇章名稱接入既有全文搜尋；正式 ZIP 保存篇章與引用，Markdown／HTML 新增按篇章順序連結原事件的閱讀版，原始與追憶檔案分開。
+- **篇章自動化回歸（2026-10-20）**：新增 13 項測試（6 項 Repository、5 項 Widget、1 項閱讀版、1 項正式 ZIP 還原），涵蓋共用／排序／刪除不改原事件、無效輸入交易回滾、私密／典藏／追憶權限、最近刪除／永久刪除、搜尋與串流更新、完整畫面操作、重新鎖定、英文 320dp 三倍字級／鍵盤及寬度切換、閱讀連結與跳脫、ZIP 還原順序不複製事件。最終完整 **350 項測試全數通過**，分析無問題，Android x64 debug APK 建置成功。日誌為 `build/stories_repository_tests.log`、`stories_integration_tests.log`、`stories_full_final.log`、`stories_analyze_final.log`、`stories_build.log`。
+- **篇章裝置驗收與預覽（2026-10-20）**：完整備份私有資料後，已保留資料安裝 APK 至 Android Studio 內嵌模擬器，實際建立臨時篇章、選入兩個事件、改名／下移調序、開啟原事件詳情及確認刪除篇章，結束後移除測試篇章，預覽停在篇章分頁。UI 自動化擷取曾被系統中止（exit 137），已由原畫面接續完成，未重複建立資料。前後 19 張非修訂紀錄的業務表、7 份媒體雜湊與草稿完全一致，保留 50 筆事件、100 段落、5 個附件引用，完整性 `ok`、外鍵錯誤 0；僅追加測試篇章的建立／修改／刪除 3 筆修訂紀錄。報告為 `build/stories_device_report.json`，安裝為 `stories_install.log`，畫面為 `build/demo_archive_validation/stories_detail.png`、`stories_editor_reordered.png`、`stories_event_detail.png`、`stories_delete_confirmation.png`、`stories_preview_final.png`。T20 本次篇章交付範圍完成，不取代 T14 全站無障礙及 T15 實體裝置等整體驗收。
+
+- **T17 定位取消與延遲回呼修正（2026-10-20）**：編輯頁使用請求編號隔離定位結果，使用者取消、改用地圖、確認捨棄草稿或頁面卸載時，先使舊請求失效再取消原生定位。平台取消失敗不阻擋文字地點或手動選點；過期成功／錯誤均不改寫草稿或結束下一筆等待狀態。Android 原生成功／逾時／監聽回呼核對原始請求身分，避免舊回呼完成新請求。未新增套件或變更資料結構／介面文字。
+- **定位回歸（2026-10-20）**：新增 **9 項 Widget 測試**，涵蓋拒絕／逾時／定位關閉後可重試、取消後結果交錯、取消平台失敗、頁面卸載、地圖回傳座標不被覆寫、拒絕定位後仍可正式儲存文字地點，以及捨棄草稿不被延遲結果重建。最終完整 **337 項全數通過**，分析無問題，Android x64 debug APK 建置成功；日誌為 `build/gps_requests_tests_final.log`、`gps_requests_full_final.log`、`gps_requests_analyze_final.log`、`gps_requests_build.log`。地圖測試僅驗證選點頁回傳資料與競態，不冒稱已測圖資／釘選拖曳。
+- **定位裝置預覽與資料核對（2026-10-20）**：完整備份私有資料後，以 `adb install -r` 成功更新 Android Studio 內嵌模擬器，實際點擊目前位置並拒絕權限，確認出現可繼續使用文字地點的提示。測後恢復原本未授權狀態及權限詢問旗標，預覽停在新增頁。前後 20 張業務表、7 份媒體雜湊與草稿檔案一致，維持 50 筆事件、100 段落、5 個附件引用，完整性 `ok`、外鍵錯誤 0；報告為 `build/gps_requests_device_report.json`，畫面為 `build/demo_archive_validation/gps_requests_denied.png`、`gps_requests_preview.png`。T17 其餘缺口如上表，維持「進行中」。
+
+- **預設文字與 UI 縮小一階（2026-10-20，使用者指定）**：保留 iOS 風格，正文 16→14sp、頁面大標題 32→28sp、一般標題 17／21→15／19sp、一般圖示 22→20dp、底部分頁 64→56dp。輸入欄位與按鈕內距、分組間距、頁面內距、卡片圓角、列表與彈出視窗同步縮小；時間軸圖文列 184→160dp、精簡列 80→72dp，捲動定位仍共用既有列高換算。已很小的輔助文字保留可讀下限，互動入口至少 48dp，未限制系統字級放大。企劃書 §4.4 與 HTML 已同步；未新增套件或變更資料庫／業務資料。
+- **縮小版驗證與預覽（2026-10-20）**：最終完整 **328 項測試通過**，分析無問題，x64 debug APK 建置與保留資料安裝成功；日誌為 `build/compact_ui_full_final.log`、`compact_ui_analyze.log`、`compact_ui_build.log`、`compact_ui_install.log`。Android Studio 內嵌模擬器已實際確認時間軸與新增頁，預覽停在新增頁，系統字級仍為原本 1.0。更新前完整備份私有資料，前後 20 張業務表及 7 份媒體雜湊一致，保留 50 筆事件、100 個段落及 5 個附件引用，完整性 `ok`、外鍵錯誤 0；比較為 `build/compact_ui_data_comparison.json`，畫面為 `build/demo_archive_validation/compact_ui_timeline.png`、`compact_ui_editor.png`。T14 全頁面無障礙與裝置極限設定等既有驗收缺口仍保留。
+
+- **T14 搜尋頁大字級與鍵盤改善（2026-10-20）**：搜尋表單與結果改用同一個 `CustomScrollView`，結果以 Sliver 按需建立，避免大字級／鍵盤開啟時固定表單擠壓結果區。窄螢幕或放大字級時年份欄位上下排列，切換寬度保留輸入條件；鍵盤可直接送出搜尋，有效條件送出後收起鍵盤，拖曳亦可收起。年份錯誤提示加入即時朗讀語意；沿用現有繁中／英文文字與 iOS 樣式，未新增套件或變更資料庫／排序／搜尋規則。
+- **搜尋大字級回歸（2026-10-20）**：新增 6 項 Widget 測試，涵蓋繁中／英文 320dp 三倍字級與鍵盤下搜尋後開啟詳情、年份錯誤與朗讀語意／修正、切換寬度保留條件及空結果、重新鎖定移除私密結果、60 筆結果按需建立並捲到最後一筆。完整 **328 項全數通過**、分析無問題，x64 debug APK 建置並保留資料安裝成功。日誌為 `build/search_accessibility_full.log`、`search_accessibility_analyze.log`、`search_accessibility_build.log`、`search_accessibility_install.log`。
+- **搜尋裝置驗證與限制（2026-10-20）**：Android Studio 內嵌 `Medium_Phone` 已以兩倍字級實際輸入 `demo-16`、送出搜尋、核對僅顯示對應 16 歲紀錄並開啟詳情；完成後恢復原本字級 1.0、1080×2400 解析度與一般空白條件搜尋預覽。320dp／三倍字級的裝置驗證途中模擬器發生 `bad color buffer handle` 並退出，已保留資料以軟體繪圖冷啟動恢復，該極限設定的裝置全流程仍未完成，不以自動化通過取代裝置驗收。裝置報告為 `build/search_accessibility_device_report.json`，畫面位於 `build/demo_archive_validation/search_large_font_*.png` 與 `search_accessibility_preview_final.png`。操作前完整備份 APP 私有目錄；結束後 20 張業務表與 7 份媒體雜湊完全一致，維持 50 筆事件、100 個段落、5 個附件引用，完整性 `ok`、外鍵錯誤 0，見 `build/search_accessibility_data_comparison.json`。T14 維持「進行中」，全頁面朗讀／48dp 與旋轉／分割畫面稽核仍待完成。
+
+- **T14 全站 iOS 視覺重設（2026-10-20，使用者指定）**：集中更新系統藍、灰白分組／純黑深色背景、大標題、無陰影圓角卡片、細分隔線、輸入欄位、操作按鈕、底部分頁、彈出視窗與 Cupertino 導覽轉場；安全性開關採自適應 Cupertino 風格。新增／編輯頁分成事件資訊、地點、人物與標籤、隱私與關聯、記述與附件；文字工具列改為獨立底色區塊。搜尋使用分組結果與分隔線，備份與設定採分組清單，詳情統一標題與閱讀字級。群組欄位移除獨立外框，避免浮動標籤被圓角裁切。繁中／英文分組標題同步 ARB；企劃書 §4.4 與 HTML 已同步。未新增套件或變更資料庫結構。
+- **iOS 視覺重設驗證（2026-10-20）**：完整回歸 **322 項全數通過**；搜尋／備份排版微調後 7 項、最終分組欄位微調後 10 項相關回歸通過，最終分析無問題。新增 320dp／三倍字級表單捲至儲存且保留草稿案例，既有普通字級工具列同排、深色大字級首頁、平板寬度切換保留選取與草稿案例通過。日誌為 `build/ios_redesign_full.log`、`ios_redesign_polish_tests.log`、`ios_redesign_group_final_tests.log`、`ios_redesign_analyze.log`、`ios_redesign_build_final.log`。T14 維持「進行中」：全頁面螢幕閱讀器、48dp 逐項稽核與裝置旋轉／分割畫面驗收尚未完成。
+- **iOS 視覺重設裝置預覽（2026-10-20）**：最終 x64 APK 已保留資料安裝，套件首次安裝時間不變；Android Studio 內嵌 `Medium_Phone` 已顯示新版繁中介面，停在新增頁。實際開啟時間軸、搜尋、備份、時區設定、事件詳情，並確認新增頁淺色／深色切換，結束恢復原本淺色設定。部署前完整備份 APP 私有目錄，原有 20 張業務表與 7 份媒體雜湊完全一致，維持 50 筆事件、100 個段落與 5 個附件引用，完整性 `ok`、外鍵錯誤 0。比較為 `build/ios_redesign_data_comparison.json`，完整備份位於 `build/demo_archive_validation/ios_redesign_before_20261020_154006/private_data.tar`，安裝日誌為 `build/ios_redesign_install.log`；畫面在同目錄 `ios_*.png`（最終新增頁為 `ios_editor_final.png`）。未解除安裝或清除業務資料。
+
+- **預覽面板與繁中語言（2026-10-20）**：Android Studio 的 Running Devices 已展開 `Medium Phone API 36.0`，使用者確認看到 APP。因模擬器語言為英文，已透過 Android 原生每個 APP 語言設定，將本 APP 預覽指定為 `zh-Hant-TW`；實際確認時間軸與導覽文字已切回繁中。未改動 APP 的語言跟隨系統規則或業務資料。操作面板時誤貼到 `main.dart` 的文字已復原，檔案與原版本一致。畫面為 `build/demo_archive_validation/preview_traditional_chinese.png`。
+
+- **T18 相對參照標題快照（2026-10-20，使用者已確認）**：沒有追憶附掛的原事件永久刪除前，於同一交易將原標題與私密標記存入直接參照者的 `time_payload.deleted_reference`，不改參照者的層級、作者、修改時間或最後排序區間，包含後續追憶層參照者。時間軸、搜尋、詳情及編輯預覽在原事件不存在時使用快照；私密快照未驗證時遮蔽，重新鎖定立即隱藏。原事件仍存在時優先讀取原事件；時間選擇器保留同一參照的快照，重新指定時移除舊快照。舊格式無快照時不推測標題。JSON／ZIP 還原保留快照，Markdown／HTML 標示原標題與已刪除；時間值 Schema 同步。企劃書 §5.1 與 HTML 已更新，未新增套件或更動資料庫 schema v1。
+- **T18／T19 刪除確認視窗保護（2026-10-20）**：私密事件永久刪除確認視窗監聽安全性狀態，重新鎖定後遮蔽標題並停用確認，提交前再次檢查私密權限。新增回歸涵蓋鎖定後無法提交、普通／私密刪除參照顯示、解鎖及重新鎖定、快照 JSON 相容性、原始／追憶參照者資訊不變、時間選擇器與跨資料庫 ZIP 還原。完整 **321 項測試通過**、分析無問題、Schema／CommonMark／HTML **264 項檢查通過**，x64 debug APK 建置通過；日誌為 `build/recycle_snapshot_full.log`、`recycle_snapshot_analyze.log`、`recycle_snapshot_schema_export.log`、`recycle_snapshot_schema_check.log`、`recycle_snapshot_build.log`。
+- **Android Studio 預覽與資料復原（2026-10-20）**：既有 `Medium_Phone` 啟動崩潰後，以軟體繪圖冷啟動恢復；內嵌面板須從 View → Tool Windows → Running Devices 開啟。模擬器 `/data` 設為 6 GB，更新 APK 曾因空間不足失敗；備份並移除三個可重建 Flutter 偵錯檔（約 103 MB）後，`adb install -r` 成功，詳見 `build/recycle_snapshot_install_final.log`。使用者執行 `flutter run` 的時段發生套件重新安裝（首次安裝時間重設），畫面核對發現資料空白；已由操作前 `build/demo_archive_validation/recycle_final_before_20261020_151043/files.tar` 回復紀錄與媒體。復原後 20 張業務表與 7 份媒體雜湊完全一致，維持 50 筆事件、100 個段落、5 個附件引用，完整性 `ok`、外鍵錯誤 0；比對為 `build/recycle_restore_comparison.json`。一般入口新版已開啟，僅連線偵錯可用 `flutter attach -d emulator-5554`。未解除安裝其他 APP。最近刪除入口與一般畫面已操作，新的私密／快照案例由自動化測試驗證，尚未在裝置建立對應案例；T18／T19 維持「進行中」，不視為全項裝置驗收。
 
 - **模擬器清理與持久安裝（2026-10-19 最新）**：先完整備份 APP 私有資料，再回收 Android 快取、移除已備份的舊測試暫存（約 5 MB）與可重建 Flutter 偵錯快照／kernel（約 103 MB）；未清除 APP 資料、照片、正式備份或解除安裝。可用空間由約 390 MB 增至清理後 591 MB，保留資料安裝最新 x64 debug APK **成功**，安裝後剩約 590 MB。重開 APP 已確認個別影音副本選擇功能存在，不再依賴熱更新。前後 20 張業務表與全部媒體雜湊一致，維持 50 筆事件、100 個段落、5 個附件引用與 7 個 blob，完整性 `ok`、外鍵錯誤 0。先前「新版 APK 持久安裝受容量限制」已解除。備份與比對位於 `build/restore_device_validation/cleanup_before/`、`cleanup_after/`，舊測試暫存另備份至 `build/emulator_cleanup/`；安裝日誌為 `build/archive_cleanup_install.log`。
 
@@ -295,6 +360,8 @@ test/                    # 與 lib/ 對應的測試結構
 
 ### T09 紀事本末詳情與回顧
 
+- 狀態：完成。361 項回歸、Android 獨立資料的 #2／#30 操作及正式 ZIP 閱讀版核對已通過，證據見上方最新紀錄。
+
 - 詳情頁依序顯示：記述段落（依使用者排序）→ 日後回顧 → 附件（§4.2）。
 - **記述段落不得寫死為起因／經過／結果**：預設只有一個未命名的「記述」欄；「新增段落」可選建議項目或輸入自訂標題；段落可增刪、改名、拖曳排序，空白段落不顯示（§4.2）。
 - 回顧採**追加**，不覆寫先前內容；每則回顧有自己的作者與時間，追記內容標示「XX 年追記」（§5）。
@@ -438,6 +505,13 @@ test/                    # 與 lib/ 對應的測試結構
 ## 4. 後續階段（尚未拆解）
 
 以下依 §12 規劃，第一階段完成後再細分為任務：
+
+### T20 標籤智慧主題（使用者要求提前並修訂需求）
+
+- 依據：§4.2 專題篇章、§9.3 權限、§10 `stories`／`story_events`、§8 閱讀版與權威 JSON。
+- 狀態：完成（使用者確認的智慧標籤規則已實作；358 項完整回歸、270 項外部檢查、分析、Android Studio 裝置操作與資料核對通過）。
+- 本次交付：智慧主題建立／改名／刪除、標籤 AND／OR／排除、條件搜尋、結果自動更新／時間排序、原事件詳情、私密與典藏保護、舊資料升級、搜尋及 ZIP 閱讀版／還原。舊版手動篇章不再作為新增入口。
+- 此任務不代表第二階段其他平台、人生階段視圖或變更歷史已完成。
 
 - **第二階段**：iOS 版（macOS＋Xcode）、簡體中文／日文／韓文翻譯與字體、文字長度、日期格式、手機與平板排版實測（§4.7）、壓縮副本與僅引用匯入（驗收 #7）、儲存空間儀表板（§7.4）、故事篇章、任職與學歷區間、履歷／感情等視圖（驗收 #10）、變更歷史。
 - **第三階段**：生命典藏模式介面與後續追憶層（§9，驗收 #9、#23、#24）、多人作者標示、加密封存（§8.9）、批次匯入。

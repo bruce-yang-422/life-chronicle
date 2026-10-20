@@ -1,3 +1,5 @@
+import '../shared/ios_group.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
@@ -108,6 +110,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       }
       final plan = await repository.prepare(
         includeMedia: chosen.includeMedia,
+        excludePrivateEvents: chosen.excludePrivateEvents,
         excludedBlobIds: chosen.excludedBlobIds,
       );
       if (!mounted) return;
@@ -120,12 +123,23 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (plan.privacyFilter != null)
+                Text(
+                  l.backupPrivateExcluded(
+                    plan.privacyFilter!.excludedEvents,
+                    plan.privacyFilter!.excludedMedia,
+                  ),
+                ),
               Text(
-                l.backupScopeSummary(switch (plan.scope.type) {
-                  'full' => l.backupScopeFull,
-                  'no_media' => l.backupScopeNoMedia,
-                  _ => l.backupScopeCustom,
-                }, plan.excludedMedia.length),
+                l.backupScopeSummary(
+                  switch (plan.scope.type) {
+                    'full' => l.backupScopeFull,
+                    'no_media' => l.backupScopeNoMedia,
+                    _ => l.backupScopeCustom,
+                  },
+                  plan.excludedMedia.length +
+                      (plan.privacyFilter?.excludedMedia ?? 0),
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -178,6 +192,11 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           'people': l.archivePeople,
           'tags': l.archiveTags,
           'periods': l.archivePeriods,
+          'stories': l.navStories,
+          'themeAll': l.themesAll,
+          'themeAny': l.themesAny,
+          'themeExclude': l.themesExclude,
+          'themeMissing': l.themesMissingTag,
           'related': l.editorRelated,
           'coordinates': l.archiveCoordinates,
           'radius': l.archiveRadius,
@@ -275,65 +294,81 @@ class _BackupPageState extends ConsumerState<BackupPage> {
     final l = AppLocalizations.of(context);
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         children: [
-          Text(l.navBackup, style: Theme.of(context).textTheme.headlineSmall),
-          ListTile(
-            title: Text(l.displaySettings),
-            leading: const Icon(Icons.settings_outlined),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => const TimeDisplaySettingsPage(),
-              ),
-            ),
-          ),
-          ListTile(
-            title: Text(l.securityTitle),
-            leading: const Icon(Icons.security),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(builder: (_) => const SecurityPage()),
-            ),
-          ),
-          if (ref.watch(securityProvider).configured)
-            ListTile(
-              title: Text(l.securityLockNow),
-              leading: const Icon(Icons.lock_outline),
-              onTap: () => ref.read(securityProvider).lock(),
-            ),
-          FilledButton.icon(
-            onPressed: _busy ? null : _export,
-            icon: const Icon(Icons.archive_outlined),
-            label: Text(l.backupExport),
-          ),
-          OutlinedButton.icon(
-            onPressed: _busy
-                ? null
-                : () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => const RestorePage(),
-                    ),
+          IosPageTitle(l.navBackup),
+          IosGroup(
+            children: [
+              ListTile(
+                title: Text(l.displaySettings),
+                leading: const Icon(Icons.settings_outlined),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const TimeDisplaySettingsPage(),
                   ),
-            icon: const Icon(Icons.restore),
-            label: Text(l.backupImport),
+                ),
+              ),
+              ListTile(
+                title: Text(l.securityTitle),
+                leading: const Icon(Icons.security),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(builder: (_) => const SecurityPage()),
+                ),
+              ),
+              if (ref.watch(securityProvider).configured)
+                ListTile(
+                  title: Text(l.securityLockNow),
+                  leading: const Icon(Icons.lock_outline),
+                  onTap: () => ref.read(securityProvider).lock(),
+                ),
+            ],
           ),
-          OutlinedButton.icon(
-            onPressed: _busy ? null : _verify,
-            icon: const Icon(Icons.fact_check_outlined),
-            label: Text(l.backupVerify),
+          IosGroup(
+            children: [
+              FilledButton.icon(
+                onPressed: _busy ? null : _export,
+                icon: const Icon(Icons.archive_outlined),
+                label: Text(l.backupExport),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const RestorePage(),
+                        ),
+                      ),
+                icon: const Icon(Icons.restore),
+                label: Text(l.backupImport),
+              ),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _verify,
+                icon: const Icon(Icons.fact_check_outlined),
+                label: Text(l.backupVerify),
+              ),
+            ],
           ),
           if (_last != null)
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l.backupLast),
+                    Text(
+                      l.backupLast,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
                     SelectableText(p.basename(_last!.zip.path)),
-                    SelectableText(_last!.hash),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      _last!.hash,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     TextButton.icon(
                       onPressed: _busy
                           ? null
@@ -373,27 +408,32 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                 ),
               ),
             ),
-          ListTile(
-            title: Text(l.recycleTitle),
-            leading: const Icon(Icons.restore_from_trash),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => const RecentlyDeletedPage(),
+          const SizedBox(height: 24),
+          IosGroup(
+            children: [
+              ListTile(
+                title: Text(l.recycleTitle),
+                leading: const Icon(Icons.restore_from_trash),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const RecentlyDeletedPage(),
+                  ),
+                ),
               ),
-            ),
-          ),
-          ListTile(
-            title: Text(l.attachmentWarehouse),
-            leading: const Icon(Icons.folder_outlined),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => const AttachmentWarehousePage(),
+              ListTile(
+                title: Text(l.attachmentWarehouse),
+                leading: const Icon(Icons.folder_outlined),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AttachmentWarehousePage(),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

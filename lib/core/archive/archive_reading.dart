@@ -9,6 +9,7 @@ import '../time/timeline_sort.dart';
 import 'commonmark_writer.dart';
 import 'markdown_document.dart';
 import 'archive_integrity.dart';
+import '../stories/theme_rule.dart';
 
 typedef ArchiveRows = Map<String, List<Map<String, Object?>>>;
 
@@ -132,7 +133,12 @@ class ArchiveReading {
       final time = TimeFormat.full(
         item.time,
         timeTexts,
-        relatedEventTitle: reference == null ? null : _eventTitle(reference),
+        relatedEventTitle: reference == null
+            ? item.time is RelativeTime &&
+                      (item.time as RelativeTime).deletedReference != null
+                  ? '${(item.time as RelativeTime).deletedReference!.title} (${label('deletedReference')})'
+                  : null
+            : _eventTitle(reference),
       );
       final metadata = [
         '${label('time')}: $time',
@@ -354,6 +360,92 @@ class ArchiveReading {
       files[paths[item.id]!] = md.toString();
       timeline.write(
         '- ${CommonMarkWriter.link('$time · $title', paths[item.id]!.substring(9))}\n',
+      );
+    }
+    final stories = data['stories'] ?? const <Map<String, Object?>>[];
+    if (stories.isNotEmpty) {
+      timeline.write(
+        '\n${CommonMarkWriter.heading(label('stories'), level: 2)}',
+      );
+      html.write('<h2>${CommonMarkWriter.html(label('stories'))}</h2>');
+    }
+    final eventsById = {for (final event in events) event['event_id']: event};
+    for (final story in stories) {
+      final id = story['story_id'] as String;
+      if (!RegExp(r'^[0-9A-HJKMNP-TV-Z]{26}$').hasMatch(id)) {
+        throw ArgumentError('篇章識別碼不是完整 ULID');
+      }
+      final path = story['layer'] == 'remembrance'
+          ? 'markdown/remembrance/story_${id.toLowerCase()}.md'
+          : 'markdown/stories/${id.toLowerCase()}.md';
+      final title = story['title'] as String;
+      final md = StringBuffer(CommonMarkWriter.heading(title));
+      final metadata = [
+        '${label('layer')}: ${label(story['layer'] as String)}',
+        '${label('author')}: ${_author(authors, story['author_id'])}',
+        '${label('recorded')}: ${_timestamp(story['created_at'] as String)}',
+      ];
+      html.write(
+        '<section id="story-${id.toLowerCase()}"><h2>${CommonMarkWriter.html(title)}</h2>',
+      );
+      for (final value in metadata) {
+        md.writeln('- ${CommonMarkWriter.text(value)}');
+        html.write('<p>${CommonMarkWriter.html(value)}</p>');
+      }
+      md.writeln();
+      var references =
+          (data['story_events'] ?? const <Map<String, Object?>>[])
+              .where((r) => r['story_id'] == id)
+              .toList()
+            ..sort(
+              (a, b) => (a['position'] as int).compareTo(b['position'] as int),
+            );
+      if (story['rules_json'] != null) {
+        final rule = ThemeRule.decode(story['rules_json'] as String);
+        final tags = <Object?, Set<String>>{};
+        for (final link
+            in data['event_tags'] ?? const <Map<String, Object?>>[]) {
+          (tags[link['event_id']] ??= {}).add(link['tag_id'] as String);
+        }
+        references = [
+          for (final item in ordered)
+            if (item.data['privacy'] != 'private' &&
+                item.data['deleted_at'] == null &&
+                rule.matches(tags[item.id] ?? {}))
+              {'event_id': item.id},
+        ];
+        final names = {
+          for (final tag in data['tags'] ?? const <Map<String, Object?>>[])
+            tag['tag_id']: tag['label'],
+        };
+        for (final value in [
+          '${label(rule.mode == TagMatchMode.all ? 'themeAll' : 'themeAny')}: ${rule.include.map((id) => names[id] ?? label('themeMissing')).join(', ')}',
+          if (rule.exclude.isNotEmpty)
+            '${label('themeExclude')}: ${rule.exclude.map((id) => names[id] ?? label('themeMissing')).join(', ')}',
+        ]) {
+          md.writeln('${CommonMarkWriter.text(value)}\n');
+          html.write('<p>${CommonMarkWriter.html(value)}</p>');
+        }
+      }
+      html.write('<ol>');
+      var number = 0;
+      for (final reference in references) {
+        final eventId = reference['event_id'] as String;
+        final event = eventsById[eventId];
+        final target = paths[eventId];
+        if (event == null || target == null) continue;
+        final eventTitle = _eventTitle(event);
+        md.writeln(
+          '${++number}. ${CommonMarkWriter.link(eventTitle, _relative(path, target))}',
+        );
+        html.write(
+          '<li><a href="#${eventId.toLowerCase()}">${CommonMarkWriter.html(eventTitle)}</a></li>',
+        );
+      }
+      html.write('</ol></section>');
+      files[path] = md.toString();
+      timeline.writeln(
+        '- ${CommonMarkWriter.link(title, _relative('markdown/timeline.md', path))}',
       );
     }
     html.write('$remembranceHtml</body></html>\n');

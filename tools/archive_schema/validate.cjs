@@ -11,7 +11,7 @@ let checks = 0;
 const supplied = process.argv.slice(2);
 const scenarios = supplied.length
   ? supplied.map(folder => [folder, path.resolve(folder)])
-  : ['full', 'no_media', 'custom'].map(scope => [scope, path.join(root, scope)]);
+  : ['full', 'no_media', 'custom', 'private'].map(scope => [scope, path.join(root, scope)]);
 for (const [scope, folder] of scenarios) {
   const read = (name) => JSON.parse(fs.readFileSync(path.join(folder, name), 'utf8'));
   const ajv = new Ajv2020({strict: true, allErrors: true});
@@ -78,6 +78,11 @@ for (const [scope, folder] of scenarios) {
       for (const field of ['time_payload', 'birth_date', 'death_date', 'start_time', 'end_time']) {
         if (row[field] != null) run('time_value.schema.json', JSON.parse(row[field]));
       }
+      if (row.rules_json != null) {
+        const schema = read('schema/stories.schema.json').items.properties.rules_json.contentSchema;
+        assert.ok(ajv.validate(schema, JSON.parse(row.rules_json)), JSON.stringify(ajv.errors));
+        checks++;
+      }
     }
   }
   if (supplied.length) continue;
@@ -117,9 +122,18 @@ for (const [scope, folder] of scenarios) {
   const invalidCount = structuredClone(manifest);
   invalidCount.counts.events = -1;
   run('manifest.schema.json', invalidCount, false);
+  for (const value of [-1, '1', null]) {
+    const invalidPrivacy = structuredClone(manifest);
+    invalidPrivacy.scope.private_events = {
+      reason: 'private_events', events: value, media: 0, snapshots: 0, history: 0,
+    };
+    run('manifest.schema.json', invalidPrivacy, false);
+  }
   for (const value of [
     {type:'unknown',year:2000}, {type:'half_year',year:2000,half:3},
     {type:'relative',event_id:'invalid',relation:'after'}, {type:'age_estimate',age:151},
+    {type:'relative',event_id:'00000000000000000000000001',relation:'after',deleted_reference:{title:'missing privacy'}},
+    {type:'relative',event_id:'00000000000000000000000001',relation:'after',deleted_reference:{title:'invalid privacy',private:'true'}},
     {type:'range',start:{type:'unknown'},end:{type:'year',year:2020}},
     {type:'day',year:1900,month:2,day:29},
     {type:'day',year:2001,month:2,day:29},

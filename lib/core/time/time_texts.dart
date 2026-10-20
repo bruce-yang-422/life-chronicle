@@ -30,7 +30,7 @@ abstract interface class TimeTexts {
 
   String relativeDuring(String title);
 
-  /// 相對事件的參照事件已刪除時，代替標題的文字。
+  /// 相對參照不存在且無可讀快照時的佔位；不能推定為刪除。
   String deletedReference();
 
   /// 例：「約 20 歲」「About age 20」。

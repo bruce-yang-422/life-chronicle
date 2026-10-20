@@ -109,13 +109,20 @@ abstract final class ArchiveSchema {
           'start': {'oneOf': calendar},
           'end': {'oneOf': calendar},
         }),
-        _object({
-          'type': {'const': 'relative'},
-          'event_id': {'type': 'string', 'pattern': _ulid},
-          'relation': {
-            'enum': RelativeRelation.values.map((e) => e.code).toList(),
-          },
-        }),
+        {
+          ..._object({
+            'type': {'const': 'relative'},
+            'event_id': {'type': 'string', 'pattern': _ulid},
+            'relation': {
+              'enum': RelativeRelation.values.map((e) => e.code).toList(),
+            },
+            'deleted_reference': _object({
+              'title': {'type': 'string'},
+              'private': {'type': 'boolean'},
+            }),
+          }),
+          'required': ['type', 'event_id', 'relation'],
+        },
         _object({
           'type': {'const': 'age_estimate'},
           'age': _integer(0, AgeEstimateTime.maxAge),
@@ -164,6 +171,27 @@ abstract final class ArchiveSchema {
       result.addAll({'minimum': -180, 'maximum': 180});
     }
     if (name == 'radius_m') result['exclusiveMinimum'] = 0;
+    if (table == 'stories' && name == 'rules_json') {
+      result.addAll({
+        'contentMediaType': 'application/json',
+        'contentSchema': _object({
+          'mode': {
+            'enum': ['all', 'any'],
+          },
+          'include': {
+            'type': 'array',
+            'minItems': 1,
+            'uniqueItems': true,
+            'items': {'type': 'string', 'pattern': _ulid},
+          },
+          'exclude': {
+            'type': 'array',
+            'uniqueItems': true,
+            'items': {'type': 'string', 'pattern': _ulid},
+          },
+        }),
+      });
+    }
     if (name == 'layer') result['enum'] = ['original', 'remembrance'];
     if (name == 'privacy') result['enum'] = ['normal', 'private'];
     if (table == 'archive_settings' && name == 'mode') {
@@ -340,8 +368,12 @@ abstract final class ArchiveSchema {
       r'$schema': dialect,
       ..._object({
         'format': {'const': 'life-chronicle-archive'},
-        'format_version': {'const': '1.0'},
-        'schema_version': {'const': 1},
+        'format_version': {
+          'enum': ['1.0', '1.1', '1.2'],
+        },
+        'schema_version': {
+          'enum': [1, 2],
+        },
         'app_version': {'type': 'string'},
         'exported_at': {
           'type': 'string',
@@ -359,18 +391,26 @@ abstract final class ArchiveSchema {
           for (final name in tables.keys)
             name: {'type': 'integer', 'minimum': 0},
         }),
-        'scope': _object({
-          'type': {
-            'enum': ['full', 'no_media', 'custom'],
-          },
-          'excluded': {
-            'type': 'array',
-            'items': _object({
-              'path': _path(),
-              'reason': {'type': 'string', 'minLength': 1},
+        'scope': {
+          ..._object({
+            'type': {
+              'enum': ['full', 'no_media', 'custom'],
+            },
+            'excluded': {
+              'type': 'array',
+              'items': _object({
+                'path': _path(),
+                'reason': {'type': 'string', 'minLength': 1},
+              }),
+            },
+            'private_events': _object({
+              'reason': {'const': 'private_events'},
+              for (final field in ['events', 'media', 'snapshots', 'history'])
+                field: {'type': 'integer', 'minimum': 0},
             }),
-          },
-        }),
+          }),
+          'required': ['type', 'excluded'],
+        },
         'files': {'type': 'array', 'items': file},
         'parts': {
           'type': 'array',

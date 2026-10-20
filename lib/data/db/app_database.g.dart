@@ -5249,6 +5249,17 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _rulesJsonMeta = const VerificationMeta(
+    'rulesJson',
+  );
+  @override
+  late final GeneratedColumn<String> rulesJson = GeneratedColumn<String>(
+    'rules_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     layer,
@@ -5257,6 +5268,7 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
     archiveSessionId,
     id,
     title,
+    rulesJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5319,6 +5331,12 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
+    if (data.containsKey('rules_json')) {
+      context.handle(
+        _rulesJsonMeta,
+        rulesJson.isAcceptableOrUnknown(data['rules_json']!, _rulesJsonMeta),
+      );
+    }
     return context;
   }
 
@@ -5352,6 +5370,10 @@ class $StoriesTable extends Stories with TableInfo<$StoriesTable, Story> {
         DriftSqlType.string,
         data['${effectivePrefix}title'],
       )!,
+      rulesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rules_json'],
+      ),
     );
   }
 
@@ -5368,6 +5390,9 @@ class Story extends DataClass implements Insertable<Story> {
   final String? archiveSessionId;
   final String id;
   final String title;
+
+  /// null 表示舊版手動篇章；智慧主題保存標籤 ID 條件，不存事件快取。
+  final String? rulesJson;
   const Story({
     required this.layer,
     required this.authorId,
@@ -5375,6 +5400,7 @@ class Story extends DataClass implements Insertable<Story> {
     this.archiveSessionId,
     required this.id,
     required this.title,
+    this.rulesJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5387,6 +5413,9 @@ class Story extends DataClass implements Insertable<Story> {
     }
     map['story_id'] = Variable<String>(id);
     map['title'] = Variable<String>(title);
+    if (!nullToAbsent || rulesJson != null) {
+      map['rules_json'] = Variable<String>(rulesJson);
+    }
     return map;
   }
 
@@ -5400,6 +5429,9 @@ class Story extends DataClass implements Insertable<Story> {
           : Value(archiveSessionId),
       id: Value(id),
       title: Value(title),
+      rulesJson: rulesJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rulesJson),
     );
   }
 
@@ -5415,6 +5447,7 @@ class Story extends DataClass implements Insertable<Story> {
       archiveSessionId: serializer.fromJson<String?>(json['archiveSessionId']),
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
+      rulesJson: serializer.fromJson<String?>(json['rulesJson']),
     );
   }
   @override
@@ -5427,6 +5460,7 @@ class Story extends DataClass implements Insertable<Story> {
       'archiveSessionId': serializer.toJson<String?>(archiveSessionId),
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String>(title),
+      'rulesJson': serializer.toJson<String?>(rulesJson),
     };
   }
 
@@ -5437,6 +5471,7 @@ class Story extends DataClass implements Insertable<Story> {
     Value<String?> archiveSessionId = const Value.absent(),
     String? id,
     String? title,
+    Value<String?> rulesJson = const Value.absent(),
   }) => Story(
     layer: layer ?? this.layer,
     authorId: authorId ?? this.authorId,
@@ -5446,6 +5481,7 @@ class Story extends DataClass implements Insertable<Story> {
         : this.archiveSessionId,
     id: id ?? this.id,
     title: title ?? this.title,
+    rulesJson: rulesJson.present ? rulesJson.value : this.rulesJson,
   );
   Story copyWithCompanion(StoriesCompanion data) {
     return Story(
@@ -5457,6 +5493,7 @@ class Story extends DataClass implements Insertable<Story> {
           : this.archiveSessionId,
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
+      rulesJson: data.rulesJson.present ? data.rulesJson.value : this.rulesJson,
     );
   }
 
@@ -5468,14 +5505,22 @@ class Story extends DataClass implements Insertable<Story> {
           ..write('createdAt: $createdAt, ')
           ..write('archiveSessionId: $archiveSessionId, ')
           ..write('id: $id, ')
-          ..write('title: $title')
+          ..write('title: $title, ')
+          ..write('rulesJson: $rulesJson')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(layer, authorId, createdAt, archiveSessionId, id, title);
+  int get hashCode => Object.hash(
+    layer,
+    authorId,
+    createdAt,
+    archiveSessionId,
+    id,
+    title,
+    rulesJson,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5485,7 +5530,8 @@ class Story extends DataClass implements Insertable<Story> {
           other.createdAt == this.createdAt &&
           other.archiveSessionId == this.archiveSessionId &&
           other.id == this.id &&
-          other.title == this.title);
+          other.title == this.title &&
+          other.rulesJson == this.rulesJson);
 }
 
 class StoriesCompanion extends UpdateCompanion<Story> {
@@ -5495,6 +5541,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
   final Value<String?> archiveSessionId;
   final Value<String> id;
   final Value<String> title;
+  final Value<String?> rulesJson;
   final Value<int> rowid;
   const StoriesCompanion({
     this.layer = const Value.absent(),
@@ -5503,6 +5550,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
     this.archiveSessionId = const Value.absent(),
     this.id = const Value.absent(),
     this.title = const Value.absent(),
+    this.rulesJson = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   StoriesCompanion.insert({
@@ -5512,6 +5560,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
     this.archiveSessionId = const Value.absent(),
     required String id,
     required String title,
+    this.rulesJson = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : layer = Value(layer),
        authorId = Value(authorId),
@@ -5525,6 +5574,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
     Expression<String>? archiveSessionId,
     Expression<String>? id,
     Expression<String>? title,
+    Expression<String>? rulesJson,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5534,6 +5584,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
       if (archiveSessionId != null) 'archive_session_id': archiveSessionId,
       if (id != null) 'story_id': id,
       if (title != null) 'title': title,
+      if (rulesJson != null) 'rules_json': rulesJson,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5545,6 +5596,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
     Value<String?>? archiveSessionId,
     Value<String>? id,
     Value<String>? title,
+    Value<String?>? rulesJson,
     Value<int>? rowid,
   }) {
     return StoriesCompanion(
@@ -5554,6 +5606,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
       archiveSessionId: archiveSessionId ?? this.archiveSessionId,
       id: id ?? this.id,
       title: title ?? this.title,
+      rulesJson: rulesJson ?? this.rulesJson,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5579,6 +5632,9 @@ class StoriesCompanion extends UpdateCompanion<Story> {
     if (title.present) {
       map['title'] = Variable<String>(title.value);
     }
+    if (rulesJson.present) {
+      map['rules_json'] = Variable<String>(rulesJson.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5594,6 +5650,7 @@ class StoriesCompanion extends UpdateCompanion<Story> {
           ..write('archiveSessionId: $archiveSessionId, ')
           ..write('id: $id, ')
           ..write('title: $title, ')
+          ..write('rulesJson: $rulesJson, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -17883,6 +17940,7 @@ typedef $$StoriesTableCreateCompanionBuilder = StoriesCompanion Function({
   Value<String?> archiveSessionId,
   required String id,
   required String title,
+  Value<String?> rulesJson,
   Value<int> rowid,
 });
 typedef $$StoriesTableUpdateCompanionBuilder = StoriesCompanion Function({
@@ -17892,6 +17950,7 @@ typedef $$StoriesTableUpdateCompanionBuilder = StoriesCompanion Function({
   Value<String?> archiveSessionId,
   Value<String> id,
   Value<String> title,
+  Value<String?> rulesJson,
   Value<int> rowid,
 });
 
@@ -17980,6 +18039,11 @@ class $$StoriesTableFilterComposer
 
   ColumnFilters<String> get title => $composableBuilder(
     column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rulesJson => $composableBuilder(
+    column: $table.rulesJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18084,6 +18148,11 @@ class $$StoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get rulesJson => $composableBuilder(
+    column: $table.rulesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$AuthorsTableOrderingComposer get authorId {
     final $$AuthorsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -18151,6 +18220,9 @@ class $$StoriesTableAnnotationComposer
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get rulesJson =>
+      $composableBuilder(column: $table.rulesJson, builder: (column) => column);
 
   $$AuthorsTableAnnotationComposer get authorId {
     final $$AuthorsTableAnnotationComposer composer = $composerBuilder(
@@ -18262,6 +18334,7 @@ class $$StoriesTableTableManager
                 Value<String?> archiveSessionId = const Value.absent(),
                 Value<String> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
+                Value<String?> rulesJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StoriesCompanion(
                 layer: layer,
@@ -18270,6 +18343,7 @@ class $$StoriesTableTableManager
                 archiveSessionId: archiveSessionId,
                 id: id,
                 title: title,
+                rulesJson: rulesJson,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -18280,6 +18354,7 @@ class $$StoriesTableTableManager
                 Value<String?> archiveSessionId = const Value.absent(),
                 required String id,
                 required String title,
+                Value<String?> rulesJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => StoriesCompanion.insert(
                 layer: layer,
@@ -18288,6 +18363,7 @@ class $$StoriesTableTableManager
                 archiveSessionId: archiveSessionId,
                 id: id,
                 title: title,
+                rulesJson: rulesJson,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

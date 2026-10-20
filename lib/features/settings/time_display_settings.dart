@@ -1,3 +1,5 @@
+import '../shared/ios_group.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,7 +64,7 @@ class _TimeDisplaySettingsPageState
     return Scaffold(
       appBar: AppBar(title: Text(l.displaySettings)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         children: [
           Text(
             l.timeZoneSetting,
@@ -74,29 +76,35 @@ class _TimeDisplaySettingsPageState
             child: Text(readableTimestamp(ref, l, DateTime.now())),
           ),
           if (current.hasError) Text(l.editorError),
-          for (var i = 0; i < labels.length; i++)
-            ListTile(
-              title: Text(labels[i]),
-              trailing: (current.value ?? 'system') == TimestampDisplay.zones[i]
-                  ? const Icon(Icons.check)
-                  : null,
-              enabled: !_saving && !current.isLoading,
-              onTap: () async {
-                setState(() => _saving = true);
-                try {
-                  await ref
-                      .read(timeZoneProvider.notifier)
-                      .select(TimestampDisplay.zones[i]);
-                } catch (_) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(l.editorError)));
-                  }
-                } finally {
-                  if (mounted) setState(() => _saving = false);
-                }
-              },
-            ),
+          IosGroup(
+            children: [
+              for (var i = 0; i < labels.length; i++)
+                ListTile(
+                  title: Text(labels[i]),
+                  trailing:
+                      (current.value ?? 'system') == TimestampDisplay.zones[i]
+                      ? const Icon(Icons.check)
+                      : null,
+                  enabled: !_saving && !current.isLoading,
+                  onTap: () async {
+                    setState(() => _saving = true);
+                    try {
+                      await ref
+                          .read(timeZoneProvider.notifier)
+                          .select(TimestampDisplay.zones[i]);
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(l.editorError)));
+                      }
+                    } finally {
+                      if (mounted) setState(() => _saving = false);
+                    }
+                  },
+                ),
+            ],
+          ),
         ],
       ),
     );

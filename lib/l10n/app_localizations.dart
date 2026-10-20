@@ -131,7 +131,7 @@ abstract class AppLocalizations {
   /// 主導航：故事篇章
   ///
   /// In zh, this message translates to:
-  /// **'故事篇章'**
+  /// **'主題瀏覽'**
   String get navStories;
 
   /// 主導航：資料與備份（同時用於底部導覽列，譯文需簡短以免換行）
@@ -206,10 +206,10 @@ abstract class AppLocalizations {
   /// **'{title}期間'**
   String timeRelativeDuring(String title);
 
-  /// 相對事件的參照事件已刪除時代替標題
+  /// 相對參照不存在且沒有可讀快照時代替標題，可能已刪除或未匯出
   ///
   /// In zh, this message translates to:
-  /// **'（參照事件已刪除）'**
+  /// **'（參照事件未提供）'**
   String get timeDeletedReference;
 
   /// 年齡推估
@@ -2051,8 +2051,248 @@ abstract class AppLocalizations {
   /// No description provided for @backupScopeCustom.
   ///
   /// In zh, this message translates to:
-  /// **'自訂影音範圍'**
+  /// **'自訂匯出範圍'**
   String get backupScopeCustom;
+
+  /// No description provided for @editorGroupBasics.
+  ///
+  /// In zh, this message translates to:
+  /// **'事件資訊'**
+  String get editorGroupBasics;
+
+  /// No description provided for @editorGroupPeople.
+  ///
+  /// In zh, this message translates to:
+  /// **'人物與標籤'**
+  String get editorGroupPeople;
+
+  /// No description provided for @editorGroupOptions.
+  ///
+  /// In zh, this message translates to:
+  /// **'隱私與關聯'**
+  String get editorGroupOptions;
+
+  /// No description provided for @editorGroupNarrative.
+  ///
+  /// In zh, this message translates to:
+  /// **'記述與附件'**
+  String get editorGroupNarrative;
+
+  /// No description provided for @storiesCreate.
+  ///
+  /// In zh, this message translates to:
+  /// **'新增智慧主題'**
+  String get storiesCreate;
+
+  /// No description provided for @storiesEdit.
+  ///
+  /// In zh, this message translates to:
+  /// **'編輯主題'**
+  String get storiesEdit;
+
+  /// No description provided for @storiesTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'主題名稱'**
+  String get storiesTitle;
+
+  /// No description provided for @storiesEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'設定標籤組合，自動瀏覽相關事件。'**
+  String get storiesEmpty;
+
+  /// No description provided for @storiesEmptyEvents.
+  ///
+  /// In zh, this message translates to:
+  /// **'目前沒有符合條件的事件。新增或調整事件標籤後，這裡會自動更新。'**
+  String get storiesEmptyEvents;
+
+  /// No description provided for @storiesEvents.
+  ///
+  /// In zh, this message translates to:
+  /// **'符合條件的事件'**
+  String get storiesEvents;
+
+  /// No description provided for @storiesAddEvents.
+  ///
+  /// In zh, this message translates to:
+  /// **'選擇事件'**
+  String get storiesAddEvents;
+
+  /// No description provided for @storiesRemoveEvent.
+  ///
+  /// In zh, this message translates to:
+  /// **'移出篇章'**
+  String get storiesRemoveEvent;
+
+  /// No description provided for @storiesSave.
+  ///
+  /// In zh, this message translates to:
+  /// **'儲存主題'**
+  String get storiesSave;
+
+  /// No description provided for @storiesDelete.
+  ///
+  /// In zh, this message translates to:
+  /// **'刪除主題'**
+  String get storiesDelete;
+
+  /// No description provided for @storiesDeleteConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'刪除此主題？事件、標籤及附件都會保留。'**
+  String get storiesDeleteConfirm;
+
+  /// No description provided for @storiesError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法儲存主題。請確認標籤仍存在，或目前是否允許修改。'**
+  String get storiesError;
+
+  /// No description provided for @storiesMissing.
+  ///
+  /// In zh, this message translates to:
+  /// **'此主題已不存在。'**
+  String get storiesMissing;
+
+  /// No description provided for @storiesReadOnly.
+  ///
+  /// In zh, this message translates to:
+  /// **'生命典藏期間，原始生命紀錄的主題設定唯讀。'**
+  String get storiesReadOnly;
+
+  /// No description provided for @storiesDeletedEvent.
+  ///
+  /// In zh, this message translates to:
+  /// **'事件已移到最近刪除'**
+  String get storiesDeletedEvent;
+
+  /// No description provided for @storiesCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'符合 {count} 個事件'**
+  String storiesCount(int count);
+
+  /// No description provided for @themesMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'納入條件'**
+  String get themesMode;
+
+  /// No description provided for @themesAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'全部符合（AND）'**
+  String get themesAll;
+
+  /// No description provided for @themesAny.
+  ///
+  /// In zh, this message translates to:
+  /// **'任一符合（OR）'**
+  String get themesAny;
+
+  /// No description provided for @themesInclude.
+  ///
+  /// In zh, this message translates to:
+  /// **'納入標籤（至少一個）'**
+  String get themesInclude;
+
+  /// No description provided for @themesExclude.
+  ///
+  /// In zh, this message translates to:
+  /// **'排除標籤（選填）'**
+  String get themesExclude;
+
+  /// No description provided for @themesAutoUpdate.
+  ///
+  /// In zh, this message translates to:
+  /// **'符合標籤條件的事件會自動更新。排除條件優先生效；私密及最近刪除事件不納入。'**
+  String get themesAutoUpdate;
+
+  /// No description provided for @themesChooseTag.
+  ///
+  /// In zh, this message translates to:
+  /// **'請至少選一個納入標籤。'**
+  String get themesChooseTag;
+
+  /// No description provided for @themesMissingTag.
+  ///
+  /// In zh, this message translates to:
+  /// **'已移除的標籤'**
+  String get themesMissingTag;
+
+  /// No description provided for @themesSearchTags.
+  ///
+  /// In zh, this message translates to:
+  /// **'搜尋標籤'**
+  String get themesSearchTags;
+
+  /// No description provided for @themesNoTags.
+  ///
+  /// In zh, this message translates to:
+  /// **'先在事件加入標籤，再建立智慧主題。'**
+  String get themesNoTags;
+
+  /// No description provided for @themesLegacy.
+  ///
+  /// In zh, this message translates to:
+  /// **'這是舊版手動篇章。設定標籤條件並儲存後，會改為智慧主題；原事件保留。'**
+  String get themesLegacy;
+
+  /// No description provided for @backupExcludePrivate.
+  ///
+  /// In zh, this message translates to:
+  /// **'排除私密事件'**
+  String get backupExcludePrivate;
+
+  /// No description provided for @backupExcludePrivateNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'不匯出私密事件、記述、追憶、標題快照及專屬附件。共用附件、獨立人物／地點／標籤與未引用的倉庫副本仍依原選擇保留；不會修改手機資料。'**
+  String get backupExcludePrivateNotice;
+
+  /// No description provided for @backupPrivateMediaExcluded.
+  ///
+  /// In zh, this message translates to:
+  /// **'僅供私密事件使用，會自動排除'**
+  String get backupPrivateMediaExcluded;
+
+  /// No description provided for @backupPrivateExcluded.
+  ///
+  /// In zh, this message translates to:
+  /// **'已刻意排除 {events} 筆私密事件及 {media} 份專屬媒體副本；不會還原這些內容。'**
+  String backupPrivateExcluded(int events, int media);
+
+  /// No description provided for @editorBodyLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'內文'**
+  String get editorBodyLabel;
+
+  /// No description provided for @editorBodyHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'從這裡開始寫下發生的事、當時的感受或想留下的話……'**
+  String get editorBodyHint;
+
+  /// No description provided for @editorSectionHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'例如：第一次見面的那一天（可以留空）'**
+  String get editorSectionHint;
+
+  /// No description provided for @editorDragSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'拖曳調整段落順序'**
+  String get editorDragSection;
+
+  /// No description provided for @editorDragSectionNumber.
+  ///
+  /// In zh, this message translates to:
+  /// **'拖曳第 {number} 段以調整順序'**
+  String editorDragSectionNumber(int number);
 }
 
 class _AppLocalizationsDelegate

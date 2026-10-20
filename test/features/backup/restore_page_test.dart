@@ -327,6 +327,26 @@ void main() {
     await unmount(tester);
   });
 
+  testWidgets('私密排除預覽明示刻意排除筆數，不當作較新未知格式', (tester) async {
+    await tester.runAsync(() async {
+      await EventContentRepository(h.context())
+          .save(EventDraft(title: 'private marker', privacy: 'private'));
+      zip = (await repository.export(
+        await repository.prepare(excludePrivateEvents: true),
+        reading,
+        readme: '# Archive\n',
+        appVersion: '1.0.0',
+      )).zip;
+    });
+    await pump(tester);
+    await select(tester);
+    final warning = find.textContaining('已刻意排除 1 筆私密事件');
+    await reveal(tester, warning);
+    expect(warning, findsOneWidget);
+    expect(find.textContaining('private marker'), findsNothing);
+    await unmount(tester);
+  });
+
   testWidgets('不含媒體的封存預覽列出排除警示與具體項目', (tester) async {
     await tester.runAsync(() async {
       final source = File('${root.path}/excluded.mp4');

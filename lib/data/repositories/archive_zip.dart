@@ -151,10 +151,22 @@ class ArchiveZip {
           version.length != 2 ||
           int.tryParse(version[0]) != 1 ||
           int.tryParse(version[1]) == null ||
-          manifest['schema_version'] != 1) {
+          ![1, 2].contains(manifest['schema_version'])) {
         throw const ArchiveIntegrityException(['manifest.json']);
       }
       final listed = <String, Map<String, Object?>>{};
+      final scope = manifest['scope'] as Map;
+      final privacy = scope['private_events'];
+      if (privacy != null &&
+          (privacy is! Map ||
+              scope['type'] != 'custom' ||
+              privacy['reason'] != 'private_events' ||
+              ['events', 'media', 'snapshots', 'history'].any(
+                (field) =>
+                    privacy[field] is! int || (privacy[field] as int) < 0,
+              ))) {
+        throw const ArchiveIntegrityException(['manifest.json']);
+      }
       for (final item in manifest['files'] as List) {
         final row = Map<String, Object?>.from(item as Map);
         final name = row['path'] as String;

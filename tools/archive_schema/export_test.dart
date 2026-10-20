@@ -9,6 +9,8 @@ import 'package:life_chronicle/data/repositories/archive_repository.dart';
 import 'package:life_chronicle/data/repositories/archive_zip.dart';
 import 'package:life_chronicle/data/repositories/attachment_repository.dart';
 import 'package:life_chronicle/data/repositories/event_content_repository.dart';
+import 'package:life_chronicle/data/repositories/story_repository.dart';
+import 'package:life_chronicle/core/stories/theme_rule.dart';
 
 import '../../test/data/repositories/archive_repository_test.dart'
     show reading, ArchiveTestPlatform;
@@ -35,6 +37,11 @@ void main() {
           sections: [DraftSection(content: '**保留** Unicode 👍🏽')],
         ),
       );
+      final tag = (await h.db.select(h.db.tags).get()).single.id;
+      await StoryRepository(h.context()).save(
+        title: '智慧主題',
+        rule: ThemeRule(mode: TagMatchMode.all, include: [tag]),
+      );
       final times = <TimeValue>[
         MonthTime(2001, 9),
         QuarterTime(2002, 3),
@@ -43,6 +50,14 @@ void main() {
         ApproxYearTime(2005),
         RangeTime(MonthTime(2006, 1), YearTime(2007)),
         RelativeTime(anchor, RelativeRelation.after),
+        RelativeTime(
+          h.context().newId(),
+          RelativeRelation.after,
+          deletedReference: const DeletedTimeReference(
+            '已刪除參照 <標題>',
+            private: true,
+          ),
+        ),
         AgeEstimateTime(20),
         const UnknownTime(),
       ];
@@ -79,7 +94,7 @@ void main() {
         output,
         const ArchiveZip(),
       );
-      for (final scope in ['full', 'no_media', 'custom']) {
+      for (final scope in ['full', 'no_media', 'custom', 'private']) {
         final staging = Directory('${output.path}/$scope');
         if (await staging.exists()) {
           // 僅清理本工具在工作區 build 下的舊驗證產物，避免殘留舊 Markdown。
@@ -100,6 +115,7 @@ void main() {
         final exported = await repo.export(
           await repo.prepare(
             includeMedia: scope != 'no_media',
+            excludePrivateEvents: scope == 'private',
             excludedBlobIds: scope == 'custom'
                 ? {(await h.db.select(h.db.blobs).get()).first.id}
                 : const {},
@@ -125,7 +141,7 @@ void main() {
           await File('${verified.directory.path}/data/events.json')
               .readAsString(),
         ) as List;
-        expect(data, hasLength(10));
+        expect(data, hasLength(scope == 'private' ? 1 : times.length + 1));
       }
     } finally {
       await h.close();

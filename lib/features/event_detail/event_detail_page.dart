@@ -251,7 +251,10 @@ class EventDetailPage extends ConsumerWidget {
               .firstOrNull
         : null;
     final reference = referenceEvent == null
-        ? null
+        ? L10nTimeTexts(l).deletedReferenceTitle(
+            time,
+            canReadPrivate: ref.watch(securityProvider).canReadPrivate,
+          )
         : referenceEvent.privacy == 'private' &&
               !ref.watch(securityProvider).canReadPrivate
         ? l.securityPrivateEvent
@@ -270,7 +273,7 @@ class EventDetailPage extends ConsumerWidget {
               child: Text(
                 data.event.title,
                 softWrap: true,
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
             ),
           ),

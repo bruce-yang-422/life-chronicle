@@ -42,6 +42,7 @@ class _RestorePageState extends ConsumerState<RestorePage> {
   ArchiveRestoreReport? _report;
   final _choices = <String, ArchiveConflictChoice>{};
   List<String> _excludedPaths = const [];
+  Map? _excludedPrivate;
   bool _busy = false;
   String? _filename;
   String? _error;
@@ -111,6 +112,9 @@ class _RestorePageState extends ConsumerState<RestorePage> {
         _report = null;
         _choices.clear();
         _filename = p.basename(file.path);
+        _excludedPrivate =
+            (inspected.verified.manifest['scope'] as Map)['private_events']
+                as Map?;
         _excludedPaths = [
           for (final item
               in (inspected.verified.manifest['scope'] as Map)['excluded']
@@ -248,7 +252,7 @@ class _RestorePageState extends ConsumerState<RestorePage> {
     final l = AppLocalizations.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -347,7 +351,7 @@ class _RestorePageState extends ConsumerState<RestorePage> {
                 ),
               )
             : ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 children: [
                   Text(l.restoreIntro),
                   const SizedBox(height: 12),
@@ -378,8 +382,21 @@ class _RestorePageState extends ConsumerState<RestorePage> {
                           entry.value.length,
                         ),
                       ),
-                    if (plan.verified.manifest['format_version'] != '1.0')
+                    if (int.parse(
+                          (plan.verified.manifest['format_version'] as String)
+                              .split('.')[1],
+                        ) >
+                        2)
                       Text(l.backupNewFormat),
+                    if ((plan.verified.manifest['scope']
+                            as Map)['private_events']
+                        case final Map privacy)
+                      Text(
+                        l.backupPrivateExcluded(
+                          privacy['events'] as int,
+                          privacy['media'] as int,
+                        ),
+                      ),
                     if (_excludedPaths.isNotEmpty) ...[
                       Text(l.restoreExcluded),
                       for (final path in _excludedPaths) Text(path),
@@ -400,6 +417,13 @@ class _RestorePageState extends ConsumerState<RestorePage> {
                     ),
                   ],
                   if (report != null) ...[
+                    if (_excludedPrivate case final Map privacy)
+                      Text(
+                        l.backupPrivateExcluded(
+                          privacy['events'] as int,
+                          privacy['media'] as int,
+                        ),
+                      ),
                     Text(
                       l.backupRestoreDone,
                       style: Theme.of(context).textTheme.titleLarge,

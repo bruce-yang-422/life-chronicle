@@ -56,7 +56,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       (Icons.history, l10n.navTimeline),
       (Icons.search, l10n.navSearch),
       (Icons.add_circle_outline, l10n.navNewEvent),
-      (Icons.menu_book_outlined, l10n.navStories),
+      (Icons.local_offer_outlined, l10n.navStories),
       (Icons.backup_outlined, l10n.navBackup),
     ];
     return Scaffold(
@@ -164,7 +164,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                 ),
               ),
               child: NavigationBar(
-                height: 76 * MediaQuery.textScalerOf(context).scale(10) / 10,
+                height: 56 * MediaQuery.textScalerOf(context).scale(10) / 10,
                 selectedIndex: _index,
                 onDestinationSelected: _select,
                 destinations: [
@@ -183,13 +183,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                     label: l10n.navNewEvent,
                   ),
                   NavigationDestination(
-                    icon: const Icon(CupertinoIcons.book),
-                    selectedIcon: const Icon(Icons.menu_book),
+                    icon: const Icon(CupertinoIcons.tag),
+                    selectedIcon: const Icon(CupertinoIcons.tag_fill),
                     label: l10n.navStories,
                   ),
                   NavigationDestination(
                     icon: const Icon(CupertinoIcons.layers),
-                    selectedIcon: const Icon(Icons.storage),
+                    selectedIcon: const Icon(CupertinoIcons.layers_fill),
                     label: l10n.navBackup,
                   ),
                 ],

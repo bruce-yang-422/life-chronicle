@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'writing_field.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
@@ -18,7 +21,7 @@ class MarkdownContent extends StatelessWidget {
     extensionSet: MarkdownDocument.extensionSet,
     styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
       tableColumnWidth: const IntrinsicColumnWidth(),
-      tableCellsPadding: const EdgeInsets.all(12),
+      tableCellsPadding: const EdgeInsets.all(8),
     ),
     softLineBreak: true,
     imageBuilder: (uri, title, alt) => Text(
@@ -210,10 +213,14 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Wrap(
+    final toolbar = DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Wrap(
           children: [
             PopupMenuButton<int>(
               tooltip: l.mdHeading,
@@ -296,6 +303,13 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             ),
           ],
         ),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(widget.label, style: Theme.of(context).textTheme.labelLarge),
+        const SizedBox(height: 8),
         if (_preview)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -306,16 +320,16 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         else
           TextFormField(
             controller: _controller,
-            minLines: 3,
+            minLines: 6,
             maxLines: null,
             textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(
-              labelText: widget.label,
-              helperText: l.mdHint,
-              helperMaxLines: 4,
-            ),
+            decoration: writingDecoration(context, l.editorBodyHint),
             onChanged: widget.onChanged,
           ),
+        const SizedBox(height: 8),
+        toolbar,
+        const SizedBox(height: 8),
+        Text(l.mdHint, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
