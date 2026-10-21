@@ -11,7 +11,7 @@ final archivePartLimitsProvider = Provider<List<int>>(
   (ref) => [1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024, 4000 * 1024 * 1024],
 );
 
-/// 共用副本只列一列，避免選擇某個附件後仍由其他引用將檔案匯出。
+/// 以私密範圍與附件總開關選擇備份，不隨附件數量增加操作量。
 class ExportScopeDialog extends ConsumerStatefulWidget {
   const ExportScopeDialog({super.key, required this.options});
   final List<ArchiveMediaOption> options;
@@ -24,7 +24,17 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
   bool _includeMedia = true;
   bool _excludePrivate = false;
   int _maxPartBytes = 0;
-  final _excluded = <String>{};
+
+  List<ArchiveMediaOption> get _selectedOptions => !_includeMedia
+      ? const []
+      : widget.options
+            .where(
+              (file) =>
+                  !_excludePrivate ||
+                  file.references == 0 ||
+                  (file.normalReferences ?? file.references) > 0,
+            )
+            .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -40,88 +50,72 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CheckboxListTile(
-                    value: _excludePrivate,
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    value: !_excludePrivate,
                     onChanged: (value) =>
-                        setState(() => _excludePrivate = value!),
-                    title: Text(l.backupExcludePrivate),
-                  ),
-                  CheckboxListTile(
-                    value: _includeMedia,
-                    onChanged: (value) =>
-                        setState(() => _includeMedia = value!),
-                    title: Text(l.backupMedia),
+                        setState(() => _excludePrivate = !value),
+                    title: Text(l.backupIncludePrivate),
+                    subtitle: Text(l.backupPrivateScopeHint),
                   ),
                   if (_excludePrivate) Text(l.backupExcludePrivateNotice),
-                  Text(l.backupMediaNotice),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<int>(
-                    initialValue: _maxPartBytes,
-                    isExpanded: true,
-                    decoration: InputDecoration(labelText: l.backupSplit),
-                    items: [
-                      DropdownMenuItem(value: 0, child: Text(l.backupNoSplit)),
-                      for (final size in ref.watch(archivePartLimitsProvider))
-                        DropdownMenuItem(
-                          value: size,
-                          child: Text(l.backupPartLimit(formatBytes(size))),
+                  const Divider(),
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    value: _includeMedia,
+                    onChanged: (value) => setState(() => _includeMedia = value),
+                    title: Text(l.backupMedia),
+                    subtitle: Text(
+                      l.backupAttachmentTotals(
+                        _selectedOptions.length,
+                        formatBytes(
+                          _selectedOptions.fold<int>(
+                            0,
+                            (sum, file) => sum + file.byteSize,
+                          ),
                         ),
-                    ],
-                    onChanged: _includeMedia
-                        ? (value) => setState(() => _maxPartBytes = value!)
-                        : null,
-                  ),
-                  if (_includeMedia && _maxPartBytes > 0)
-                    Text(l.backupSplitNotice),
-                  if (_includeMedia && widget.options.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Text(l.backupMediaSelection),
-                    SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.3,
-                      child: ListView.builder(
-                        itemCount: widget.options.length,
-                        itemBuilder: (context, index) {
-                          final option = widget.options[index];
-                          final privateOnly =
-                              _excludePrivate &&
-                              option.references > 0 &&
-                              option.normalReferences == 0;
-                          final names =
-                              _excludePrivate &&
-                                  option.normalNames?.isNotEmpty == true
-                              ? option.normalNames!
-                              : option.names;
-                          return CheckboxListTile(
-                            value:
-                                !privateOnly &&
-                                !_excluded.contains(option.blobId),
-                            onChanged: privateOnly
-                                ? null
-                                : (value) => setState(() {
-                                    if (value == true) {
-                                      _excluded.remove(option.blobId);
-                                    } else {
-                                      _excluded.add(option.blobId);
-                                    }
-                                  }),
-                            title: Text(names.join('\n')),
-                            subtitle: Text(
-                              privateOnly
-                                  ? l.backupPrivateMediaExcluded
-                                  : l.backupMediaDetails(
-                                      formatBytes(option.byteSize),
-                                      _excludePrivate
-                                          ? option.normalReferences ??
-                                                option.references
-                                          : option.references,
-                                    ),
-                            ),
-                          );
-                        },
                       ),
                     ),
-                  ],
+                  ),
+                  if (!_includeMedia) Text(l.backupMediaNotice),
                   if (widget.options.isEmpty) Text(l.backupNoMedia),
+                  const SizedBox(height: 12),
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    title: Text(l.backupAdvanced),
+                    childrenPadding: const EdgeInsets.only(top: 12, bottom: 8),
+                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.backupSplit,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<int>(
+                        initialValue: _maxPartBytes,
+                        isExpanded: true,
+                        decoration: const InputDecoration(),
+                        items: [
+                          DropdownMenuItem(
+                            value: 0,
+                            child: Text(l.backupNoSplit),
+                          ),
+                          for (final size in ref.watch(
+                            archivePartLimitsProvider,
+                          ))
+                            DropdownMenuItem(
+                              value: size,
+                              child: Text(l.backupPartLimit(formatBytes(size))),
+                            ),
+                        ],
+                        onChanged: _includeMedia
+                            ? (value) => setState(() => _maxPartBytes = value!)
+                            : null,
+                      ),
+                      if (_includeMedia && _maxPartBytes > 0)
+                        Text(l.backupSplitNotice),
+                    ],
+                  ),
                 ],
               )
             : Text(l.securityPrivateUnlock),
@@ -141,11 +135,10 @@ class _ExportScopeDialogState extends ConsumerState<ExportScopeDialog> {
                     maxPartBytes: _includeMedia && _maxPartBytes > 0
                         ? _maxPartBytes
                         : null,
-                    excludedBlobIds: _excluded,
                   ),
                 )
               : null,
-          child: Text(l.backupExport),
+          child: Text(l.backupContinue),
         ),
       ],
     );

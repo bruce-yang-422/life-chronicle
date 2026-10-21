@@ -15,6 +15,10 @@ import 'package:life_chronicle/data/repositories/event_draft_store.dart';
 
 import 'harness.dart';
 
+import 'package:life_chronicle/core/policy/layer_policy.dart';
+
+import 'package:life_chronicle/data/repositories/repository_context.dart';
+
 import 'package:life_chronicle/core/attachments/attachment_file_progress.dart';
 
 import '../../support/media_samples.dart';
@@ -76,6 +80,88 @@ void main() {
     }
     return AttachmentSource(file.path, name);
   }
+
+  test('額度顯示逐引用計數、納入追憶層並隨引用移除更新', () async {
+    final file = await source('quota.txt', [42, 43]);
+    final id = await repository.importBatch(
+      await repository.prepare([file, file]),
+      saveEvent: () => content.save(EventDraft(title: 'quota')),
+    );
+    var usage = await repository.watchUsage(id).first;
+    expect((usage.usedBytes, usage.count), (4, 2));
+    await h.activateArchive();
+    final family = AttachmentRepository(
+      h.context(actingAuthorId: h.familyAuthorId),
+      repository.directory,
+      platform,
+    );
+    await family.importBatch(await family.prepare([file]), eventId: id);
+    usage = await repository.watchUsage(id).first;
+    expect((usage.usedBytes, usage.count), (6, 3));
+    final stored = await family.watch(id).first;
+    final remembrance = stored.singleWhere(
+      (item) => item.attachment.layer == 'remembrance',
+    );
+    final updated = family
+        .watchUsage(id)
+        .firstWhere((value) => value.count == 2);
+    await family.removeReference(remembrance.attachment.id);
+    usage = await updated;
+    expect((usage.usedBytes, usage.count), (4, 2));
+  });
+
+  test('額度顯示草稿按實際大小計入，同一引用重試不重算，缺檔不冒稱零容量', () async {
+    final file = await source('draft-quota.txt', [42, 43, 44]);
+    final retained = await repository.retainForDraft(
+      await repository.prepare([file]),
+      ImportCancellation(),
+    );
+    var usage = await repository
+        .watchUsage(null, pending: [retained.single, retained.single])
+        .first;
+    expect(
+      (usage.pendingBytes, usage.pendingCount, usage.remainingBytes),
+      (3, 1, 24999997),
+    );
+    final id = await repository.importBatch(
+      await repository.prepare(retained),
+      saveEvent: () => content.save(EventDraft(title: 'draft quota')),
+    );
+    usage = await repository.watchUsage(id, pending: retained).first;
+    expect(
+      (usage.usedBytes, usage.count, usage.pendingBytes, usage.pendingCount),
+      (3, 1, 0, 0),
+    );
+    await File(file.path).delete();
+    await expectLater(
+      repository.watchUsage(null, pending: [file]),
+      emitsError(isA<ImportIntegrityException>()),
+    );
+  });
+
+  test('額度顯示拒絕鎖定私密事件與不存在事件', () async {
+    final id = await content.save(
+      EventDraft(title: 'secret', privacy: 'private'),
+    );
+    final locked = AttachmentRepository(
+      RepositoryContext(
+        h.db,
+        subjectId: h.profile.subjectId,
+        actingAuthorId: h.profile.selfAuthorId,
+        canReadPrivate: false,
+      ),
+      repository.directory,
+      platform,
+    );
+    await expectLater(
+      locked.watchUsage(id),
+      emitsError(isA<PermissionDeniedException>()),
+    );
+    await expectLater(
+      repository.watchUsage('missing'),
+      emitsError(isA<Object>()),
+    );
+  });
 
   test('預覽草稿額度不重算已保存引用，新引用即使相同內容仍計入', () async {
     final original = await source('note.txt', [42, 43]);
@@ -700,6 +786,75 @@ void main() {
     await reopened.cleanUnreferenced();
     expect(await interrupted.exists(), isFalse);
   });
+  test('500 MB 餘量採精確 bytes 邊界，去重只省實體空間且不能偽造計畫大小', () async {
+    final file = await source('reserve.txt', [1, 2, 3]);
+    final plan = await repository.prepare([file]);
+    platform.free = 500000002;
+    await expectLater(
+      repository.importBatch(
+        plan,
+        saveEvent: () => content.save(EventDraft(title: 'blocked')),
+      ),
+      throwsA(isA<ImportSpaceException>()),
+    );
+    expect(await h.db.select(h.db.events).get(), isEmpty);
+    platform.free = 500000003;
+    final id = await repository.importBatch(
+      plan,
+      saveEvent: () => content.save(EventDraft(title: 'boundary')),
+    );
+    platform.free = 500000000;
+    await repository.importBatch(await repository.prepare([file]), eventId: id);
+    expect((await repository.watch(id).first).length, 2);
+    expect(await repository.usedBytes(id), 6);
+    final other = await source('new.txt', [4, 5, 6]);
+    final next = await repository.prepare([other]);
+    final forged = AttachmentImportPlan(next.files, 0, 0, 9999999999, 0);
+    await expectLater(
+      repository.importBatch(forged, eventId: id),
+      throwsA(isA<ImportSpaceException>()),
+    );
+    expect(await repository.usedBytes(id), 6);
+  });
+
+  test('草稿空間檢查不採信計畫總量，預留草稿與後續持久副本的尖峰容量', () async {
+    final file = await source('draft-reserve.txt', [1, 2, 3]);
+    final plan = await repository.prepare([file]);
+    final forged = AttachmentImportPlan(plan.files, 0, 0, 9999999999, 0);
+    platform.free = 500000003;
+    await expectLater(
+      repository.retainForDraft(forged, ImportCancellation()),
+      throwsA(isA<ImportSpaceException>()),
+    );
+    expect(await File(file.path).readAsBytes(), [1, 2, 3]);
+    expect(
+      await Directory('${repository.directory.parent.path}/draft_media')
+          .list()
+          .toList(),
+      isEmpty,
+    );
+  });
+
+  test('複製中空間下降會整批回復；文字記錄仍可保存', () async {
+    final file = await source('reserve-race.txt', [1, 2, 3]);
+    final plan = await repository.prepare([file]);
+    await expectLater(
+      repository.importBatch(
+        plan,
+        saveEvent: () => content.save(EventDraft(title: 'not saved')),
+        onProgress: (_, _) => platform.free = 499999999,
+      ),
+      throwsA(isA<ImportSpaceException>()),
+    );
+    expect(await h.db.select(h.db.events).get(), isEmpty);
+    expect(await h.db.select(h.db.attachments).get(), isEmpty);
+    expect(await h.db.select(h.db.blobs).get(), isEmpty);
+    expect(await File(file.path).readAsBytes(), [1, 2, 3]);
+    platform.free = 0;
+    final id = await content.save(EventDraft(title: 'text allowed'));
+    expect(await h.events().find(id), isNotNull);
+  });
+
   test('空間不足時不建立事件，來源檔保留', () async {
     final file = await source('large.mp4', [1, 2, 3]);
     final plan = await repository.prepare([file]);

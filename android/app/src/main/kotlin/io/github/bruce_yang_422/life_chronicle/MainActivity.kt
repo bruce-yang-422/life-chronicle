@@ -184,6 +184,39 @@ class MainActivity : FlutterFragmentActivity() {
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "life_chronicle/attachments")
             .setMethodCallHandler { call, result ->
+                if (call.method == "storageUsage") {
+                    photoWorker.execute {
+                        try {
+                            val appBytes = if (Build.VERSION.SDK_INT >= 26) {
+                                val manager = getSystemService(android.app.usage.StorageStatsManager::class.java)
+                                val storage = getSystemService(android.os.storage.StorageManager::class.java)
+                                val stats = manager.queryStatsForUid(storage.getUuidForPath(filesDir), applicationInfo.uid)
+                                // dataBytes 已含 cacheBytes，不能再加一次。
+                                stats.appBytes + stats.dataBytes
+                            } else {
+                                // 舊版只走訪本 APP 已知目錄，略過符號連結並避免重複計數。
+                                val roots = listOfNotNull(File(applicationInfo.dataDir),
+                                    getExternalFilesDir(null), externalCacheDir,
+                                    File(applicationInfo.sourceDir), File(applicationInfo.nativeLibraryDir)) +
+                                    (applicationInfo.splitSourceDirs?.map { File(it) } ?: emptyList())
+                                val visited = hashSetOf<String>()
+                                var total = 0L
+                                for (root in roots) {
+                                    val canonical = root.canonicalFile
+                                    for (file in canonical.walkTopDown().onEnter { it.canonicalPath == it.absolutePath }) {
+                                        if (file.isFile && file.canonicalPath == file.absolutePath && visited.add(file.canonicalPath)) total += file.length()
+                                    }
+                                }
+                                total
+                            }
+                            val free = StatFs(filesDir.path).availableBytes
+                            photoHandler.post { result.success(mapOf("appBytes" to appBytes, "freeBytes" to free)) }
+                        } catch (error: Exception) {
+                            photoHandler.post { result.error("storage_unavailable", "無法取得空間資訊", null) }
+                        }
+                    }
+                    return@setMethodCallHandler
+                }
                 val path = call.argument<String>("path")
                 if (path == null) {
                     result.error("invalid_path", "缺少檔案路徑", null)

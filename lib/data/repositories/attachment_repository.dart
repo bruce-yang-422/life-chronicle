@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/attachments/attachment_quota.dart';
+import '../../core/attachments/storage_space.dart';
 import '../../core/attachments/attachment_file_progress.dart';
 import '../../core/attachments/media_probe.dart';
 import '../db/app_database.dart';
@@ -281,6 +282,55 @@ class AttachmentRepository {
     return bytes;
   }
 
+  /// 監聽全部層的引用；草稿只讀取實際檔案大小，不解碼、不複製。
+  Stream<AttachmentUsage> watchUsage(
+    String? eventId, {
+    List<AttachmentSource> pending = const [],
+  }) async* {
+    final snapshots = eventId == null
+        ? Stream.value(<StoredAttachment>[])
+        : watch(eventId);
+    await for (final stored in snapshots) {
+      // 不能把不存在、其他主角或鎖定事件誤呈現為零用量。
+      if (eventId != null) await usedBytes(eventId);
+      final committed = {for (final item in stored) item.attachment.id: item};
+      final seen = <String, AttachmentSource>{};
+      var pendingBytes = 0, pendingCount = 0;
+      for (final source in pending) {
+        final id = source.referenceId;
+        if (id != null) {
+          final prior = committed[id];
+          if (prior != null) {
+            if (prior.attachment.originalFilename != source.name) {
+              throw ImportIntegrityException();
+            }
+            continue;
+          }
+          final repeated = seen[id];
+          if (repeated != null) {
+            if (repeated.path != source.path || repeated.name != source.name) {
+              throw ImportIntegrityException();
+            }
+            continue;
+          }
+          seen[id] = source;
+        }
+        final stat = await File(source.path).stat();
+        if (stat.type != FileSystemEntityType.file) {
+          throw ImportIntegrityException();
+        }
+        pendingBytes += stat.size;
+        pendingCount++;
+      }
+      yield AttachmentUsage(
+        usedBytes: stored.fold(0, (sum, item) => sum + item.blob.byteSize),
+        count: stored.length,
+        pendingBytes: pendingBytes,
+        pendingCount: pendingCount,
+      );
+    }
+  }
+
   Future<bool> _valid(Blob blob, ImportCancellation cancellation) async {
     final file = File(blob.path);
     return blob.verifyStatus == 'verified' &&
@@ -316,6 +366,38 @@ class AttachmentRepository {
     } finally {
       await handle.close();
     }
+  }
+
+  Future<void> ensureSpace(int addedBytes) async {
+    await directory.create(recursive: true);
+    if (!StorageSpace.canAdd(
+      await platform.availableBytes(directory.path),
+      addedBytes,
+    )) {
+      throw ImportSpaceException();
+    }
+  }
+
+  /// 不信任外部傳入的 addedBytes，按實際已保存副本重新估算。
+  Future<int> _physicalBytes(AttachmentImportPlan plan) async {
+    final unique = <String, int>{};
+    for (final file in plan.files) {
+      if (unique.containsKey(file.hash)) {
+        if (unique[file.hash] != file.size) throw ImportIntegrityException();
+      } else {
+        unique[file.hash] = file.size;
+      }
+    }
+    var required = 0;
+    for (final entry in unique.entries) {
+      final prior = await _existing(entry.key);
+      if (prior == null || !await File(prior.path).exists()) {
+        required += entry.value;
+      } else if (prior.byteSize != entry.value) {
+        throw ImportIntegrityException();
+      }
+    }
+    return required;
   }
 
   Future<AttachmentImportPlan> prepare(
@@ -427,10 +509,10 @@ class AttachmentRepository {
       p.join(directory.parent.path, 'draft_media'),
     );
     await draftDirectory.create(recursive: true);
-    if (await platform.availableBytes(directory.path) <
-        plan.originalBytes + plan.addedBytes) {
-      throw ImportSpaceException();
-    }
+    await ensureSpace(
+      plan.files.fold<int>(0, (sum, file) => sum + file.size) +
+          await _physicalBytes(plan),
+    );
     final retained = <AttachmentSource>[];
     var done = 0;
     var completed = 0;
@@ -496,6 +578,7 @@ class AttachmentRepository {
         );
       }
       _activeDraftPaths.addAll(retained.map((source) => _pathKey(source.path)));
+      await ensureSpace(0);
       return retained;
     } catch (_) {
       await releaseDraftSources(retained);
@@ -532,9 +615,7 @@ class AttachmentRepository {
     var completed = 0;
     try {
       await directory.create(recursive: true);
-      if (await platform.availableBytes(directory.path) < plan.addedBytes) {
-        throw ImportSpaceException();
-      }
+      await ensureSpace(await _physicalBytes(plan));
       for (final file in plan.files) {
         token.check();
         onFileProgress?.call(
@@ -587,6 +668,7 @@ class AttachmentRepository {
           );
           continue;
         }
+        await ensureSpace(file.size);
         final temporary = File(
           p.join(directory.path, '${ctx.newId()}.partial'),
         );
@@ -626,6 +708,7 @@ class AttachmentRepository {
         );
       }
       token.check();
+      await ensureSpace(0);
       // 計畫可由呼叫端建立；重複雜湊也須逐筆確認實際保存大小。
       for (final file in plan.files) {
         token.check();

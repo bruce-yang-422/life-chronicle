@@ -47,3 +47,6 @@ app.*.map.json
 # 企劃書工具
 /tools/plan_doc/node_modules/
 /tools/archive_schema/node_modules/
+
+# 本機產生的照片壓力測資
+/mock_camera_photos/

@@ -18,7 +18,7 @@ void main() {
       [],
       0,
       0,
-      1000000,
+      1000000000,
       0,
       rejected: [
         RejectedAttachment(
@@ -56,7 +56,7 @@ void main() {
       ],
       100,
       100,
-      1000000,
+      1000000000,
       0,
       rejected: [
         RejectedAttachment(
@@ -152,7 +152,7 @@ void main() {
       [file('first', 2), file('second', 1)],
       3,
       3,
-      2,
+      500000002,
       0,
     );
     await tester.pumpWidget(
@@ -195,7 +195,7 @@ void main() {
       ],
       300,
       300,
-      1000000,
+      1000000000,
       0,
     );
     AttachmentImportPlan? result;

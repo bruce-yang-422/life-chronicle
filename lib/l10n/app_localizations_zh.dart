@@ -462,7 +462,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get attachmentError => '匯入失敗，整批未保存，原檔保留。請重試。';
 
   @override
-  String get attachmentNoSpace => '可用空間不足，未匯入任何附件';
+  String get attachmentNoSpace =>
+      '手機剩餘空間不足：新增檔案後須保留至少 500 MB。可壓縮或取消部分檔案；既有內容與原件不受影響。';
 
   @override
   String get attachmentVideoUnsupported => '影片不支援';
@@ -594,7 +595,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupVerify => '驗證既有備份';
 
   @override
-  String get backupMedia => '包含影音原始副本';
+  String get backupMedia => '包含附件檔案';
 
   @override
   String get backupScope => '選擇備份範圍';
@@ -633,7 +634,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get backupRestoreConfirm =>
-      '還原已驗證的封存內容？相同 ID 的資料依你的逐筆選擇處理。不含影音的項目會標示為不可用。';
+      '還原已驗證的封存內容？相同 ID 的資料依你的逐筆選擇處理。不含檔案的附件會標示為不可用。';
 
   @override
   String get backupRestoreDone => '還原核對報告';
@@ -646,7 +647,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String excluded,
     String extras,
   ) {
-    return '新增：$inserted\n替換：$replaced\n略過：$skipped\n刻意排除影音：$excluded\n忽略額外檔案：$extras';
+    return '新增：$inserted\n替換：$replaced\n略過：$skipped\n刻意排除附件檔案：$excluded\n忽略額外檔案：$extras';
   }
 
   @override
@@ -654,7 +655,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get backupReadme =>
-      '# 人生編年史封存\n\n解壓縮全部檔案後，以瀏覽器開啟 index.html，或閱讀 markdown/timeline.md。媒體為原始副本，位於 media/。\n\ndata/ 內 JSON 是唯一權威資料，Markdown 與 HTML 是閱讀版本；修改閱讀版本不會被匯入。各資料表檔案的欄位規格見 schema/data.schema.json。時間 payload 保存原始精確度，sort_start 與 sort_end 只供排序。\n\n所有時間戳記含時區。SHA256SUMS.txt 記錄除自身外全部檔案的 SHA-256；ZIP 外旁檔可驗證整包。\n\n請將 ZIP 與旁檔另存至其他裝置；移除 APP 可能連同私有目錄中的備份一起刪除。\n';
+      '# 人生編年史封存\n\n解壓縮全部檔案後，以瀏覽器開啟 index.html，或閱讀 markdown/timeline.md。附件檔案為保存版本，位於 media/。\n\ndata/ 內 JSON 是唯一權威資料，Markdown 與 HTML 是閱讀版本；修改閱讀版本不會被匯入。各資料表檔案的欄位規格見 schema/data.schema.json。時間 payload 保存原始精確度，sort_start 與 sort_end 只供排序。\n\n所有時間戳記含時區。SHA256SUMS.txt 記錄除自身外全部檔案的 SHA-256；ZIP 外旁檔可驗證整包。\n\n請將 ZIP 與旁檔另存至其他裝置；移除 APP 可能連同私有目錄中的備份一起刪除。\n';
 
   @override
   String get archiveTimeLabel => '時間';
@@ -1020,7 +1021,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get restoreCancelled => '已取消還原，原有資料未改動。';
 
   @override
-  String get restoreExcluded => '此備份刻意排除部分影音，還原後這些附件可能無法開啟。';
+  String get restoreExcluded => '此備份刻意排除部分附件檔案，還原後這些附件無法開啟。';
 
   @override
   String get restoreExtraFiles => '下列額外檔案會忽略，不會匯入：';
@@ -1071,7 +1072,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'reflections': '回顧',
       'stories': '篇章',
       'story_events': '篇章事件連結',
-      'blobs': '影音副本',
+      'blobs': '附件檔案',
       'attachments': '附件',
       'event_tags': '事件標籤',
       'event_people': '事件人物連結',
@@ -1107,7 +1108,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'tag_id': '標籤',
       'life_period_id': '人生階段',
       'story_id': '篇章',
-      'blob_id': '影音副本',
+      'blob_id': '附件檔案',
       'event_a_id': '關聯事件',
       'event_b_id': '關聯事件',
       'archive_session_id': '典藏期間',
@@ -1132,7 +1133,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'sha256': '檔案校驗值',
       'byte_size': '檔案大小',
       'media_type': '媒體類型',
-      'path': '副本位置',
+      'path': '檔案位置',
       'verify_status': '校驗狀態',
       'original_filename': '原始檔名',
       'captured_at': '拍攝時間',
@@ -1156,7 +1157,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String restoreMediaTotals(int count, String size) {
-    return '還原後附件：$count 個；可用影音副本總容量：$size（共用副本只計一次）';
+    return '還原後附件：$count 個；可用附件檔案總容量：$size（共用副本只計一次）';
   }
 
   @override
@@ -1175,7 +1176,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get archiveFilename => '原始檔名';
 
   @override
-  String get archiveExcludedMedia => '此副本未包含於備份中，無法從本封存開啟';
+  String get archiveExcludedMedia => '此附件檔案未包含於備份中，無法從本封存開啟';
 
   @override
   String get archiveDeletedReference => '原事件已刪除';
@@ -1195,29 +1196,21 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get backupMediaNotice => '取消勾選可排除個別影音副本。附件名稱等紀錄資料仍會保留；共用同一副本的附件會一起排除。';
+  String get backupMediaNotice => '保留附件名稱與紀錄，不包含檔案；還原後無法開啟這些附件。';
 
   @override
-  String get backupMediaSelection => '選擇要包含的副本';
-
-  @override
-  String get backupNoMedia => '目前沒有影音副本。';
-
-  @override
-  String backupMediaDetails(String size, int count) {
-    return '$size · $count 個附件共用';
-  }
+  String get backupNoMedia => '目前沒有附件檔案。';
 
   @override
   String backupScopeSummary(String scope, int count) {
-    return '範圍：$scope；排除 $count 個副本';
+    return '範圍：$scope；排除 $count 個附件檔案';
   }
 
   @override
   String get backupScopeFull => '完整備份';
 
   @override
-  String get backupScopeNoMedia => '不含影音';
+  String get backupScopeNoMedia => '不含附件檔案';
 
   @override
   String get backupScopeCustom => '自訂匯出範圍';
@@ -1355,14 +1348,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get backupExcludePrivateNotice =>
-      '不匯出私密事件、記述、追憶、標題快照及專屬附件。共用附件、獨立人物／地點／標籤與未引用的倉庫副本仍依原選擇保留；不會修改手機資料。';
-
-  @override
-  String get backupPrivateMediaExcluded => '僅供私密事件使用，會自動排除';
+      '不包含私密事件、記述、追憶、標題快照及專屬附件。一般事件使用的共用附件仍保留；未引用檔案依「包含附件檔案」設定處理，不修改手機資料。';
 
   @override
   String backupPrivateExcluded(int events, int media) {
-    return '已刻意排除 $events 筆私密事件及 $media 份專屬媒體副本；不會還原這些內容。';
+    return '已排除 $events 筆私密事件及 $media 個專屬附件檔案。';
   }
 
   @override
@@ -1492,4 +1482,91 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get photoPreviewUnavailable => '暫時無法顯示照片預覽，仍可選擇保存附件或取消。';
+
+  @override
+  String attachmentUsage(String used, int count) {
+    return '已用 $used MB／25 MB・$count 個附件';
+  }
+
+  @override
+  String attachmentRemaining(String remaining) {
+    return '剩餘 $remaining MB';
+  }
+
+  @override
+  String attachmentPendingUsage(String size, int count) {
+    return '待保存 $size MB・$count 個附件（已計入剩餘額度）';
+  }
+
+  @override
+  String get attachmentQuotaLow => '剩餘額度較少，照片可改用壓縮。';
+
+  @override
+  String attachmentUsageOverLimit(String excess) {
+    return '超出 $excess MB，請減少待加入附件；既有內容不受影響。';
+  }
+
+  @override
+  String get attachmentUsageUnavailable => '暫時無法計算附件額度，請重新開啟頁面；保存時仍會檢查。';
+
+  @override
+  String get backupIncludePrivate => '包含私密事件';
+
+  @override
+  String get backupPrivateScopeHint => '依事件隱私層級判定，包含其記述與附件。';
+
+  @override
+  String get backupAdvanced => '進階選項';
+
+  @override
+  String get backupContinue => '下一步';
+
+  @override
+  String get backupStart => '開始備份';
+
+  @override
+  String backupAttachmentTotals(int count, String size) {
+    return '附件檔案：$count 個・$size（共用檔案只計一次）';
+  }
+
+  @override
+  String backupContentsSummary(int events, int files) {
+    return '$events 篇事件・$files 個附件檔案';
+  }
+
+  @override
+  String get backupPrivateIncluded => '包含私密事件及其附件。';
+
+  @override
+  String get backupSizeNotice => '這是空間需求估算，實際 ZIP 大小以完成後為準。';
+
+  @override
+  String get attachmentSpaceReserve =>
+      '手機剩餘空間不足：新增檔案後須保留至少 500 MB。可壓縮或取消部分檔案；既有內容與原件不受影響。';
+
+  @override
+  String get storageLoading => '正在取得空間資訊…';
+
+  @override
+  String get storageUnavailable => '暫時無法取得空間資訊。';
+
+  @override
+  String get storageApp => 'APP 總占用';
+
+  @override
+  String get storageFree => '手機剩餘空間';
+
+  @override
+  String get storageEstimate => '空間數值為目前估算，包含 APP、資料與快取；不等於各篇附件額度的總和。';
+
+  @override
+  String get storageRefresh => '重新整理';
+
+  @override
+  String get storageDismiss => '關閉空間提醒';
+
+  @override
+  String storageLow(String free) {
+    return '手機剩餘 $free，低於 1 GB。建議釋放空間，仍可繼續記錄文字。';
+  }
 }

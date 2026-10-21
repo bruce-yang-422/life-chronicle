@@ -477,7 +477,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attachmentNoSpace =>
-      'Not enough space. No attachments were imported';
+      'Not enough device storage. At least 500 MB must remain after adding files. Compress or deselect files; existing content and originals are preserved.';
 
   @override
   String get attachmentVideoUnsupported => 'Videos are not supported';
@@ -615,7 +615,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupVerify => 'Verify existing backup';
 
   @override
-  String get backupMedia => 'Include original media copies';
+  String get backupMedia => 'Include attachment files';
 
   @override
   String get backupScope => 'Choose backup scope';
@@ -656,7 +656,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupRestoreConfirm =>
-      'Restore verified archive contents? Records with matching IDs follow your individual choices. Excluded media will be marked unavailable.';
+      'Restore the verified archive? Conflicting IDs follow your choices. Attachments without files are marked unavailable.';
 
   @override
   String get backupRestoreDone => 'Restore verification report';
@@ -669,7 +669,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String excluded,
     String extras,
   ) {
-    return 'Added: $inserted\nReplaced: $replaced\nSkipped: $skipped\nIntentionally excluded media: $excluded\nExtra files ignored: $extras';
+    return 'Added: $inserted\nReplaced: $replaced\nSkipped: $skipped\nIntentionally excluded attachment files: $excluded\nExtra files ignored: $extras';
   }
 
   @override
@@ -678,7 +678,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupReadme =>
-      '# Life Chronicle archive\n\nExtract all files and open index.html in a browser, or read markdown/timeline.md. Original media copies are in media/.\n\nJSON in data/ is the authoritative source. Markdown and HTML are reading copies. Edits to reading copies are not imported. Table fields are described in schema/data.schema.json. Time payloads preserve input precision; sort_start and sort_end are for ordering only.\n\nTimestamps include a timezone. SHA256SUMS.txt covers every file except itself. The external sidecar verifies the whole ZIP.\n\nSave the ZIP and its sidecar on another device. Uninstalling the app may delete private backups.\n';
+      '# Life Chronicle archive\n\nExtract all files and open index.html in a browser, or read markdown/timeline.md. Saved attachment files are in media/.\n\nJSON in data/ is the authoritative source. Markdown and HTML are reading copies. Edits to reading copies are not imported. Table fields are described in schema/data.schema.json. Time payloads preserve input precision; sort_start and sort_end are for ordering only.\n\nTimestamps include a timezone. SHA256SUMS.txt covers every file except itself. The external sidecar verifies the whole ZIP.\n\nSave the ZIP and its sidecar on another device. Uninstalling the app may delete private backups.\n';
 
   @override
   String get archiveTimeLabel => 'Time';
@@ -1082,7 +1082,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restoreExcluded =>
-      'Some media was intentionally excluded. Those attachments may be unavailable after restoration.';
+      'This backup intentionally omits some attachment files, which cannot be opened after restoration.';
 
   @override
   String get restoreExtraFiles => 'These extra files will be ignored:';
@@ -1133,7 +1133,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'reflections': 'Reflections',
       'stories': 'Stories',
       'story_events': 'Story links',
-      'blobs': 'Media copies',
+      'blobs': 'Attachment files',
       'attachments': 'Attachments',
       'event_tags': 'Event tags',
       'event_people': 'Event people links',
@@ -1169,7 +1169,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'tag_id': 'Tag',
       'life_period_id': 'Life period',
       'story_id': 'Story',
-      'blob_id': 'Media copy',
+      'blob_id': 'Attachment file',
       'event_a_id': 'Related event',
       'event_b_id': 'Related event',
       'archive_session_id': 'Archive session',
@@ -1194,7 +1194,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'sha256': 'File checksum',
       'byte_size': 'File size',
       'media_type': 'Media type',
-      'path': 'Copy location',
+      'path': 'File location',
       'verify_status': 'Verification status',
       'original_filename': 'Original filename',
       'captured_at': 'Captured',
@@ -1218,7 +1218,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String restoreMediaTotals(int count, String size) {
-    return 'Attachments after restoration: $count; available media: $size (shared copies counted once)';
+    return 'Attachments after restoration: $count; available attachment files: $size (shared files counted once)';
   }
 
   @override
@@ -1238,7 +1238,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get archiveExcludedMedia =>
-      'This copy is not included and cannot be opened from this archive';
+      'This attachment file is not included and cannot be opened from this archive';
 
   @override
   String get archiveDeletedReference => 'Original event deleted';
@@ -1259,29 +1259,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupMediaNotice =>
-      'Uncheck a file to exclude its media copy. Record data, including attachment names, is kept. All attachments sharing that copy are affected.';
+      'Attachment names and records are kept, but files are omitted and cannot be opened after restoration.';
 
   @override
-  String get backupMediaSelection => 'Choose copies to include';
-
-  @override
-  String get backupNoMedia => 'There are no media copies.';
-
-  @override
-  String backupMediaDetails(String size, int count) {
-    return '$size · Shared by $count attachments';
-  }
+  String get backupNoMedia => 'There are no attachment files.';
 
   @override
   String backupScopeSummary(String scope, int count) {
-    return 'Scope: $scope; $count copies excluded';
+    return 'Scope: $scope; $count attachment files excluded';
   }
 
   @override
   String get backupScopeFull => 'Full backup';
 
   @override
-  String get backupScopeNoMedia => 'Without media';
+  String get backupScopeNoMedia => 'Without attachment files';
 
   @override
   String get backupScopeCustom => 'Custom export selection';
@@ -1427,15 +1419,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupExcludePrivateNotice =>
-      'Omit private entries, sections, reflections, title snapshots and exclusive attachments. Shared attachments, independent people/places/tags and unreferenced warehouse copies follow your other selections. Device data stays intact.';
-
-  @override
-  String get backupPrivateMediaExcluded =>
-      'Used only by private entries; automatically excluded';
+      'Private entries, sections, reflections, title snapshots and exclusive attachments are omitted. Files shared with normal entries are kept. Unreferenced files follow the attachment switch. Device data stays intact.';
 
   @override
   String backupPrivateExcluded(int events, int media) {
-    return 'Intentionally excluded $events private entries and $media exclusive media copies. These contents will not be restored.';
+    return 'Excluded $events private entries and $media exclusive attachment files.';
   }
 
   @override
@@ -1576,4 +1564,98 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get photoPreviewUnavailable =>
       'Photo preview is unavailable. You can still save the attachment or cancel.';
+
+  @override
+  String attachmentUsage(String used, int count) {
+    return '$used MB / 25 MB used · $count attachments';
+  }
+
+  @override
+  String attachmentRemaining(String remaining) {
+    return '$remaining MB remaining';
+  }
+
+  @override
+  String attachmentPendingUsage(String size, int count) {
+    return 'Pending: $size MB · $count attachments (included in remaining capacity)';
+  }
+
+  @override
+  String get attachmentQuotaLow =>
+      'Capacity is running low. Consider compressing photos.';
+
+  @override
+  String attachmentUsageOverLimit(String excess) {
+    return '$excess MB over capacity. Reduce pending attachments; existing content is preserved.';
+  }
+
+  @override
+  String get attachmentUsageUnavailable =>
+      'Attachment capacity is unavailable. Reopen this page; saving still checks the limit.';
+
+  @override
+  String get backupIncludePrivate => 'Include private entries';
+
+  @override
+  String get backupPrivateScopeHint =>
+      'Uses entry privacy settings, including their sections and attachments.';
+
+  @override
+  String get backupAdvanced => 'Advanced options';
+
+  @override
+  String get backupContinue => 'Next';
+
+  @override
+  String get backupStart => 'Start backup';
+
+  @override
+  String backupAttachmentTotals(int count, String size) {
+    return 'Attachment files: $count · $size (shared files counted once)';
+  }
+
+  @override
+  String backupContentsSummary(int events, int files) {
+    return '$events entries · $files attachment files';
+  }
+
+  @override
+  String get backupPrivateIncluded =>
+      'Private entries and their attachments are included.';
+
+  @override
+  String get backupSizeNotice =>
+      'This estimates required space. The final ZIP size is shown after completion.';
+
+  @override
+  String get attachmentSpaceReserve =>
+      'Not enough device storage. At least 500 MB must remain after adding files. Compress or deselect files; existing content and originals are preserved.';
+
+  @override
+  String get storageLoading => 'Checking storage…';
+
+  @override
+  String get storageUnavailable =>
+      'Storage information is temporarily unavailable.';
+
+  @override
+  String get storageApp => 'App storage used';
+
+  @override
+  String get storageFree => 'Device storage available';
+
+  @override
+  String get storageEstimate =>
+      'Current estimates include the app, data and cache. They differ from the sum of entry attachment quotas.';
+
+  @override
+  String get storageRefresh => 'Refresh';
+
+  @override
+  String get storageDismiss => 'Dismiss storage warning';
+
+  @override
+  String storageLow(String free) {
+    return 'Device storage remaining: $free, below 1 GB. Consider freeing space. You can still write text.';
+  }
 }

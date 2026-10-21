@@ -353,7 +353,7 @@
   "attachmentPlanBody": "共 {count} 個檔案\n原檔總大小：{size}\n預估新增容量：{added}\n可用空間：{free}\n相同副本：{duplicates} 個\n原檔會保留。任一檔案失敗，整批取消，可重新匯入。",
   "attachmentImport": "匯入附件",
   "attachmentError": "匯入失敗，整批未保存，原檔保留。請重試。",
-  "attachmentNoSpace": "可用空間不足，未匯入任何附件",
+  "attachmentNoSpace": "手機剩餘空間不足：新增檔案後須保留至少 500 MB。可壓縮或取消部分檔案；既有內容與原件不受影響。",
   "attachmentVideoUnsupported": "影片不支援",
   "attachmentStaticImageOnly": "{name}：僅保存動態照片的靜態圖像，不保存影片部分。",
   "@attachmentStaticImageOnly": { "placeholders": { "name": { "type": "String" } } },
@@ -462,7 +462,7 @@
   "backupExport": "匯出 ZIP 備份",
   "backupImport": "匯入與還原 ZIP",
   "backupVerify": "驗證既有備份",
-  "backupMedia": "包含影音原始副本",
+  "backupMedia": "包含附件檔案",
   "backupScope": "選擇備份範圍",
   "backupPlan": "預估需要：{required}\n可用空間：{free}\n事件：{count} 筆\n完成後可透過系統分享另存。",
   "@backupPlan": {
@@ -487,9 +487,9 @@
   "backupConflict": "逐筆處理相同 ID 的差異",
   "backupKeep": "保留目前資料",
   "backupUseArchive": "使用封存內容",
-  "backupRestoreConfirm": "還原已驗證的封存內容？相同 ID 的資料依你的逐筆選擇處理。不含影音的項目會標示為不可用。",
+  "backupRestoreConfirm": "還原已驗證的封存內容？相同 ID 的資料依你的逐筆選擇處理。不含檔案的附件會標示為不可用。",
   "backupRestoreDone": "還原核對報告",
-  "backupReport": "新增：{inserted}\n替換：{replaced}\n略過：{skipped}\n刻意排除影音：{excluded}\n忽略額外檔案：{extras}",
+  "backupReport": "新增：{inserted}\n替換：{replaced}\n略過：{skipped}\n刻意排除附件檔案：{excluded}\n忽略額外檔案：{extras}",
   "@backupReport": {
     "placeholders": {
       "inserted": {
@@ -510,7 +510,7 @@
     }
   },
   "backupNewFormat": "部分新格式資料無法辨識，僅還原已知欄位。",
-  "backupReadme": "# 人生編年史封存\n\n解壓縮全部檔案後，以瀏覽器開啟 index.html，或閱讀 markdown/timeline.md。媒體為原始副本，位於 media/。\n\ndata/ 內 JSON 是唯一權威資料，Markdown 與 HTML 是閱讀版本；修改閱讀版本不會被匯入。各資料表檔案的欄位規格見 schema/data.schema.json。時間 payload 保存原始精確度，sort_start 與 sort_end 只供排序。\n\n所有時間戳記含時區。SHA256SUMS.txt 記錄除自身外全部檔案的 SHA-256；ZIP 外旁檔可驗證整包。\n\n請將 ZIP 與旁檔另存至其他裝置；移除 APP 可能連同私有目錄中的備份一起刪除。\n",
+  "backupReadme": "# 人生編年史封存\n\n解壓縮全部檔案後，以瀏覽器開啟 index.html，或閱讀 markdown/timeline.md。附件檔案為保存版本，位於 media/。\n\ndata/ 內 JSON 是唯一權威資料，Markdown 與 HTML 是閱讀版本；修改閱讀版本不會被匯入。各資料表檔案的欄位規格見 schema/data.schema.json。時間 payload 保存原始精確度，sort_start 與 sort_end 只供排序。\n\n所有時間戳記含時區。SHA256SUMS.txt 記錄除自身外全部檔案的 SHA-256；ZIP 外旁檔可驗證整包。\n\n請將 ZIP 與旁檔另存至其他裝置；移除 APP 可能連同私有目錄中的備份一起刪除。\n",
   "archiveTimeLabel": "時間",
   "archiveLayerLabel": "紀錄層",
   "archiveAuthorLabel": "作者",
@@ -707,7 +707,7 @@
   "restoreInvalidSubject": "備份的主角、本人作者或典藏設定不符合單一主角格式，無法還原。",
   "restoreChanged": "預覽後原有資料已變更。請重新選取備份、核對差異後再還原。",
   "restoreCancelled": "已取消還原，原有資料未改動。",
-  "restoreExcluded": "此備份刻意排除部分影音，還原後這些附件可能無法開啟。",
+  "restoreExcluded": "此備份刻意排除部分附件檔案，還原後這些附件無法開啟。",
   "restoreExtraFiles": "下列額外檔案會忽略，不會匯入：",
   "restoreEmpty": "未填寫",
   "restoreYes": "是",
@@ -750,7 +750,7 @@
       }
     }
   },
-  "restoreTable": "{table, select, subjects{主角} authors{作者} archive_sessions{典藏期間} archive_settings{典藏設定} places{地點} people{人物} tags{標籤} events{事件} event_sections{記述段落} life_periods{人生階段} event_life_periods{人生階段連結} reflections{回顧} stories{篇章} story_events{篇章事件連結} blobs{影音副本} attachments{附件} event_tags{事件標籤} event_people{事件人物連結} event_links{關聯事件} change_history{修訂紀錄} other{其他資料}}",
+  "restoreTable": "{table, select, subjects{主角} authors{作者} archive_sessions{典藏期間} archive_settings{典藏設定} places{地點} people{人物} tags{標籤} events{事件} event_sections{記述段落} life_periods{人生階段} event_life_periods{人生階段連結} reflections{回顧} stories{篇章} story_events{篇章事件連結} blobs{附件檔案} attachments{附件} event_tags{事件標籤} event_people{事件人物連結} event_links{關聯事件} change_history{修訂紀錄} other{其他資料}}",
   "@restoreTable": {
     "placeholders": {
       "table": {
@@ -758,7 +758,7 @@
       }
     }
   },
-  "restoreField": "{field, select, display_name{名稱} birth_date{生日} death_date{逝世日期} title{標題} content_md{內容} time_payload{發生時間} category{類別} privacy{隱私} created_at{建立時間} updated_at{更新時間} recorded_at{記錄時間} deleted_at{刪除時間} purged_at{永久刪除時間} layer{紀錄層} author_id{作者} event_id{事件} subject_id{主角} place_id{地點} person_id{人物} tag_id{標籤} life_period_id{人生階段} story_id{篇章} blob_id{影音副本} event_a_id{關聯事件} event_b_id{關聯事件} archive_session_id{典藏期間} current_session_id{目前典藏期間} role{角色／用途} is_subject_self{本人作者} mode{典藏狀態} activated_at{啟用時間} deactivated_at{結束時間} activated_by{啟用作者} deactivated_by{結束作者} sort_start{排序區間起點} sort_end{排序區間終點} manual_order{手動排序} position{排列位置} suggestion_key{段落建議類型} type{類型} start_time{開始時間} end_time{結束時間} organization{組織} provenance{來源說明} sha256{檔案校驗值} byte_size{檔案大小} media_type{媒體類型} path{副本位置} verify_status{校驗狀態} original_filename{原始檔名} captured_at{拍攝時間} captured_latitude{拍攝緯度} captured_longitude{拍攝經度} imported_at{匯入時間} storage_mode{保存方式} name{名稱} name_key{名稱比對值} latitude{緯度} longitude{經度} radius_m{範圍半徑（公尺）} label{標籤} operation{操作} timestamp{記錄時間} entity_id{修訂對象} other{其他欄位}}",
+  "restoreField": "{field, select, display_name{名稱} birth_date{生日} death_date{逝世日期} title{標題} content_md{內容} time_payload{發生時間} category{類別} privacy{隱私} created_at{建立時間} updated_at{更新時間} recorded_at{記錄時間} deleted_at{刪除時間} purged_at{永久刪除時間} layer{紀錄層} author_id{作者} event_id{事件} subject_id{主角} place_id{地點} person_id{人物} tag_id{標籤} life_period_id{人生階段} story_id{篇章} blob_id{附件檔案} event_a_id{關聯事件} event_b_id{關聯事件} archive_session_id{典藏期間} current_session_id{目前典藏期間} role{角色／用途} is_subject_self{本人作者} mode{典藏狀態} activated_at{啟用時間} deactivated_at{結束時間} activated_by{啟用作者} deactivated_by{結束作者} sort_start{排序區間起點} sort_end{排序區間終點} manual_order{手動排序} position{排列位置} suggestion_key{段落建議類型} type{類型} start_time{開始時間} end_time{結束時間} organization{組織} provenance{來源說明} sha256{檔案校驗值} byte_size{檔案大小} media_type{媒體類型} path{檔案位置} verify_status{校驗狀態} original_filename{原始檔名} captured_at{拍攝時間} captured_latitude{拍攝緯度} captured_longitude{拍攝經度} imported_at{匯入時間} storage_mode{保存方式} name{名稱} name_key{名稱比對值} latitude{緯度} longitude{經度} radius_m{範圍半徑（公尺）} label{標籤} operation{操作} timestamp{記錄時間} entity_id{修訂對象} other{其他欄位}}",
   "@restoreField": {
     "placeholders": {
       "field": {
@@ -766,7 +766,7 @@
       }
     }
   },
-  "restoreMediaTotals": "還原後附件：{count} 個；可用影音副本總容量：{size}（共用副本只計一次）",
+  "restoreMediaTotals": "還原後附件：{count} 個；可用附件檔案總容量：{size}（共用副本只計一次）",
   "@restoreMediaTotals": {
     "placeholders": {
       "count": {
@@ -782,21 +782,18 @@
   "archiveCaptured": "拍攝時間",
   "archiveImported": "匯入時間",
   "archiveFilename": "原始檔名",
-  "archiveExcludedMedia": "此副本未包含於備份中，無法從本封存開啟",
+  "archiveExcludedMedia": "此附件檔案未包含於備份中，無法從本封存開啟",
   "archiveDeletedReference": "原事件已刪除",
   "archivePeople": "參與人物",
   "archiveTags": "標籤",
   "archivePeriods": "人生階段",
   "restoreReuseId": "同名資料將重用本機 ID。封存 ID：{sourceId}；本機 ID：{localId}。請選擇保留的內容；匯入引用會連到本機資料。",
-  "backupMediaNotice": "取消勾選可排除個別影音副本。附件名稱等紀錄資料仍會保留；共用同一副本的附件會一起排除。",
-  "backupMediaSelection": "選擇要包含的副本",
-  "backupNoMedia": "目前沒有影音副本。",
-  "backupMediaDetails": "{size} · {count} 個附件共用",
-  "backupScopeSummary": "範圍：{scope}；排除 {count} 個副本",
+  "backupMediaNotice": "保留附件名稱與紀錄，不包含檔案；還原後無法開啟這些附件。",
+  "backupNoMedia": "目前沒有附件檔案。",
+  "backupScopeSummary": "範圍：{scope}；排除 {count} 個附件檔案",
   "backupScopeFull": "完整備份",
-  "backupScopeNoMedia": "不含影音",
+  "backupScopeNoMedia": "不含附件檔案",
   "backupScopeCustom": "自訂匯出範圍",
-  "@backupMediaDetails": { "placeholders": { "size": { "type": "String" }, "count": { "type": "int" } } },
   "@backupScopeSummary": { "placeholders": { "scope": { "type": "String" }, "count": { "type": "int" } } },
   "@restoreReuseId": {
     "placeholders": {
@@ -848,9 +845,8 @@
   "@backupPartCount": {"placeholders": {"count": {"type": "int"}}},
   "backupSplitReadme": "\n## 分包使用方式\n\n若此備份包含多個 ZIP，每包都可獨立解壓；第一包包含全部文字、JSON 與 manifest，其餘包包含媒體。請保留全部 ZIP 與各自的 .sha256 旁檔；.parts.json 索引另記錄各包檔名、位元組大小與 SHA-256。離線閱讀時將各包解壓到同一資料夾，各包的 SHA256SUMS.txt 請分別驗證。APP 還原或驗證時一次選取全部 ZIP，順序不限；缺包時不會寫入資料。\n",
   "backupExcludePrivate": "排除私密事件",
-  "backupExcludePrivateNotice": "不匯出私密事件、記述、追憶、標題快照及專屬附件。共用附件、獨立人物／地點／標籤與未引用的倉庫副本仍依原選擇保留；不會修改手機資料。",
-  "backupPrivateMediaExcluded": "僅供私密事件使用，會自動排除",
-  "backupPrivateExcluded": "已刻意排除 {events} 筆私密事件及 {media} 份專屬媒體副本；不會還原這些內容。",
+  "backupExcludePrivateNotice": "不包含私密事件、記述、追憶、標題快照及專屬附件。一般事件使用的共用附件仍保留；未引用檔案依「包含附件檔案」設定處理，不修改手機資料。",
+  "backupPrivateExcluded": "已排除 {events} 筆私密事件及 {media} 個專屬附件檔案。",
   "@backupPrivateExcluded": {"placeholders": {"events": {"type": "int"}, "media": {"type": "int"}}},
   "editorBodyLabel": "內文",
   "editorBodyHint": "從這裡開始寫下發生的事、當時的感受或想留下的話……",
@@ -955,5 +951,36 @@
       }
     }
   },
-  "photoPreviewUnavailable": "暫時無法顯示照片預覽，仍可選擇保存附件或取消。"
+  "photoPreviewUnavailable": "暫時無法顯示照片預覽，仍可選擇保存附件或取消。",
+  "attachmentUsage": "已用 {used} MB／25 MB・{count} 個附件",
+  "@attachmentUsage": {"placeholders": {"used": {"type": "String"}, "count": {"type": "int"}}},
+  "attachmentRemaining": "剩餘 {remaining} MB",
+  "@attachmentRemaining": {"placeholders": {"remaining": {"type": "String"}}},
+  "attachmentPendingUsage": "待保存 {size} MB・{count} 個附件（已計入剩餘額度）",
+  "@attachmentPendingUsage": {"placeholders": {"size": {"type": "String"}, "count": {"type": "int"}}},
+  "attachmentQuotaLow": "剩餘額度較少，照片可改用壓縮。",
+  "attachmentUsageOverLimit": "超出 {excess} MB，請減少待加入附件；既有內容不受影響。",
+  "@attachmentUsageOverLimit": {"placeholders": {"excess": {"type": "String"}}},
+  "attachmentUsageUnavailable": "暫時無法計算附件額度，請重新開啟頁面；保存時仍會檢查。",
+  "backupIncludePrivate": "包含私密事件",
+  "backupPrivateScopeHint": "依事件隱私層級判定，包含其記述與附件。",
+  "backupAdvanced": "進階選項",
+  "backupContinue": "下一步",
+  "backupStart": "開始備份",
+  "backupAttachmentTotals": "附件檔案：{count} 個・{size}（共用檔案只計一次）",
+  "@backupAttachmentTotals": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "backupContentsSummary": "{events} 篇事件・{files} 個附件檔案",
+  "@backupContentsSummary": {"placeholders": {"events": {"type": "int"}, "files": {"type": "int"}}},
+  "backupPrivateIncluded": "包含私密事件及其附件。",
+  "backupSizeNotice": "這是空間需求估算，實際 ZIP 大小以完成後為準。",
+  "attachmentSpaceReserve": "手機剩餘空間不足：新增檔案後須保留至少 500 MB。可壓縮或取消部分檔案；既有內容與原件不受影響。",
+  "storageLoading": "正在取得空間資訊…",
+  "storageUnavailable": "暫時無法取得空間資訊。",
+  "storageApp": "APP 總占用",
+  "storageFree": "手機剩餘空間",
+  "storageEstimate": "空間數值為目前估算，包含 APP、資料與快取；不等於各篇附件額度的總和。",
+  "storageRefresh": "重新整理",
+  "storageDismiss": "關閉空間提醒",
+  "storageLow": "手機剩餘 {free}，低於 1 GB。建議釋放空間，仍可繼續記錄文字。",
+  "@storageLow": {"placeholders": {"free": {"type": "String"}}}
 }

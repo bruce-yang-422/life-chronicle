@@ -16,6 +16,7 @@ import '../../data/repositories/event_draft_store.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_time_texts.dart';
 import '../attachments/attachment_import.dart';
+import '../attachments/attachment_quota_panel.dart';
 import '../event_detail/event_detail_page.dart';
 import 'event_selection_sheet.dart';
 import 'time_picker_sheet.dart';
@@ -868,6 +869,10 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
                   onPressed: _addSection,
                   icon: const Icon(Icons.add),
                   label: Text(l.editorAddSection),
+                ),
+                EventAttachmentQuota(
+                  eventId: widget.eventId,
+                  pending: _sources,
                 ),
                 OutlinedButton.icon(
                   onPressed: _addAttachments,

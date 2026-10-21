@@ -1,3 +1,4 @@
+import '../settings/storage_status.dart';
 import '../attachments/cached_attachment_photo.dart';
 
 import 'dart:async';
@@ -394,6 +395,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
       child: Column(
         children: [
           TimelineMasthead(trailing: kDebugMode ? _demoMenu(l10n) : null),
+          const StorageStatus(banner: true),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: Wrap(

@@ -76,7 +76,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.widgetWithText(FilledButton, '匯出 ZIP 備份'));
     await settle(tester);
-    expect(find.text('選擇要包含的副本'), findsOneWidget);
+    expect(find.text('包含附件檔案'), findsOneWidget);
   }
 
   Future<void> accept(WidgetTester tester) async {
@@ -95,12 +95,12 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
   }
 
-  testWidgets('從備份頁選擇個別排除並完成正式自訂 ZIP', (tester) async {
+  testWidgets('從備份頁關閉附件並完成僅含紀錄 ZIP', (tester) async {
     final before = jsonEncode(await repository.snapshot());
     await pump(tester);
-    await tester.tap(find.text('敏感影片.mp4'));
+    await tester.tap(find.text('包含附件檔案'));
     await accept(tester);
-    expect(find.text('範圍：自訂匯出範圍；排除 1 個副本'), findsOneWidget);
+    expect(find.text('範圍：不含附件檔案；排除 2 個附件檔案'), findsOneWidget);
     await accept(tester);
     for (var i = 0; i < 100; i++) {
       await settle(tester);
@@ -112,19 +112,19 @@ void main() {
         await File('${repository.outputDirectory.path}/latest.json')
             .readAsString(),
       ) as Map;
-      expect((record['scope'] as Map)['type'], 'custom');
+      expect((record['scope'] as Map)['type'], 'no_media');
       final verified = await repository.zipCodec.verify(
         File(record['path'] as String),
         Directory('${root.path}/verified'),
         freeBytes: 1 << 30,
         cancellation: ImportCancellation(),
       );
-      expect((verified.manifest['scope'] as Map)['excluded'], hasLength(1));
+      expect((verified.manifest['scope'] as Map)['excluded'], hasLength(2));
       expect(
         (verified.manifest['files'] as List).where(
           (row) => (row as Map)['path'].toString().startsWith('media/'),
         ),
-        hasLength(1),
+        isEmpty,
       );
       expect(jsonEncode(await repository.snapshot()), before);
       expect(await File('${root.path}/first.mp4').readAsBytes(), [1, 2, 3]);
@@ -135,7 +135,7 @@ void main() {
 
   testWidgets('預估容量畫面取消時不建立 ZIP 或備份紀錄', (tester) async {
     await pump(tester);
-    await tester.tap(find.text('敏感影片.mp4'));
+    await tester.tap(find.text('包含附件檔案'));
     await accept(tester);
     await tester.tap(find.text('取消'));
     await settle(tester);

@@ -1,3 +1,4 @@
+import '../settings/storage_status.dart';
 import '../shared/ios_group.dart';
 
 import 'package:flutter/material.dart';
@@ -160,6 +161,20 @@ class _BackupPageState extends ConsumerState<BackupPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                l.backupContentsSummary(
+                  plan.data['events']!.length,
+                  plan.media.length,
+                ),
+              ),
+              Text(
+                chosen.excludePrivateEvents
+                    ? l.backupExcludePrivate
+                    : l.backupPrivateIncluded,
+              ),
+              if (!chosen.includeMedia) Text(l.backupMediaNotice),
+              Text(l.backupSizeNotice),
+              const SizedBox(height: 12),
               if (plan.scope.maxPartBytes != null)
                 Text(l.backupPartLimit(formatBytes(plan.scope.maxPartBytes!))),
               if (plan.privacyFilter != null)
@@ -199,7 +214,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
               onPressed: plan.requiredBytes > plan.freeBytes
                   ? null
                   : () => Navigator.pop(context, true),
-              child: Text(l.backupExport),
+              child: Text(l.backupStart),
             ),
           ],
         ),
@@ -344,6 +359,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
         padding: const EdgeInsets.all(12),
         children: [
           IosPageTitle(l.navBackup),
+          const StorageStatus(),
           IosGroup(
             children: [
               ListTile(

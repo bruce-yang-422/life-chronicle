@@ -10,6 +10,7 @@ import '../../data/repositories/attachment_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_time_texts.dart';
 import '../attachments/attachment_import.dart';
+import '../attachments/attachment_quota_panel.dart';
 import '../attachments/cached_attachment_photo.dart';
 import '../event_editor/new_event_page.dart';
 import '../security/security_dialogs.dart';
@@ -396,6 +397,7 @@ class EventDetailPage extends ConsumerWidget {
           ),
         const SizedBox(height: 16),
         Text(l.detailMedia, style: Theme.of(context).textTheme.titleLarge),
+        EventAttachmentQuota(eventId: eventId),
         ref
             .watch(eventAttachmentsProvider(eventId))
             .when(

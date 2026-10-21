@@ -86,6 +86,8 @@ class PhotoImportSession {
       info.height,
       preset,
     );
+    // 先保留安全餘量，再建立壓縮暫存；以 RGBA 原始像素作保守估算。
+    await repository.ensureSpace(expected.width * expected.height * 4 + 65536);
     _work ??= await PhotoWorkStore.create(repository.directory.parent);
     final id = repository.ctx.newId();
     final outputPath = p.join(_work!.path, '$id.photo');

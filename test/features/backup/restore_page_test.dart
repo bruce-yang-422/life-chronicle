@@ -377,7 +377,7 @@ void main() {
     });
     await pump(tester);
     await select(tester);
-    final warning = find.textContaining('已刻意排除 1 筆私密事件');
+    final warning = find.textContaining('已排除 1 筆私密事件');
     await reveal(tester, warning);
     expect(warning, findsOneWidget);
     expect(find.textContaining('private marker'), findsNothing);
@@ -403,7 +403,7 @@ void main() {
     });
     await pump(tester);
     await select(tester);
-    final warning = find.textContaining('此備份刻意排除部分影音');
+    final warning = find.textContaining('此備份刻意排除部分附件檔案');
     await reveal(tester, warning);
     expect(warning, findsOneWidget);
     expect(find.textContaining('media/'), findsWidgets);

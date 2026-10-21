@@ -887,7 +887,7 @@ abstract class AppLocalizations {
   /// No description provided for @attachmentNoSpace.
   ///
   /// In zh, this message translates to:
-  /// **'可用空間不足，未匯入任何附件'**
+  /// **'手機剩餘空間不足：新增檔案後須保留至少 500 MB。可壓縮或取消部分檔案；既有內容與原件不受影響。'**
   String get attachmentNoSpace;
 
   /// No description provided for @attachmentVideoUnsupported.
@@ -1115,7 +1115,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupMedia.
   ///
   /// In zh, this message translates to:
-  /// **'包含影音原始副本'**
+  /// **'包含附件檔案'**
   String get backupMedia;
 
   /// No description provided for @backupScope.
@@ -1187,7 +1187,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupRestoreConfirm.
   ///
   /// In zh, this message translates to:
-  /// **'還原已驗證的封存內容？相同 ID 的資料依你的逐筆選擇處理。不含影音的項目會標示為不可用。'**
+  /// **'還原已驗證的封存內容？相同 ID 的資料依你的逐筆選擇處理。不含檔案的附件會標示為不可用。'**
   String get backupRestoreConfirm;
 
   /// No description provided for @backupRestoreDone.
@@ -1199,7 +1199,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupReport.
   ///
   /// In zh, this message translates to:
-  /// **'新增：{inserted}\n替換：{replaced}\n略過：{skipped}\n刻意排除影音：{excluded}\n忽略額外檔案：{extras}'**
+  /// **'新增：{inserted}\n替換：{replaced}\n略過：{skipped}\n刻意排除附件檔案：{excluded}\n忽略額外檔案：{extras}'**
   String backupReport(
     String inserted,
     String replaced,
@@ -1217,7 +1217,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupReadme.
   ///
   /// In zh, this message translates to:
-  /// **'# 人生編年史封存\n\n解壓縮全部檔案後，以瀏覽器開啟 index.html，或閱讀 markdown/timeline.md。媒體為原始副本，位於 media/。\n\ndata/ 內 JSON 是唯一權威資料，Markdown 與 HTML 是閱讀版本；修改閱讀版本不會被匯入。各資料表檔案的欄位規格見 schema/data.schema.json。時間 payload 保存原始精確度，sort_start 與 sort_end 只供排序。\n\n所有時間戳記含時區。SHA256SUMS.txt 記錄除自身外全部檔案的 SHA-256；ZIP 外旁檔可驗證整包。\n\n請將 ZIP 與旁檔另存至其他裝置；移除 APP 可能連同私有目錄中的備份一起刪除。\n'**
+  /// **'# 人生編年史封存\n\n解壓縮全部檔案後，以瀏覽器開啟 index.html，或閱讀 markdown/timeline.md。附件檔案為保存版本，位於 media/。\n\ndata/ 內 JSON 是唯一權威資料，Markdown 與 HTML 是閱讀版本；修改閱讀版本不會被匯入。各資料表檔案的欄位規格見 schema/data.schema.json。時間 payload 保存原始精確度，sort_start 與 sort_end 只供排序。\n\n所有時間戳記含時區。SHA256SUMS.txt 記錄除自身外全部檔案的 SHA-256；ZIP 外旁檔可驗證整包。\n\n請將 ZIP 與旁檔另存至其他裝置；移除 APP 可能連同私有目錄中的備份一起刪除。\n'**
   String get backupReadme;
 
   /// No description provided for @archiveTimeLabel.
@@ -1901,7 +1901,7 @@ abstract class AppLocalizations {
   /// No description provided for @restoreExcluded.
   ///
   /// In zh, this message translates to:
-  /// **'此備份刻意排除部分影音，還原後這些附件可能無法開啟。'**
+  /// **'此備份刻意排除部分附件檔案，還原後這些附件無法開啟。'**
   String get restoreExcluded;
 
   /// No description provided for @restoreExtraFiles.
@@ -1955,19 +1955,19 @@ abstract class AppLocalizations {
   /// No description provided for @restoreTable.
   ///
   /// In zh, this message translates to:
-  /// **'{table, select, subjects{主角} authors{作者} archive_sessions{典藏期間} archive_settings{典藏設定} places{地點} people{人物} tags{標籤} events{事件} event_sections{記述段落} life_periods{人生階段} event_life_periods{人生階段連結} reflections{回顧} stories{篇章} story_events{篇章事件連結} blobs{影音副本} attachments{附件} event_tags{事件標籤} event_people{事件人物連結} event_links{關聯事件} change_history{修訂紀錄} other{其他資料}}'**
+  /// **'{table, select, subjects{主角} authors{作者} archive_sessions{典藏期間} archive_settings{典藏設定} places{地點} people{人物} tags{標籤} events{事件} event_sections{記述段落} life_periods{人生階段} event_life_periods{人生階段連結} reflections{回顧} stories{篇章} story_events{篇章事件連結} blobs{附件檔案} attachments{附件} event_tags{事件標籤} event_people{事件人物連結} event_links{關聯事件} change_history{修訂紀錄} other{其他資料}}'**
   String restoreTable(String table);
 
   /// No description provided for @restoreField.
   ///
   /// In zh, this message translates to:
-  /// **'{field, select, display_name{名稱} birth_date{生日} death_date{逝世日期} title{標題} content_md{內容} time_payload{發生時間} category{類別} privacy{隱私} created_at{建立時間} updated_at{更新時間} recorded_at{記錄時間} deleted_at{刪除時間} purged_at{永久刪除時間} layer{紀錄層} author_id{作者} event_id{事件} subject_id{主角} place_id{地點} person_id{人物} tag_id{標籤} life_period_id{人生階段} story_id{篇章} blob_id{影音副本} event_a_id{關聯事件} event_b_id{關聯事件} archive_session_id{典藏期間} current_session_id{目前典藏期間} role{角色／用途} is_subject_self{本人作者} mode{典藏狀態} activated_at{啟用時間} deactivated_at{結束時間} activated_by{啟用作者} deactivated_by{結束作者} sort_start{排序區間起點} sort_end{排序區間終點} manual_order{手動排序} position{排列位置} suggestion_key{段落建議類型} type{類型} start_time{開始時間} end_time{結束時間} organization{組織} provenance{來源說明} sha256{檔案校驗值} byte_size{檔案大小} media_type{媒體類型} path{副本位置} verify_status{校驗狀態} original_filename{原始檔名} captured_at{拍攝時間} captured_latitude{拍攝緯度} captured_longitude{拍攝經度} imported_at{匯入時間} storage_mode{保存方式} name{名稱} name_key{名稱比對值} latitude{緯度} longitude{經度} radius_m{範圍半徑（公尺）} label{標籤} operation{操作} timestamp{記錄時間} entity_id{修訂對象} other{其他欄位}}'**
+  /// **'{field, select, display_name{名稱} birth_date{生日} death_date{逝世日期} title{標題} content_md{內容} time_payload{發生時間} category{類別} privacy{隱私} created_at{建立時間} updated_at{更新時間} recorded_at{記錄時間} deleted_at{刪除時間} purged_at{永久刪除時間} layer{紀錄層} author_id{作者} event_id{事件} subject_id{主角} place_id{地點} person_id{人物} tag_id{標籤} life_period_id{人生階段} story_id{篇章} blob_id{附件檔案} event_a_id{關聯事件} event_b_id{關聯事件} archive_session_id{典藏期間} current_session_id{目前典藏期間} role{角色／用途} is_subject_self{本人作者} mode{典藏狀態} activated_at{啟用時間} deactivated_at{結束時間} activated_by{啟用作者} deactivated_by{結束作者} sort_start{排序區間起點} sort_end{排序區間終點} manual_order{手動排序} position{排列位置} suggestion_key{段落建議類型} type{類型} start_time{開始時間} end_time{結束時間} organization{組織} provenance{來源說明} sha256{檔案校驗值} byte_size{檔案大小} media_type{媒體類型} path{檔案位置} verify_status{校驗狀態} original_filename{原始檔名} captured_at{拍攝時間} captured_latitude{拍攝緯度} captured_longitude{拍攝經度} imported_at{匯入時間} storage_mode{保存方式} name{名稱} name_key{名稱比對值} latitude{緯度} longitude{經度} radius_m{範圍半徑（公尺）} label{標籤} operation{操作} timestamp{記錄時間} entity_id{修訂對象} other{其他欄位}}'**
   String restoreField(String field);
 
   /// No description provided for @restoreMediaTotals.
   ///
   /// In zh, this message translates to:
-  /// **'還原後附件：{count} 個；可用影音副本總容量：{size}（共用副本只計一次）'**
+  /// **'還原後附件：{count} 個；可用附件檔案總容量：{size}（共用副本只計一次）'**
   String restoreMediaTotals(int count, String size);
 
   /// No description provided for @archiveCoordinates.
@@ -2003,7 +2003,7 @@ abstract class AppLocalizations {
   /// No description provided for @archiveExcludedMedia.
   ///
   /// In zh, this message translates to:
-  /// **'此副本未包含於備份中，無法從本封存開啟'**
+  /// **'此附件檔案未包含於備份中，無法從本封存開啟'**
   String get archiveExcludedMedia;
 
   /// No description provided for @archiveDeletedReference.
@@ -2039,31 +2039,19 @@ abstract class AppLocalizations {
   /// No description provided for @backupMediaNotice.
   ///
   /// In zh, this message translates to:
-  /// **'取消勾選可排除個別影音副本。附件名稱等紀錄資料仍會保留；共用同一副本的附件會一起排除。'**
+  /// **'保留附件名稱與紀錄，不包含檔案；還原後無法開啟這些附件。'**
   String get backupMediaNotice;
-
-  /// No description provided for @backupMediaSelection.
-  ///
-  /// In zh, this message translates to:
-  /// **'選擇要包含的副本'**
-  String get backupMediaSelection;
 
   /// No description provided for @backupNoMedia.
   ///
   /// In zh, this message translates to:
-  /// **'目前沒有影音副本。'**
+  /// **'目前沒有附件檔案。'**
   String get backupNoMedia;
-
-  /// No description provided for @backupMediaDetails.
-  ///
-  /// In zh, this message translates to:
-  /// **'{size} · {count} 個附件共用'**
-  String backupMediaDetails(String size, int count);
 
   /// No description provided for @backupScopeSummary.
   ///
   /// In zh, this message translates to:
-  /// **'範圍：{scope}；排除 {count} 個副本'**
+  /// **'範圍：{scope}；排除 {count} 個附件檔案'**
   String backupScopeSummary(String scope, int count);
 
   /// No description provided for @backupScopeFull.
@@ -2075,7 +2063,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupScopeNoMedia.
   ///
   /// In zh, this message translates to:
-  /// **'不含影音'**
+  /// **'不含附件檔案'**
   String get backupScopeNoMedia;
 
   /// No description provided for @backupScopeCustom.
@@ -2327,19 +2315,13 @@ abstract class AppLocalizations {
   /// No description provided for @backupExcludePrivateNotice.
   ///
   /// In zh, this message translates to:
-  /// **'不匯出私密事件、記述、追憶、標題快照及專屬附件。共用附件、獨立人物／地點／標籤與未引用的倉庫副本仍依原選擇保留；不會修改手機資料。'**
+  /// **'不包含私密事件、記述、追憶、標題快照及專屬附件。一般事件使用的共用附件仍保留；未引用檔案依「包含附件檔案」設定處理，不修改手機資料。'**
   String get backupExcludePrivateNotice;
-
-  /// No description provided for @backupPrivateMediaExcluded.
-  ///
-  /// In zh, this message translates to:
-  /// **'僅供私密事件使用，會自動排除'**
-  String get backupPrivateMediaExcluded;
 
   /// No description provided for @backupPrivateExcluded.
   ///
   /// In zh, this message translates to:
-  /// **'已刻意排除 {events} 筆私密事件及 {media} 份專屬媒體副本；不會還原這些內容。'**
+  /// **'已排除 {events} 筆私密事件及 {media} 個專屬附件檔案。'**
   String backupPrivateExcluded(int events, int media);
 
   /// No description provided for @editorBodyLabel.
@@ -2561,6 +2543,150 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'暫時無法顯示照片預覽，仍可選擇保存附件或取消。'**
   String get photoPreviewUnavailable;
+
+  /// No description provided for @attachmentUsage.
+  ///
+  /// In zh, this message translates to:
+  /// **'已用 {used} MB／25 MB・{count} 個附件'**
+  String attachmentUsage(String used, int count);
+
+  /// No description provided for @attachmentRemaining.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩餘 {remaining} MB'**
+  String attachmentRemaining(String remaining);
+
+  /// No description provided for @attachmentPendingUsage.
+  ///
+  /// In zh, this message translates to:
+  /// **'待保存 {size} MB・{count} 個附件（已計入剩餘額度）'**
+  String attachmentPendingUsage(String size, int count);
+
+  /// No description provided for @attachmentQuotaLow.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩餘額度較少，照片可改用壓縮。'**
+  String get attachmentQuotaLow;
+
+  /// No description provided for @attachmentUsageOverLimit.
+  ///
+  /// In zh, this message translates to:
+  /// **'超出 {excess} MB，請減少待加入附件；既有內容不受影響。'**
+  String attachmentUsageOverLimit(String excess);
+
+  /// No description provided for @attachmentUsageUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'暫時無法計算附件額度，請重新開啟頁面；保存時仍會檢查。'**
+  String get attachmentUsageUnavailable;
+
+  /// No description provided for @backupIncludePrivate.
+  ///
+  /// In zh, this message translates to:
+  /// **'包含私密事件'**
+  String get backupIncludePrivate;
+
+  /// No description provided for @backupPrivateScopeHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'依事件隱私層級判定，包含其記述與附件。'**
+  String get backupPrivateScopeHint;
+
+  /// No description provided for @backupAdvanced.
+  ///
+  /// In zh, this message translates to:
+  /// **'進階選項'**
+  String get backupAdvanced;
+
+  /// No description provided for @backupContinue.
+  ///
+  /// In zh, this message translates to:
+  /// **'下一步'**
+  String get backupContinue;
+
+  /// No description provided for @backupStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'開始備份'**
+  String get backupStart;
+
+  /// No description provided for @backupAttachmentTotals.
+  ///
+  /// In zh, this message translates to:
+  /// **'附件檔案：{count} 個・{size}（共用檔案只計一次）'**
+  String backupAttachmentTotals(int count, String size);
+
+  /// No description provided for @backupContentsSummary.
+  ///
+  /// In zh, this message translates to:
+  /// **'{events} 篇事件・{files} 個附件檔案'**
+  String backupContentsSummary(int events, int files);
+
+  /// No description provided for @backupPrivateIncluded.
+  ///
+  /// In zh, this message translates to:
+  /// **'包含私密事件及其附件。'**
+  String get backupPrivateIncluded;
+
+  /// No description provided for @backupSizeNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'這是空間需求估算，實際 ZIP 大小以完成後為準。'**
+  String get backupSizeNotice;
+
+  /// No description provided for @attachmentSpaceReserve.
+  ///
+  /// In zh, this message translates to:
+  /// **'手機剩餘空間不足：新增檔案後須保留至少 500 MB。可壓縮或取消部分檔案；既有內容與原件不受影響。'**
+  String get attachmentSpaceReserve;
+
+  /// No description provided for @storageLoading.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在取得空間資訊…'**
+  String get storageLoading;
+
+  /// No description provided for @storageUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'暫時無法取得空間資訊。'**
+  String get storageUnavailable;
+
+  /// No description provided for @storageApp.
+  ///
+  /// In zh, this message translates to:
+  /// **'APP 總占用'**
+  String get storageApp;
+
+  /// No description provided for @storageFree.
+  ///
+  /// In zh, this message translates to:
+  /// **'手機剩餘空間'**
+  String get storageFree;
+
+  /// No description provided for @storageEstimate.
+  ///
+  /// In zh, this message translates to:
+  /// **'空間數值為目前估算，包含 APP、資料與快取；不等於各篇附件額度的總和。'**
+  String get storageEstimate;
+
+  /// No description provided for @storageRefresh.
+  ///
+  /// In zh, this message translates to:
+  /// **'重新整理'**
+  String get storageRefresh;
+
+  /// No description provided for @storageDismiss.
+  ///
+  /// In zh, this message translates to:
+  /// **'關閉空間提醒'**
+  String get storageDismiss;
+
+  /// No description provided for @storageLow.
+  ///
+  /// In zh, this message translates to:
+  /// **'手機剩餘 {free}，低於 1 GB。建議釋放空間，仍可繼續記錄文字。'**
+  String storageLow(String free);
 }
 
 class _AppLocalizationsDelegate

@@ -106,6 +106,44 @@ void main() {
     }
   });
 
+  test('JPEG 密集 stuffed bytes／restart 仍按區塊讀取，保留跨界 EOI', () async {
+    for (final ending in [0, 1, 2]) {
+      final entropy = <int>[
+        for (var i = 0; i < 100000; i++) ...[17, 255, i.isEven ? 0 : 0xd0],
+        ...List.filled(ending, 17),
+      ];
+      final bytes = <int>[255, 216, 255, 218, 0, 2, ...entropy, 255, 217];
+      var readBytes = 0;
+      final probe = MediaProbe(bytes.length, (offset, count) async {
+        readBytes += count;
+        return bytes.sublist(offset, offset + count);
+      });
+      expect(await probe.inspect(), 'image/jpeg');
+      expect(readBytes, lessThan(bytes.length * 4));
+      expect(probe.staticImageBytes, isNull);
+    }
+    // 第一塊末尾的 FF 與下一塊的 00 仍是熵資料，不能誤截照片。
+    final bytes = <int>[
+      255,
+      216,
+      255,
+      218,
+      0,
+      2,
+      ...List.filled(65535, 17),
+      255,
+      0,
+      17,
+      255,
+      217,
+    ];
+    expect(await inspect(bytes), 'image/jpeg');
+    await expectLater(
+      inspect(bytes.sublist(0, bytes.length - 1)),
+      throwsFormatException,
+    );
+  });
+
   test('動態 JPEG 只取外層 EOI 之前的靜態圖，不截在 EXIF 縮圖', () async {
     final bytes = [
       ...stillJpeg,

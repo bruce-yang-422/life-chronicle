@@ -226,20 +226,27 @@ class MediaProbe {
       }
       at += size;
       if (marker == 0xda) {
+        entropy:
         while (at < length) {
-          final bytes = await _bytes(at, math.min(65536, length - at));
-          final next = bytes.indexOf(255);
-          if (next < 0) {
-            at += bytes.length;
-            continue;
+          final start = at;
+          final bytes = await _bytes(start, math.min(65536, length - start));
+          var cursor = 0;
+          // 同一區塊內同步走訪 FF00／restart，避免每遇 FF 都重讀 64 KiB。
+          while (cursor < bytes.length) {
+            final next = bytes.indexOf(255, cursor);
+            if (next < 0) break;
+            final code = next + 1 < bytes.length
+                ? bytes[next + 1]
+                : (await _bytes(start + next + 1, 1)).single;
+            if (code == 0 || code >= 0xd0 && code <= 0xd7) {
+              cursor = next + 2;
+            } else {
+              at = start + next;
+              break entropy;
+            }
           }
-          at += next;
-          final code = (await _bytes(at + 1, 1)).single;
-          if (code == 0 || code >= 0xd0 && code <= 0xd7) {
-            at += 2;
-          } else {
-            break;
-          }
+          // FF 在區塊末尾時，下一個區塊的 stuffed byte 可能也已消耗。
+          at = start + math.max(bytes.length, cursor);
         }
       }
     }

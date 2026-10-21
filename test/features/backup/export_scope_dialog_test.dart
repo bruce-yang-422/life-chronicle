@@ -65,20 +65,38 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('共用副本只列一列，取消勾選後回傳精確範圍', (tester) async {
-    await pump(tester);
-    expect(find.byType(CheckboxListTile), findsNWidgets(4));
-    expect(find.text('1.0 KiB · 2 個附件共用'), findsOneWidget);
-    await tester.tap(find.text('敏感影片.mp4\n共用影片.mp4'));
-    await tester.pump();
-    await tester.tap(find.text('匯出 ZIP 備份'));
+  testWidgets('大量附件維持兩個開關，不顯示逐檔名稱，預設完整備份', (tester) async {
+    await pump(
+      tester,
+      items: [
+        for (var i = 0; i < 10000; i++)
+          ArchiveMediaOption(
+            'blob$i',
+            ['附件$i.jpg'],
+            1024,
+            1,
+            normalReferences: 1,
+          ),
+      ],
+    );
+    expect(find.byType(SwitchListTile), findsNWidgets(2));
+    expect(find.byType(CheckboxListTile), findsNothing);
+    expect(find.text('附件0.jpg'), findsNothing);
+    expect(find.textContaining('10000'), findsOneWidget);
+    expect(
+      find.byType(DropdownButtonFormField<int>).hitTestable(),
+      findsNothing,
+    );
+    await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
-    expect(result!.type, 'custom');
-    expect(result!.excludedBlobIds, {'shared'});
+    expect(result!.type, 'full');
+    expect(result!.excludedBlobIds, isEmpty);
   });
 
-  testWidgets('分包上限可見且可選，提交所選大小', (tester) async {
+  testWidgets('進階選項可選分包，關閉附件時不提交分包設定', (tester) async {
     await pump(tester);
+    await tester.tap(find.text('進階選項'));
+    await tester.pumpAndSettle();
     final dropdown = find.byType(DropdownButtonFormField<int>);
     await tester.ensureVisible(dropdown);
     await tester.tap(dropdown);
@@ -86,57 +104,54 @@ void main() {
     await tester.tap(find.text('每包最多 1.00 GiB').last);
     await tester.pumpAndSettle();
     expect(find.textContaining('每個分包可獨立解壓'), findsOneWidget);
-    await tester.tap(find.text('匯出 ZIP 備份'));
+    await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     expect(result!.maxPartBytes, 1024 * 1024 * 1024);
+    await pump(tester);
+    await tester.tap(find.text('包含附件檔案'));
+    await tester.pump();
+    expect(find.textContaining('還原後無法開啟'), findsOneWidget);
+    await tester.tap(find.text('下一步'));
+    await tester.pumpAndSettle();
+    expect(result!.type, 'no_media');
+    expect(result!.maxPartBytes, isNull);
   });
 
-  testWidgets('切換不含影音後恢復選擇，取消對話框不提交', (tester) async {
+  testWidgets('切換範圍後取消不提交', (tester) async {
     await pump(tester);
-    await tester.tap(find.text('敏感影片.mp4\n共用影片.mp4'));
-    await tester.tap(find.text('包含影音原始副本'));
-    await tester.pump();
-    expect(find.text('保留影片.mp4'), findsNothing);
-    await tester.tap(find.text('包含影音原始副本'));
-    await tester.pump();
-    final shared = find.ancestor(
-      of: find.text('敏感影片.mp4\n共用影片.mp4'),
-      matching: find.byType(CheckboxListTile),
-    );
-    expect(tester.widget<CheckboxListTile>(shared).value, isFalse);
+    await tester.tap(find.text('包含附件檔案'));
+    await tester.tap(find.text('包含私密事件'));
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
     expect(result, isNull);
   });
 
-  testWidgets('無副本時英文介面仍可選擇不含影音', (tester) async {
+  testWidgets('無附件的英文介面可選不含附件備份', (tester) async {
     await pump(tester, items: [], locale: 'en');
-    expect(find.text('There are no media copies.'), findsOneWidget);
-    await tester.tap(find.text('Include original media copies'));
-    await tester.tap(find.widgetWithText(FilledButton, 'Export ZIP backup'));
+    expect(find.text('There are no attachment files.'), findsOneWidget);
+    await tester.tap(find.text('Include attachment files'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Next'));
     await tester.pumpAndSettle();
     expect(result!.type, 'no_media');
   });
 
-  testWidgets('三倍字級與長檔名可捲動且不溢出', (tester) async {
+  testWidgets('三倍字級可捲動而且不載入長檔名清單', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 3;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await pump(
       tester,
       items: [
-        ArchiveMediaOption('long', ['很長的檔案名稱' * 20], 1024, 3),
+        ArchiveMediaOption('long', ['很長的檔名' * 100], 1024, 3),
       ],
     );
-    await tester.ensureVisible(find.byType(ListView));
+    await tester.ensureVisible(find.text('進階選項'));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -160));
-    await tester.pump();
     expect(tester.takeException(), isNull);
     await tester.tap(find.text('取消'));
     await tester.pumpAndSettle();
   });
 
-  testWidgets('重新鎖定立即遮蔽副本名稱並停用提交', (tester) async {
+  testWidgets('重新鎖定遮蔽摘要並停用下一步', (tester) async {
     await pump(tester);
     final container = ProviderScope.containerOf(
       tester.element(find.byType(ExportScopeDialog)),
@@ -151,10 +166,10 @@ void main() {
       service.lock();
     });
     await settle(tester);
-    expect(find.text('敏感影片.mp4\n共用影片.mp4'), findsNothing);
+    expect(find.textContaining('附件檔案：'), findsNothing);
     expect(
       tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, '匯出 ZIP 備份'))
+          .widget<FilledButton>(find.widgetWithText(FilledButton, '下一步'))
           .onPressed,
       isNull,
     );
@@ -163,7 +178,7 @@ void main() {
     expect(result, isNull);
   });
 
-  testWidgets('排除私密事件時專屬副本停用，共用副本保留一般事件名稱', (tester) async {
+  testWidgets('排除私密時摘要扣除專屬檔案，共用與未引用檔案仍納入', (tester) async {
     await pump(
       tester,
       items: const [
@@ -172,43 +187,18 @@ void main() {
           ['一般.pdf', '私密.pdf'],
           10,
           2,
-          normalNames: ['一般.pdf'],
           normalReferences: 1,
         ),
-        ArchiveMediaOption(
-          'private',
-          ['私密專屬.pdf'],
-          10,
-          1,
-          normalNames: [],
-          normalReferences: 0,
-        ),
-        ArchiveMediaOption(
-          'unused',
-          ['倉庫.pdf'],
-          10,
-          0,
-          normalNames: [],
-          normalReferences: 0,
-        ),
+        ArchiveMediaOption('private', ['私密專屬.pdf'], 10, 1, normalReferences: 0),
+        ArchiveMediaOption('unused', ['倉庫.pdf'], 10, 0, normalReferences: 0),
       ],
     );
-    await tester.tap(find.text('排除私密事件'));
+    expect(find.textContaining('附件檔案：3 個'), findsOneWidget);
+    await tester.tap(find.text('包含私密事件'));
     await tester.pump();
-    expect(find.text('一般.pdf'), findsOneWidget);
-    expect(find.text('一般.pdf\n私密.pdf'), findsNothing);
-    final privateTile = find.ancestor(
-      of: find.text('私密專屬.pdf'),
-      matching: find.byType(CheckboxListTile),
-    );
-    expect(tester.widget<CheckboxListTile>(privateTile).value, isFalse);
-    expect(tester.widget<CheckboxListTile>(privateTile).onChanged, isNull);
-    final unused = find.ancestor(
-      of: find.text('倉庫.pdf'),
-      matching: find.byType(CheckboxListTile),
-    );
-    expect(tester.widget<CheckboxListTile>(unused).value, isTrue);
-    await tester.tap(find.text('匯出 ZIP 備份'));
+    expect(find.textContaining('附件檔案：2 個・20 B'), findsOneWidget);
+    expect(find.text('私密專屬.pdf'), findsNothing);
+    await tester.tap(find.text('下一步'));
     await tester.pumpAndSettle();
     expect(result!.excludePrivateEvents, isTrue);
     expect(result!.excludedBlobIds, isEmpty);

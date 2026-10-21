@@ -19,3 +19,19 @@ class AttachmentQuotaExceeded implements Exception {
   final int addedBytes;
   int get excessBytes => usedBytes + addedBytes - AttachmentQuota.limitBytes;
 }
+
+/// 額度顯示快照；草稿與已保存引用分開，實體去重不減免容量。
+class AttachmentUsage {
+  const AttachmentUsage({
+    this.usedBytes = 0,
+    this.count = 0,
+    this.pendingBytes = 0,
+    this.pendingCount = 0,
+  });
+
+  final int usedBytes, count, pendingBytes, pendingCount;
+  int get totalBytes => usedBytes + pendingBytes;
+  int get remainingBytes => AttachmentQuota.limitBytes - totalBytes;
+  bool get isOverLimit => remainingBytes < 0;
+  bool get isLow => remainingBytes >= 0 && remainingBytes < 5000000;
+}

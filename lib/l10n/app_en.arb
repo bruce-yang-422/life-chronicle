@@ -188,7 +188,7 @@
   "attachmentPlanBody": "{count} files\nOriginal size: {size}\nEstimated added storage: {added}\nAvailable: {free}\nExisting copies: {duplicates}\nOriginal files are retained. If any file fails, the entire batch is cancelled and can be retried.",
   "attachmentImport": "Import attachments",
   "attachmentError": "Import failed. No files in this batch were saved. Originals are retained. Please retry.",
-  "attachmentNoSpace": "Not enough space. No attachments were imported",
+  "attachmentNoSpace": "Not enough device storage. At least 500 MB must remain after adding files. Compress or deselect files; existing content and originals are preserved.",
   "attachmentVideoUnsupported": "Videos are not supported",
   "attachmentStaticImageOnly": "{name}: Only the still image will be saved. The video portion will be excluded.",
   "attachmentTypeUnverified": "Media tracks could not be verified. Check the file integrity or choose another file",
@@ -290,7 +290,7 @@
   "backupExport": "Export ZIP backup",
   "backupImport": "Import and restore ZIP",
   "backupVerify": "Verify existing backup",
-  "backupMedia": "Include original media copies",
+  "backupMedia": "Include attachment files",
   "backupScope": "Choose backup scope",
   "backupPlan": "Estimated space required: {required}\nAvailable space: {free}\nEvents: {count}\nSave a copy through system sharing after completion.",
   "@backupPlan": {
@@ -315,9 +315,9 @@
   "backupConflict": "Resolve differences for matching IDs",
   "backupKeep": "Keep current data",
   "backupUseArchive": "Use archived content",
-  "backupRestoreConfirm": "Restore verified archive contents? Records with matching IDs follow your individual choices. Excluded media will be marked unavailable.",
+  "backupRestoreConfirm": "Restore the verified archive? Conflicting IDs follow your choices. Attachments without files are marked unavailable.",
   "backupRestoreDone": "Restore verification report",
-  "backupReport": "Added: {inserted}\nReplaced: {replaced}\nSkipped: {skipped}\nIntentionally excluded media: {excluded}\nExtra files ignored: {extras}",
+  "backupReport": "Added: {inserted}\nReplaced: {replaced}\nSkipped: {skipped}\nIntentionally excluded attachment files: {excluded}\nExtra files ignored: {extras}",
   "@backupReport": {
     "placeholders": {
       "inserted": {
@@ -338,7 +338,7 @@
     }
   },
   "backupNewFormat": "Some newer format data is not recognized. Only known fields will be restored.",
-  "backupReadme": "# Life Chronicle archive\n\nExtract all files and open index.html in a browser, or read markdown/timeline.md. Original media copies are in media/.\n\nJSON in data/ is the authoritative source. Markdown and HTML are reading copies. Edits to reading copies are not imported. Table fields are described in schema/data.schema.json. Time payloads preserve input precision; sort_start and sort_end are for ordering only.\n\nTimestamps include a timezone. SHA256SUMS.txt covers every file except itself. The external sidecar verifies the whole ZIP.\n\nSave the ZIP and its sidecar on another device. Uninstalling the app may delete private backups.\n",
+  "backupReadme": "# Life Chronicle archive\n\nExtract all files and open index.html in a browser, or read markdown/timeline.md. Saved attachment files are in media/.\n\nJSON in data/ is the authoritative source. Markdown and HTML are reading copies. Edits to reading copies are not imported. Table fields are described in schema/data.schema.json. Time payloads preserve input precision; sort_start and sort_end are for ordering only.\n\nTimestamps include a timezone. SHA256SUMS.txt covers every file except itself. The external sidecar verifies the whole ZIP.\n\nSave the ZIP and its sidecar on another device. Uninstalling the app may delete private backups.\n",
   "archiveTimeLabel": "Time",
   "archiveLayerLabel": "Content layer",
   "archiveAuthorLabel": "Author",
@@ -535,7 +535,7 @@
   "restoreInvalidSubject": "The backup does not contain a valid single person, self author, and archive settings.",
   "restoreChanged": "Your data changed after the preview. Select the backup again and review the updated differences.",
   "restoreCancelled": "Restore cancelled. Your data is unchanged.",
-  "restoreExcluded": "Some media was intentionally excluded. Those attachments may be unavailable after restoration.",
+  "restoreExcluded": "This backup intentionally omits some attachment files, which cannot be opened after restoration.",
   "restoreExtraFiles": "These extra files will be ignored:",
   "restoreEmpty": "Not set",
   "restoreYes": "Yes",
@@ -578,7 +578,7 @@
       }
     }
   },
-  "restoreTable": "{table, select, subjects{Person} authors{Authors} archive_sessions{Archive sessions} archive_settings{Archive settings} places{Places} people{People} tags{Tags} events{Events} event_sections{Narrative sections} life_periods{Life periods} event_life_periods{Life period links} reflections{Reflections} stories{Stories} story_events{Story links} blobs{Media copies} attachments{Attachments} event_tags{Event tags} event_people{Event people links} event_links{Related event links} change_history{Change history} other{Other records}}",
+  "restoreTable": "{table, select, subjects{Person} authors{Authors} archive_sessions{Archive sessions} archive_settings{Archive settings} places{Places} people{People} tags{Tags} events{Events} event_sections{Narrative sections} life_periods{Life periods} event_life_periods{Life period links} reflections{Reflections} stories{Stories} story_events{Story links} blobs{Attachment files} attachments{Attachments} event_tags{Event tags} event_people{Event people links} event_links{Related event links} change_history{Change history} other{Other records}}",
   "@restoreTable": {
     "placeholders": {
       "table": {
@@ -586,7 +586,7 @@
       }
     }
   },
-  "restoreField": "{field, select, display_name{Name} birth_date{Birth date} death_date{Death date} title{Title} content_md{Content} time_payload{Event time} category{Category} privacy{Privacy} created_at{Created} updated_at{Updated} recorded_at{Recorded} deleted_at{Deleted} purged_at{Permanently deleted} layer{Layer} author_id{Author} event_id{Event} subject_id{Person} place_id{Place} person_id{Participant} tag_id{Tag} life_period_id{Life period} story_id{Story} blob_id{Media copy} event_a_id{Related event} event_b_id{Related event} archive_session_id{Archive session} current_session_id{Current archive session} role{Role} is_subject_self{Self author} mode{Archive mode} activated_at{Activated} deactivated_at{Ended} activated_by{Activated by} deactivated_by{Ended by} sort_start{Sort range start} sort_end{Sort range end} manual_order{Manual order} position{Position} suggestion_key{Section suggestion} type{Type} start_time{Start time} end_time{End time} organization{Organization} provenance{Provenance} sha256{File checksum} byte_size{File size} media_type{Media type} path{Copy location} verify_status{Verification status} original_filename{Original filename} captured_at{Captured} captured_latitude{Capture latitude} captured_longitude{Capture longitude} imported_at{Imported} storage_mode{Storage mode} name{Name} name_key{Normalized name} latitude{Latitude} longitude{Longitude} radius_m{Radius (meters)} label{Label} operation{Operation} timestamp{Recorded} entity_id{Changed record} other{Other field}}",
+  "restoreField": "{field, select, display_name{Name} birth_date{Birth date} death_date{Death date} title{Title} content_md{Content} time_payload{Event time} category{Category} privacy{Privacy} created_at{Created} updated_at{Updated} recorded_at{Recorded} deleted_at{Deleted} purged_at{Permanently deleted} layer{Layer} author_id{Author} event_id{Event} subject_id{Person} place_id{Place} person_id{Participant} tag_id{Tag} life_period_id{Life period} story_id{Story} blob_id{Attachment file} event_a_id{Related event} event_b_id{Related event} archive_session_id{Archive session} current_session_id{Current archive session} role{Role} is_subject_self{Self author} mode{Archive mode} activated_at{Activated} deactivated_at{Ended} activated_by{Activated by} deactivated_by{Ended by} sort_start{Sort range start} sort_end{Sort range end} manual_order{Manual order} position{Position} suggestion_key{Section suggestion} type{Type} start_time{Start time} end_time{End time} organization{Organization} provenance{Provenance} sha256{File checksum} byte_size{File size} media_type{Media type} path{File location} verify_status{Verification status} original_filename{Original filename} captured_at{Captured} captured_latitude{Capture latitude} captured_longitude{Capture longitude} imported_at{Imported} storage_mode{Storage mode} name{Name} name_key{Normalized name} latitude{Latitude} longitude{Longitude} radius_m{Radius (meters)} label{Label} operation{Operation} timestamp{Recorded} entity_id{Changed record} other{Other field}}",
   "@restoreField": {
     "placeholders": {
       "field": {
@@ -594,7 +594,7 @@
       }
     }
   },
-  "restoreMediaTotals": "Attachments after restoration: {count}; available media: {size} (shared copies counted once)",
+  "restoreMediaTotals": "Attachments after restoration: {count}; available attachment files: {size} (shared files counted once)",
   "@restoreMediaTotals": {
     "placeholders": {
       "count": {
@@ -610,21 +610,18 @@
   "archiveCaptured": "Captured",
   "archiveImported": "Imported",
   "archiveFilename": "Original filename",
-  "archiveExcludedMedia": "This copy is not included and cannot be opened from this archive",
+  "archiveExcludedMedia": "This attachment file is not included and cannot be opened from this archive",
   "archiveDeletedReference": "Original event deleted",
   "archivePeople": "People",
   "archiveTags": "Tags",
   "archivePeriods": "Life periods",
   "restoreReuseId": "This name already exists. Archive ID: {sourceId}; local ID: {localId}. Choose which content to keep. Imported references will use the local ID.",
-  "backupMediaNotice": "Uncheck a file to exclude its media copy. Record data, including attachment names, is kept. All attachments sharing that copy are affected.",
-  "backupMediaSelection": "Choose copies to include",
-  "backupNoMedia": "There are no media copies.",
-  "backupMediaDetails": "{size} · Shared by {count} attachments",
-  "backupScopeSummary": "Scope: {scope}; {count} copies excluded",
+  "backupMediaNotice": "Attachment names and records are kept, but files are omitted and cannot be opened after restoration.",
+  "backupNoMedia": "There are no attachment files.",
+  "backupScopeSummary": "Scope: {scope}; {count} attachment files excluded",
   "backupScopeFull": "Full backup",
-  "backupScopeNoMedia": "Without media",
+  "backupScopeNoMedia": "Without attachment files",
   "backupScopeCustom": "Custom export selection",
-  "@backupMediaDetails": { "placeholders": { "size": { "type": "String" }, "count": { "type": "int" } } },
   "@backupScopeSummary": { "placeholders": { "scope": { "type": "String" }, "count": { "type": "int" } } },
   "@restoreReuseId": {
     "placeholders": {
@@ -676,9 +673,8 @@
   "@backupPartCount": {"placeholders": {"count": {"type": "int"}}},
   "backupSplitReadme": "\n## Using archive parts\n\nEach part is an independent ZIP. The first holds all text, JSON and the manifest; later parts hold media. Keep every ZIP and its .sha256 sidecar. The .parts.json index records each filename, byte size and SHA-256. Extract all parts into the same folder for offline reading, verifying each part's SHA256SUMS.txt separately. Select all ZIPs together, in any order, to restore or verify in the app. Missing parts prevent any database writes.\n",
   "backupExcludePrivate": "Exclude private entries",
-  "backupExcludePrivateNotice": "Omit private entries, sections, reflections, title snapshots and exclusive attachments. Shared attachments, independent people/places/tags and unreferenced warehouse copies follow your other selections. Device data stays intact.",
-  "backupPrivateMediaExcluded": "Used only by private entries; automatically excluded",
-  "backupPrivateExcluded": "Intentionally excluded {events} private entries and {media} exclusive media copies. These contents will not be restored.",
+  "backupExcludePrivateNotice": "Private entries, sections, reflections, title snapshots and exclusive attachments are omitted. Files shared with normal entries are kept. Unreferenced files follow the attachment switch. Device data stays intact.",
+  "backupPrivateExcluded": "Excluded {events} private entries and {media} exclusive attachment files.",
   "@backupPrivateExcluded": {"placeholders": {"events": {"type": "int"}, "media": {"type": "int"}}},
   "editorBodyLabel": "Body",
   "editorBodyHint": "Start writing what happened, how you felt, or what you want to remember…",
@@ -783,5 +779,36 @@
       }
     }
   },
-  "photoPreviewUnavailable": "Photo preview is unavailable. You can still save the attachment or cancel."
+  "photoPreviewUnavailable": "Photo preview is unavailable. You can still save the attachment or cancel.",
+  "attachmentUsage": "{used} MB / 25 MB used · {count} attachments",
+  "@attachmentUsage": {"placeholders": {"used": {"type": "String"}, "count": {"type": "int"}}},
+  "attachmentRemaining": "{remaining} MB remaining",
+  "@attachmentRemaining": {"placeholders": {"remaining": {"type": "String"}}},
+  "attachmentPendingUsage": "Pending: {size} MB · {count} attachments (included in remaining capacity)",
+  "@attachmentPendingUsage": {"placeholders": {"size": {"type": "String"}, "count": {"type": "int"}}},
+  "attachmentQuotaLow": "Capacity is running low. Consider compressing photos.",
+  "attachmentUsageOverLimit": "{excess} MB over capacity. Reduce pending attachments; existing content is preserved.",
+  "@attachmentUsageOverLimit": {"placeholders": {"excess": {"type": "String"}}},
+  "attachmentUsageUnavailable": "Attachment capacity is unavailable. Reopen this page; saving still checks the limit.",
+  "backupIncludePrivate": "Include private entries",
+  "backupPrivateScopeHint": "Uses entry privacy settings, including their sections and attachments.",
+  "backupAdvanced": "Advanced options",
+  "backupContinue": "Next",
+  "backupStart": "Start backup",
+  "backupAttachmentTotals": "Attachment files: {count} · {size} (shared files counted once)",
+  "@backupAttachmentTotals": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "backupContentsSummary": "{events} entries · {files} attachment files",
+  "@backupContentsSummary": {"placeholders": {"events": {"type": "int"}, "files": {"type": "int"}}},
+  "backupPrivateIncluded": "Private entries and their attachments are included.",
+  "backupSizeNotice": "This estimates required space. The final ZIP size is shown after completion.",
+  "attachmentSpaceReserve": "Not enough device storage. At least 500 MB must remain after adding files. Compress or deselect files; existing content and originals are preserved.",
+  "storageLoading": "Checking storage…",
+  "storageUnavailable": "Storage information is temporarily unavailable.",
+  "storageApp": "App storage used",
+  "storageFree": "Device storage available",
+  "storageEstimate": "Current estimates include the app, data and cache. They differ from the sum of entry attachment quotas.",
+  "storageRefresh": "Refresh",
+  "storageDismiss": "Dismiss storage warning",
+  "storageLow": "Device storage remaining: {free}, below 1 GB. Consider freeing space. You can still write text.",
+  "@storageLow": {"placeholders": {"free": {"type": "String"}}}
 }

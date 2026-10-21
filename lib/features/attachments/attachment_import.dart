@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/attachments/attachment_quota.dart';
+import '../../core/attachments/storage_space.dart';
 import '../../core/attachments/attachment_file_progress.dart';
 import '../../core/attachments/photo_compression.dart';
 import '../../data/platform/photo_platform.dart';
@@ -495,7 +496,7 @@ class _AttachmentImportDialogState extends State<AttachmentImportDialog> {
     final remaining = AttachmentQuota.limitBytes - total;
     final required =
         plan.addedBytes + (widget.forDraft ? plan.originalBytes : 0);
-    final fitsSpace = required <= plan.freeBytes;
+    final fitsSpace = StorageSpace.canAdd(plan.freeBytes, required);
     return PopScope(
       canPop: !_busy,
       child: AlertDialog(
@@ -523,7 +524,7 @@ class _AttachmentImportDialogState extends State<AttachmentImportDialog> {
                       color: Theme.of(context).colorScheme.error,
                     ),
                   ),
-                if (!fitsSpace) Text(l.attachmentNoSpace),
+                if (!fitsSpace) Text(l.attachmentSpaceReserve),
                 Text(
                   l.attachmentPlanBody(
                     plan.files.length,
