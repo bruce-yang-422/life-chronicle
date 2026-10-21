@@ -354,6 +354,19 @@
   "attachmentImport": "匯入附件",
   "attachmentError": "匯入失敗，整批未保存，原檔保留。請重試。",
   "attachmentNoSpace": "可用空間不足，未匯入任何附件",
+  "attachmentVideoUnsupported": "影片不支援",
+  "attachmentStaticImageOnly": "{name}：僅保存動態照片的靜態圖像，不保存影片部分。",
+  "@attachmentStaticImageOnly": { "placeholders": { "name": { "type": "String" } } },
+  "attachmentTypeUnverified": "無法確認媒體軌道，請確認檔案完整性或改用其他檔案",
+  "attachmentExcludedFile": "已排除：{name}（{reason}）",
+  "@attachmentExcludedFile": { "placeholders": { "name": { "type": "String" }, "reason": { "type": "String" } } },
+  "attachmentRejectedImport": "檔案未通過類型檢查，整批未保存。{reason}",
+  "@attachmentRejectedImport": { "placeholders": { "reason": { "type": "String" } } },
+  "attachmentQuotaExceeded": "每篇附件上限為 25 MB，目前超出 {excess} MB。整批未保存，請減少附件後重試；既有附件與原檔保留。",
+  "@attachmentQuotaExceeded": {
+    "description": "附件最終額度檢查失敗；以十進位 MB 表示精確超額，避免 1 byte 顯示為零",
+    "placeholders": { "excess": { "type": "String" } }
+  },
   "attachmentCancel": "取消匯入",
   "attachmentProgress": "已處理 {done}／{total} 位元組",
   "attachmentUnavailable": "附件無法開啟，請確認檔案完整或選擇支援的 APP",
@@ -844,5 +857,103 @@
   "editorSectionHint": "例如：第一次見面的那一天（可以留空）",
   "editorDragSection": "拖曳調整段落順序",
   "editorDragSectionNumber": "拖曳第 {number} 段以調整順序",
-  "@editorDragSectionNumber": {"placeholders": {"number": {"type": "int"}}}
+  "@editorDragSectionNumber": {"placeholders": {"number": {"type": "int"}}},
+  "attachmentQuotaPreview": "已用 {used} MB／25 MB\n待加入 {pending} MB\n保存後剩餘 {remaining} MB",
+  "@attachmentQuotaPreview": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "pending": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentSingleOverLimit": "單檔超過每篇 25 MB 上限，無法加入。請縮小檔案後再加入。",
+  "attachmentFileDescription": "{type} · {bytes} B ({mb} MB)",
+  "@attachmentFileDescription": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      },
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "photoHigh": "高畫質 · 4096 px",
+  "photoStandard": "標準 · 3072 px",
+  "photoCompact": "精簡 · 2048 px",
+  "photoOriginal": "原始檔",
+  "photoCompressed": "壓縮後",
+  "photoCompare": "比較原始與壓縮照片",
+  "photoCompressAll": "照片全部改為壓縮",
+  "photoUseCompact": "改用精簡檔位",
+  "photoAutomaticCompression": "原始檔放不下剩餘額度，已依預設檔位壓縮。",
+  "photoOriginalSmaller": "原檔已較小，保留原始檔。",
+  "photoLossless": "無損",
+  "photoCompressionError": "無法處理這張照片。可選原始檔、其他照片或取消匯入。",
+  "photoDimensions": "{width} × {height} px",
+  "photoCompressionResult": "壓縮結果：{width} × {height} px · {mb} MB · 品質 {quality}",
+  "@photoDimensions": {
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      }
+    }
+  },
+  "@photoCompressionResult": {
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "mb": {
+        "type": "String"
+      },
+      "quality": {
+        "type": "String"
+      }
+    }
+  },
+  "appSettings": "設定",
+  "photoSaveSettings": "照片保存",
+  "photoAlwaysCompress": "一律預設壓縮",
+  "photoDefaultHelp": "關閉時優先保存原始檔；放不下剩餘額度時，使用預設壓縮檔位。匯入時仍可逐張調整。",
+  "photoDefaultPreset": "預設壓縮檔位",
+  "photoRemoveGps": "壓縮時移除照片定位",
+  "photoGpsRemovalHelp": "僅移除壓縮檔內的 GPS；拍攝座標仍保存於資料庫供地點建議。移除後即使較大也不退回原檔，仍須符合每篇額度。",
+  "photoSettingsScope": "設定只影響之後的匯入，不修改既有附件。原始檔模式完整保留原始資料，包括定位資訊。",
+  "photoSettingsError": "無法讀取或保存照片設定，請重試。",
+  "photoSettingsRetry": "重試",
+  "photoGpsRemovalNotice": "壓縮檔將移除 GPS；原始檔模式仍保留定位。",
+  "attachmentFileProgress": "正在處理：{name}\n已處理 {done}／{total} 件，剩餘 {remaining} 件",
+  "@attachmentFileProgress": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "photoPreviewUnavailable": "暫時無法顯示照片預覽，仍可選擇保存附件或取消。"
 }

@@ -1,5 +1,6 @@
+import '../attachments/cached_attachment_photo.dart';
+
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -833,8 +834,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
                   if (preview.imagePath != null)
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
-                      child: _TimelineThumbnail(
+                      child: CachedAttachmentPhoto(
                         key: ValueKey(preview.imagePath),
+                        eventId: item.id,
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
                         path: preview.imagePath!,
                         label: preview.imageLabel,
                       ),
@@ -973,43 +978,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
             : l10n.timelineRemembrance,
     ];
   }
-}
-
-/// 縮圖只在可視列建立，離開時從圖片快取釋放。
-class _TimelineThumbnail extends StatefulWidget {
-  const _TimelineThumbnail({super.key, required this.path, this.label});
-  final String path;
-  final String? label;
-  @override
-  State<_TimelineThumbnail> createState() => _TimelineThumbnailState();
-}
-
-class _TimelineThumbnailState extends State<_TimelineThumbnail> {
-  late final ImageProvider _image = ResizeImage(
-    FileImage(File(widget.path)),
-    width: 192,
-    height: 192,
-    policy: ResizeImagePolicy.fit,
-  );
-  @override
-  void dispose() {
-    _image.evict();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => Image(
-    image: _image,
-    width: 64,
-    height: 64,
-    fit: BoxFit.cover,
-    semanticLabel: widget.label,
-    errorBuilder: (context, error, stack) => const SizedBox(
-      width: 64,
-      height: 64,
-      child: Icon(Icons.image_not_supported_outlined),
-    ),
-  );
 }
 
 class _YearHeader extends SliverPersistentHeaderDelegate {

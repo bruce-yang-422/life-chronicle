@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +10,7 @@ import '../../data/repositories/attachment_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_time_texts.dart';
 import '../attachments/attachment_import.dart';
+import '../attachments/cached_attachment_photo.dart';
 import '../event_editor/new_event_page.dart';
 import '../security/security_dialogs.dart';
 import '../../core/location/location_anchor.dart';
@@ -117,19 +116,28 @@ class EventDetailPage extends ConsumerWidget {
     try {
       final repository = await ref.read(attachmentRepositoryProvider.future);
       if (!context.mounted) return;
-      final plan = await pickImportPlan(context, repository);
-      if (plan == null || !context.mounted) return;
+      final plan = await pickImportPlan(context, repository, eventId: eventId);
+      if (plan == null) return;
+      if (!context.mounted) {
+        await plan.release?.call();
+        return;
+      }
       final token = ImportCancellation();
-      await withImportProgress(
-        context,
-        token,
-        (progress) => repository.importBatch(
-          plan,
-          eventId: eventId,
-          cancellation: token,
-          onProgress: progress,
-        ),
-      );
+      try {
+        await withAttachmentProgress(
+          context,
+          token,
+          (progress, files) => repository.importBatch(
+            plan,
+            eventId: eventId,
+            cancellation: token,
+            onProgress: progress,
+            onFileProgress: files,
+          ),
+        );
+      } finally {
+        await plan.release?.call();
+      }
     } catch (error) {
       if (context.mounted) showImportError(context, error);
     }
@@ -436,16 +444,10 @@ class _AttachmentTile extends ConsumerWidget {
       child: Column(
         children: [
           if (stored.blob.mediaType.startsWith('image/'))
-            Image(
-              image: ResizeImage(
-                FileImage(File(stored.blob.path)),
-                width: 800,
-                height: 480,
-                policy: ResizeImagePolicy.fit,
-              ),
+            CachedAttachmentPhoto(
+              eventId: stored.attachment.eventId,
+              path: stored.blob.path,
               height: 160,
-              fit: BoxFit.contain,
-              errorBuilder: (_, error, stack) => Text(l.attachmentUnavailable),
             ),
           ListTile(
             title: Text(stored.attachment.originalFilename),

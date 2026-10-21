@@ -27,6 +27,9 @@ import android.app.DatePickerDialog
 import java.util.GregorianCalendar
 
 class MainActivity : FlutterFragmentActivity() {
+    private val photoWorker = java.util.concurrent.Executors.newSingleThreadExecutor()
+    private val photoRequests = java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.AtomicBoolean>()
+    private val photoHandler = Handler(Looper.getMainLooper())
     private var locationResult: MethodChannel.Result? = null
     private var locationCancellation: CancellationSignal? = null
     private var locationListener: LocationListener? = null
@@ -86,6 +89,8 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onDestroy() {
         finishLocation(error = "location_cancelled")
+        photoRequests.values.forEach { it.set(true) }
+        photoWorker.shutdown()
         super.onDestroy()
     }
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -140,6 +145,41 @@ class MainActivity : FlutterFragmentActivity() {
                     else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                     if (Build.VERSION.SDK_INT >= 33) setRecentsScreenshotEnabled(!hidden)
                     result.success(null)
+                } else result.notImplemented()
+            }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "life_chronicle/photos")
+            .setMethodCallHandler { call, result ->
+                val requestId = call.argument<String>("requestId")
+                if (call.method == "cancel") {
+                    if (requestId != null) photoRequests[requestId]?.set(true)
+                    result.success(null)
+                } else if (call.method == "inspect" || call.method == "compress" || call.method == "preview") {
+                    val path = call.argument<String>("path")
+                    val output = call.argument<String>("output")
+                    val edge = call.argument<Int>("longEdge")
+                    if (path == null || (call.method != "inspect" && (requestId == null || output == null || edge == null))) {
+                        result.error("photo_invalid", "Invalid photo request", null)
+                    } else {
+                        val cancellation = java.util.concurrent.atomic.AtomicBoolean(false)
+                        if (requestId != null && photoRequests.putIfAbsent(requestId, cancellation) != null) {
+                            result.error("photo_busy", "Duplicate photo request", null)
+                            return@setMethodCallHandler
+                        }
+                        photoWorker.execute {
+                            try {
+                                val value = if (call.method == "inspect") PhotoProcessor.inspect(path)
+                                    else if (call.method == "preview") PhotoProcessor.preview(path, output!!, edge!!, cancellation)
+                                    else PhotoProcessor.compress(path, output!!, edge!!, call.argument<Boolean>("keepGps") != false, cancellation)
+                                photoHandler.post { result.success(value) }
+                            } catch (error: Exception) {
+                                photoHandler.post { result.error(if (cancellation.get()) "photo_cancelled" else "photo_error", "Photo processing failed", error.javaClass.simpleName) }
+                            } catch (_: OutOfMemoryError) {
+                                photoHandler.post { result.error("photo_memory", "Photo exceeds available memory", null) }
+                            } finally {
+                                if (requestId != null) photoRequests.remove(requestId, cancellation)
+                            }
+                        }
+                    }
                 } else result.notImplemented()
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "life_chronicle/attachments")

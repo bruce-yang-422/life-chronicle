@@ -7,16 +7,34 @@ import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/attachments/attachment_quota.dart';
+import '../../core/attachments/attachment_file_progress.dart';
+import '../../core/attachments/media_probe.dart';
 import '../db/app_database.dart';
 import '../platform/attachment_platform.dart';
 import 'event_repository.dart';
 import 'repository_context.dart';
+import 'photo_work_store.dart';
+import 'photo_cache_files.dart';
 
 class ImportCancelled implements Exception {}
 
 class ImportSpaceException implements Exception {}
 
 class ImportIntegrityException implements Exception {}
+
+enum AttachmentRejectionReason { video, unverified }
+
+class ImportMediaException implements Exception {
+  const ImportMediaException(this.reason);
+  final AttachmentRejectionReason reason;
+}
+
+class RejectedAttachment {
+  const RejectedAttachment(this.source, this.reason);
+  final AttachmentSource source;
+  final AttachmentRejectionReason reason;
+}
 
 class ImportCancellation {
   bool cancelled = false;
@@ -26,7 +44,39 @@ class ImportCancellation {
 }
 
 class AttachmentSource {
-  const AttachmentSource(this.path, this.name, {this.referenceId});
+  const AttachmentSource(
+    this.path,
+    this.name, {
+    this.referenceId,
+    this.metadata,
+  });
+  final AttachmentMetadata? metadata;
+  factory AttachmentSource.fromDraft(Map<String, String> value) =>
+      AttachmentSource(
+        value['path']!,
+        value['name']!,
+        referenceId: value['referenceId'],
+        metadata: value['metadataStored'] != '1'
+            ? null
+            : AttachmentMetadata(
+                capturedAt: DateTime.tryParse(value['capturedAt'] ?? ''),
+                latitude: double.tryParse(value['latitude'] ?? ''),
+                longitude: double.tryParse(value['longitude'] ?? ''),
+              ),
+      );
+  Map<String, String> toDraft() => {
+    'path': path,
+    'name': name,
+    'referenceId': ?referenceId,
+    if (metadata != null) ...{
+      'metadataStored': '1',
+      if (metadata!.capturedAt != null)
+        'capturedAt': metadata!.capturedAt!.toIso8601String(),
+      if (metadata!.latitude != null) 'latitude': metadata!.latitude.toString(),
+      if (metadata!.longitude != null)
+        'longitude': metadata!.longitude.toString(),
+    },
+  };
   final String path;
   final String name;
   final String? referenceId;
@@ -38,13 +88,17 @@ class PreparedAttachment {
     this.size,
     this.hash,
     this.metadata,
-    this.existing,
-  );
+    this.existing, {
+    this.staticImageOnly = false,
+    this.sourceBytes,
+  });
   final AttachmentSource source;
   final int size;
   final String hash;
   final AttachmentMetadata metadata;
   final Blob? existing;
+  final bool staticImageOnly;
+  final int? sourceBytes;
 }
 
 class AttachmentImportPlan {
@@ -53,13 +107,41 @@ class AttachmentImportPlan {
     this.originalBytes,
     this.addedBytes,
     this.freeBytes,
-    this.duplicates,
-  );
+    this.duplicates, {
+    this.rejected = const [],
+    this.release,
+  });
   final List<PreparedAttachment> files;
   final int originalBytes;
   final int addedBytes;
   final int freeBytes;
   final int duplicates;
+  final List<RejectedAttachment> rejected;
+  final Future<void> Function()? release;
+
+  /// Recompute physical storage after selection; logical bytes count every reference.
+  AttachmentImportPlan select(Iterable<PreparedAttachment> selection) {
+    final chosen = selection.toList(growable: false);
+    final hashes = <String>{};
+    var bytes = 0, added = 0, duplicates = 0;
+    for (final file in chosen) {
+      bytes += file.size;
+      if (!hashes.add(file.hash) || file.existing != null) {
+        duplicates++;
+      } else {
+        added += file.size;
+      }
+    }
+    return AttachmentImportPlan(
+      chosen,
+      bytes,
+      added,
+      freeBytes,
+      duplicates,
+      rejected: rejected,
+      release: release,
+    );
+  }
 }
 
 class StoredAttachment {
@@ -70,7 +152,15 @@ class StoredAttachment {
 
 /// 批次匯入採全有或全無：所有檔案驗證後，才以同一資料庫交易登錄。
 class AttachmentRepository {
-  AttachmentRepository(this.ctx, this.directory, this.platform);
+  AttachmentRepository(
+    this.ctx,
+    this.directory,
+    this.platform, {
+    Directory? photoCacheDirectory,
+  }) : photoCacheDirectory =
+           photoCacheDirectory ??
+           Directory(p.join(directory.parent.path, 'photo_cache'));
+  final Directory photoCacheDirectory;
   final RepositoryContext ctx;
   final Directory directory;
   final AttachmentPlatform platform;
@@ -84,7 +174,14 @@ class AttachmentRepository {
       p.join((await getApplicationSupportDirectory()).path, 'media'),
     );
     await directory.create(recursive: true);
-    return AttachmentRepository(ctx, directory, DeviceAttachmentPlatform());
+    return AttachmentRepository(
+      ctx,
+      directory,
+      DeviceAttachmentPlatform(),
+      photoCacheDirectory: Directory(
+        p.join((await getTemporaryDirectory()).path, 'photo_cache'),
+      ),
+    );
   }
 
   Future<T> _exclusive<T>(Future<T> Function() action) {
@@ -103,10 +200,11 @@ class AttachmentRepository {
     File file,
     ImportCancellation cancellation, {
     void Function(int bytes)? onBytes,
+    int? end,
   }) async {
     final digest = await sha256
         .bind(
-          file.openRead().map((bytes) {
+          file.openRead(0, end).map((bytes) {
             cancellation.check();
             onBytes?.call(bytes.length);
             return bytes;
@@ -120,6 +218,69 @@ class AttachmentRepository {
   Future<Blob?> _existing(String hash) => (ctx.db.select(
     ctx.db.blobs,
   )..where((blob) => blob.sha256.equals(hash))).getSingleOrNull();
+
+  /// 每筆引用各自計入，不能用 DISTINCT 或按 blob 去重，所有層一起加總。
+  Future<int> _usedBytes(String eventId) async {
+    final total = ctx.db.blobs.byteSize.sum();
+    final query = ctx.db.selectOnly(ctx.db.attachments)
+      ..addColumns([total])
+      ..join([
+        innerJoin(
+          ctx.db.blobs,
+          ctx.db.blobs.id.equalsExp(ctx.db.attachments.blobId),
+        ),
+      ])
+      ..where(ctx.db.attachments.eventId.equals(eventId));
+    return (await query.getSingle()).read(total) ?? 0;
+  }
+
+  Future<int> usedBytes(String eventId) async {
+    final event = await EventRepository(ctx).find(eventId);
+    if (event == null || event.subjectId != ctx.subjectId) {
+      throw const EventStateException('事件不存在');
+    }
+    ctx.ensureCanReadPrivate(event.privacy);
+    return _usedBytes(eventId);
+  }
+
+  /// Draft references already committed by a previous save are not counted twice.
+  Future<int> pendingBytes(
+    String? eventId,
+    AttachmentImportPlan pending,
+  ) async {
+    if (eventId != null) await usedBytes(eventId);
+    final seen = <String, PreparedAttachment>{};
+    var bytes = 0;
+    for (final file in pending.files) {
+      final id = file.source.referenceId;
+      if (id != null) {
+        final repeated = seen[id];
+        if (repeated != null) {
+          if (repeated.hash != file.hash ||
+              repeated.source.name != file.source.name) {
+            throw ImportIntegrityException();
+          }
+          continue;
+        }
+        seen[id] = file;
+        final prior = await (ctx.db.select(
+          ctx.db.attachments,
+        )..where((a) => a.id.equals(id))).getSingleOrNull();
+        if (prior != null) {
+          final blob = await _existing(file.hash);
+          if (prior.eventId != eventId ||
+              prior.blobId != blob?.id ||
+              prior.originalFilename != file.source.name) {
+            throw ImportIntegrityException();
+          }
+          continue;
+        }
+      }
+      bytes += file.size;
+    }
+    return bytes;
+  }
+
   Future<bool> _valid(Blob blob, ImportCancellation cancellation) async {
     final file = File(blob.path);
     return blob.verifyStatus == 'verified' &&
@@ -128,10 +289,40 @@ class AttachmentRepository {
         await _hash(file, cancellation) == blob.sha256;
   }
 
+  Future<({String type, int size, bool staticImageOnly})> _probeFile(
+    File file,
+    ImportCancellation token,
+  ) async {
+    final handle = await file.open();
+    try {
+      final length = await handle.length();
+      final probe = MediaProbe(length, (offset, count) async {
+        token.check();
+        await handle.setPosition(offset);
+        return handle.read(count);
+      });
+      final type = await probe.inspect();
+      token.check();
+      if (probe.containsVideo) {
+        throw const ImportMediaException(AttachmentRejectionReason.video);
+      }
+      return (
+        type: type,
+        size: probe.staticImageBytes ?? length,
+        staticImageOnly: probe.staticImageBytes != null,
+      );
+    } on FormatException {
+      throw const ImportMediaException(AttachmentRejectionReason.unverified);
+    } finally {
+      await handle.close();
+    }
+  }
+
   Future<AttachmentImportPlan> prepare(
     List<AttachmentSource> sources, {
     ImportCancellation? cancellation,
     void Function(int done, int total)? onProgress,
+    void Function(AttachmentFileProgress)? onFileProgress,
   }) async {
     final token = cancellation ?? ImportCancellation();
     await directory.create(recursive: true);
@@ -144,19 +335,46 @@ class AttachmentRepository {
     var added = 0;
     var duplicates = 0;
     final files = <PreparedAttachment>[];
+    final rejected = <RejectedAttachment>[];
     final unique = <String>{};
+    var completed = 0;
     for (final source in sources) {
       token.check();
+      onFileProgress?.call(
+        AttachmentFileProgress(source.name, completed, sources.length),
+      );
       final file = File(source.path);
-      final size = await file.length();
+      final originalSize = await file.length();
+      String type;
+      int size;
+      bool staticImageOnly;
+      try {
+        final result = await _probeFile(file, token);
+        type = result.type;
+        size = result.size;
+        staticImageOnly = result.staticImageOnly;
+      } on ImportMediaException catch (error) {
+        rejected.add(RejectedAttachment(source, error.reason));
+        done += originalSize;
+        onProgress?.call(done, total);
+        onFileProgress?.call(
+          AttachmentFileProgress(source.name, ++completed, sources.length),
+        );
+        continue;
+      }
       final hash = await _hash(
         file,
         token,
+        end: size,
         onBytes: (bytes) {
           done += bytes;
           onProgress?.call(done, total);
         },
       );
+      if (staticImageOnly) {
+        done += originalSize - size;
+        onProgress?.call(done, total);
+      }
       final blob = await _existing(hash);
       if (blob != null &&
           (blob.byteSize != size || !await _valid(blob, token))) {
@@ -167,17 +385,35 @@ class AttachmentRepository {
       } else {
         added += size;
       }
+      final metadata = source.metadata ?? await platform.metadata(source.path);
       files.add(
         PreparedAttachment(
           source,
           size,
           hash,
-          await platform.metadata(source.path),
+          AttachmentMetadata(
+            mediaType: type,
+            capturedAt: metadata.capturedAt,
+            latitude: metadata.latitude,
+            longitude: metadata.longitude,
+          ),
           blob,
+          staticImageOnly: staticImageOnly,
+          sourceBytes: originalSize,
         ),
       );
+      onFileProgress?.call(
+        AttachmentFileProgress(source.name, ++completed, sources.length),
+      );
     }
-    return AttachmentImportPlan(files, total, added, free, duplicates);
+    return AttachmentImportPlan(
+      files,
+      files.fold(0, (sum, file) => sum + file.size),
+      added,
+      free,
+      duplicates,
+      rejected: rejected,
+    );
   }
 
   /// 使用者確認後，將尚未提交的附件留在持久性草稿目錄，避免系統清除 picker 快取。
@@ -185,6 +421,7 @@ class AttachmentRepository {
     AttachmentImportPlan plan,
     ImportCancellation token, {
     void Function(int done, int total)? onProgress,
+    void Function(AttachmentFileProgress)? onFileProgress,
   }) => _exclusive(() async {
     final draftDirectory = Directory(
       p.join(directory.parent.path, 'draft_media'),
@@ -196,9 +433,21 @@ class AttachmentRepository {
     }
     final retained = <AttachmentSource>[];
     var done = 0;
+    var completed = 0;
     try {
       for (final source in plan.files) {
         token.check();
+        onFileProgress?.call(
+          AttachmentFileProgress(
+            source.source.name,
+            completed,
+            plan.files.length,
+          ),
+        );
+        if (await File(source.source.path).length() !=
+            (source.sourceBytes ?? source.size)) {
+          throw ImportIntegrityException();
+        }
         final extension = p.extension(p.basename(source.source.name));
         final suffix = RegExp(r'^\.[a-zA-Z0-9]+$').hasMatch(extension)
             ? extension
@@ -211,11 +460,14 @@ class AttachmentRepository {
             target.path,
             source.source.name,
             referenceId: p.basenameWithoutExtension(target.path),
+            metadata: source.metadata,
           ),
         );
         final sink = target.openWrite();
         try {
-          await for (final bytes in File(source.source.path).openRead()) {
+          await for (final bytes in File(
+            source.source.path,
+          ).openRead(0, source.size)) {
             token.check();
             sink.add(bytes);
             done += bytes.length;
@@ -229,6 +481,19 @@ class AttachmentRepository {
             await _hash(target, token) != source.hash) {
           throw ImportIntegrityException();
         }
+        final result = await _probeFile(target, token);
+        if (result.staticImageOnly) {
+          throw const ImportMediaException(
+            AttachmentRejectionReason.unverified,
+          );
+        }
+        onFileProgress?.call(
+          AttachmentFileProgress(
+            source.source.name,
+            ++completed,
+            plan.files.length,
+          ),
+        );
       }
       _activeDraftPaths.addAll(retained.map((source) => _pathKey(source.path)));
       return retained;
@@ -256,19 +521,39 @@ class AttachmentRepository {
     Future<String> Function()? saveEvent,
     ImportCancellation? cancellation,
     void Function(int done, int total)? onProgress,
+    void Function(AttachmentFileProgress)? onFileProgress,
   }) => _exclusive(() async {
     final token = cancellation ?? ImportCancellation();
     final temporaryPaths = <String>[];
     final createdPaths = <String>[];
     final paths = <String, String>{};
+    final mediaTypes = <String, String>{};
     var done = 0;
+    var completed = 0;
     try {
+      await directory.create(recursive: true);
       if (await platform.availableBytes(directory.path) < plan.addedBytes) {
         throw ImportSpaceException();
       }
       for (final file in plan.files) {
         token.check();
-        if (paths.containsKey(file.hash)) continue;
+        onFileProgress?.call(
+          AttachmentFileProgress(
+            file.source.name,
+            completed,
+            plan.files.length,
+          ),
+        );
+        if (paths.containsKey(file.hash)) {
+          onFileProgress?.call(
+            AttachmentFileProgress(
+              file.source.name,
+              ++completed,
+              plan.files.length,
+            ),
+          );
+          continue;
+        }
         final existing = await _existing(file.hash);
         if (existing != null) {
           if (existing.byteSize != file.size ||
@@ -276,6 +561,13 @@ class AttachmentRepository {
             throw ImportIntegrityException();
           }
           paths[file.hash] = existing.path;
+          onFileProgress?.call(
+            AttachmentFileProgress(
+              file.source.name,
+              ++completed,
+              plan.files.length,
+            ),
+          );
           continue;
         }
         final target = File(p.join(directory.path, file.hash));
@@ -286,15 +578,28 @@ class AttachmentRepository {
             throw ImportIntegrityException();
           }
           paths[file.hash] = target.path;
+          onFileProgress?.call(
+            AttachmentFileProgress(
+              file.source.name,
+              ++completed,
+              plan.files.length,
+            ),
+          );
           continue;
         }
         final temporary = File(
           p.join(directory.path, '${ctx.newId()}.partial'),
         );
         temporaryPaths.add(temporary.path);
+        if (await File(file.source.path).length() !=
+            (file.sourceBytes ?? file.size)) {
+          throw ImportIntegrityException();
+        }
         final sink = temporary.openWrite();
         try {
-          await for (final bytes in File(file.source.path).openRead()) {
+          await for (final bytes in File(
+            file.source.path,
+          ).openRead(0, file.size)) {
             token.check();
             sink.add(bytes);
             done += bytes.length;
@@ -312,8 +617,31 @@ class AttachmentRepository {
         await temporary.rename(target.path);
         createdPaths.add(target.path);
         paths[file.hash] = target.path;
+        onFileProgress?.call(
+          AttachmentFileProgress(
+            file.source.name,
+            ++completed,
+            plan.files.length,
+          ),
+        );
       }
       token.check();
+      // 計畫可由呼叫端建立；重複雜湊也須逐筆確認實際保存大小。
+      for (final file in plan.files) {
+        token.check();
+        if (await File(paths[file.hash]!).length() != file.size) {
+          throw ImportIntegrityException();
+        }
+        if (!mediaTypes.containsKey(file.hash)) {
+          final result = await _probeFile(File(paths[file.hash]!), token);
+          if (result.staticImageOnly) {
+            throw const ImportMediaException(
+              AttachmentRejectionReason.unverified,
+            );
+          }
+          mediaTypes[file.hash] = result.type;
+        }
+      }
       return await ctx.db.transaction(() async {
         final id = saveEvent != null ? await saveEvent() : eventId!;
         final event = await EventRepository(ctx).find(id);
@@ -323,7 +651,45 @@ class AttachmentRepository {
           throw const EventStateException('事件不存在或已刪除');
         }
         ctx.ensureCanReadPrivate(event.privacy);
+        // 先配置整批引用，排除相同草稿引用的重試；超額以整批總和回報。
+        final references = <String, PreparedAttachment>{};
         for (final file in plan.files) {
+          token.check();
+          final referenceId = file.source.referenceId ?? ctx.newId();
+          final repeated = references[referenceId];
+          if (repeated != null) {
+            if (repeated.hash != file.hash ||
+                repeated.source.name != file.source.name) {
+              throw ImportIntegrityException();
+            }
+            continue;
+          }
+          final prior = await (ctx.db.select(
+            ctx.db.attachments,
+          )..where((a) => a.id.equals(referenceId))).getSingleOrNull();
+          if (prior != null) {
+            final blob = await _existing(file.hash);
+            if (prior.eventId != id ||
+                prior.blobId != blob?.id ||
+                prior.originalFilename != file.source.name) {
+              throw ImportIntegrityException();
+            }
+            continue;
+          }
+          references[referenceId] = file;
+        }
+        // 沒有新引用時允許既有超額資料保存文字或重試；新增空檔仍須檢查。
+        if (references.isNotEmpty) {
+          AttachmentQuota.check(
+            usedBytes: await _usedBytes(id),
+            addedBytes: references.values.fold(
+              0,
+              (sum, file) => sum + file.size,
+            ),
+          );
+        }
+        for (final entry in references.entries) {
+          final file = entry.value;
           token.check();
           final stamp = await ctx.stampForNew();
           var blob = await _existing(file.hash);
@@ -336,25 +702,20 @@ class AttachmentRepository {
                     id: blobId,
                     sha256: file.hash,
                     byteSize: file.size,
-                    mediaType: file.metadata.mediaType,
+                    mediaType: mediaTypes[file.hash]!,
                     path: paths[file.hash]!,
                     verifyStatus: 'verified',
                   ),
                 );
             blob = await _existing(file.hash);
+          } else if (blob.mediaType != mediaTypes[file.hash]) {
+            await (ctx.db.update(
+              ctx.db.blobs,
+            )..where((b) => b.id.equals(blob!.id))).write(
+              BlobsCompanion(mediaType: Value(mediaTypes[file.hash]!)),
+            );
           }
-          final attachmentId = file.source.referenceId ?? ctx.newId();
-          final prior = await (ctx.db.select(
-            ctx.db.attachments,
-          )..where((a) => a.id.equals(attachmentId))).getSingleOrNull();
-          if (prior != null) {
-            if (prior.eventId != id ||
-                prior.blobId != blob!.id ||
-                prior.originalFilename != file.source.name) {
-              throw ImportIntegrityException();
-            }
-            continue;
-          }
+          final attachmentId = entry.key;
           await ctx.db
               .into(ctx.db.attachments)
               .insert(
@@ -488,6 +849,20 @@ class AttachmentRepository {
         ),
       );
     }
+    result.addAll(
+      (await PhotoWorkStore.interrupted(directory.parent)).where(
+        (file) =>
+            !referenced.contains(_pathKey(file.path)) &&
+            !draftPaths.contains(_pathKey(file.path)),
+      ),
+    );
+    result.addAll(
+      (await PhotoCacheFiles.interrupted(photoCacheDirectory)).where(
+        (file) =>
+            !referenced.contains(_pathKey(file.path)) &&
+            !draftPaths.contains(_pathKey(file.path)),
+      ),
+    );
     return result;
   }
 
@@ -514,6 +889,7 @@ class AttachmentRepository {
         if (await file.exists()) await file.delete();
       });
     }
+    await PhotoWorkStore.removeEmpty(directory.parent);
   });
   Future<void> openAttachment(StoredAttachment stored) async {
     final event = await EventRepository(ctx).find(stored.attachment.eventId);

@@ -890,6 +890,42 @@ abstract class AppLocalizations {
   /// **'可用空間不足，未匯入任何附件'**
   String get attachmentNoSpace;
 
+  /// No description provided for @attachmentVideoUnsupported.
+  ///
+  /// In zh, this message translates to:
+  /// **'影片不支援'**
+  String get attachmentVideoUnsupported;
+
+  /// No description provided for @attachmentStaticImageOnly.
+  ///
+  /// In zh, this message translates to:
+  /// **'{name}：僅保存動態照片的靜態圖像，不保存影片部分。'**
+  String attachmentStaticImageOnly(String name);
+
+  /// No description provided for @attachmentTypeUnverified.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法確認媒體軌道，請確認檔案完整性或改用其他檔案'**
+  String get attachmentTypeUnverified;
+
+  /// No description provided for @attachmentExcludedFile.
+  ///
+  /// In zh, this message translates to:
+  /// **'已排除：{name}（{reason}）'**
+  String attachmentExcludedFile(String name, String reason);
+
+  /// No description provided for @attachmentRejectedImport.
+  ///
+  /// In zh, this message translates to:
+  /// **'檔案未通過類型檢查，整批未保存。{reason}'**
+  String attachmentRejectedImport(String reason);
+
+  /// 附件最終額度檢查失敗；以十進位 MB 表示精確超額，避免 1 byte 顯示為零
+  ///
+  /// In zh, this message translates to:
+  /// **'每篇附件上限為 25 MB，目前超出 {excess} MB。整批未保存，請減少附件後重試；既有附件與原檔保留。'**
+  String attachmentQuotaExceeded(String excess);
+
   /// No description provided for @attachmentCancel.
   ///
   /// In zh, this message translates to:
@@ -2335,6 +2371,196 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'拖曳第 {number} 段以調整順序'**
   String editorDragSectionNumber(int number);
+
+  /// No description provided for @attachmentQuotaPreview.
+  ///
+  /// In zh, this message translates to:
+  /// **'已用 {used} MB／25 MB\n待加入 {pending} MB\n保存後剩餘 {remaining} MB'**
+  String attachmentQuotaPreview(String used, String pending, String remaining);
+
+  /// No description provided for @attachmentSingleOverLimit.
+  ///
+  /// In zh, this message translates to:
+  /// **'單檔超過每篇 25 MB 上限，無法加入。請縮小檔案後再加入。'**
+  String get attachmentSingleOverLimit;
+
+  /// No description provided for @attachmentFileDescription.
+  ///
+  /// In zh, this message translates to:
+  /// **'{type} · {bytes} B ({mb} MB)'**
+  String attachmentFileDescription(String type, int bytes, String mb);
+
+  /// No description provided for @photoHigh.
+  ///
+  /// In zh, this message translates to:
+  /// **'高畫質 · 4096 px'**
+  String get photoHigh;
+
+  /// No description provided for @photoStandard.
+  ///
+  /// In zh, this message translates to:
+  /// **'標準 · 3072 px'**
+  String get photoStandard;
+
+  /// No description provided for @photoCompact.
+  ///
+  /// In zh, this message translates to:
+  /// **'精簡 · 2048 px'**
+  String get photoCompact;
+
+  /// No description provided for @photoOriginal.
+  ///
+  /// In zh, this message translates to:
+  /// **'原始檔'**
+  String get photoOriginal;
+
+  /// No description provided for @photoCompressed.
+  ///
+  /// In zh, this message translates to:
+  /// **'壓縮後'**
+  String get photoCompressed;
+
+  /// No description provided for @photoCompare.
+  ///
+  /// In zh, this message translates to:
+  /// **'比較原始與壓縮照片'**
+  String get photoCompare;
+
+  /// No description provided for @photoCompressAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'照片全部改為壓縮'**
+  String get photoCompressAll;
+
+  /// No description provided for @photoUseCompact.
+  ///
+  /// In zh, this message translates to:
+  /// **'改用精簡檔位'**
+  String get photoUseCompact;
+
+  /// No description provided for @photoAutomaticCompression.
+  ///
+  /// In zh, this message translates to:
+  /// **'原始檔放不下剩餘額度，已依預設檔位壓縮。'**
+  String get photoAutomaticCompression;
+
+  /// No description provided for @photoOriginalSmaller.
+  ///
+  /// In zh, this message translates to:
+  /// **'原檔已較小，保留原始檔。'**
+  String get photoOriginalSmaller;
+
+  /// No description provided for @photoLossless.
+  ///
+  /// In zh, this message translates to:
+  /// **'無損'**
+  String get photoLossless;
+
+  /// No description provided for @photoCompressionError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法處理這張照片。可選原始檔、其他照片或取消匯入。'**
+  String get photoCompressionError;
+
+  /// No description provided for @photoDimensions.
+  ///
+  /// In zh, this message translates to:
+  /// **'{width} × {height} px'**
+  String photoDimensions(int width, int height);
+
+  /// No description provided for @photoCompressionResult.
+  ///
+  /// In zh, this message translates to:
+  /// **'壓縮結果：{width} × {height} px · {mb} MB · 品質 {quality}'**
+  String photoCompressionResult(
+    int width,
+    int height,
+    String mb,
+    String quality,
+  );
+
+  /// No description provided for @appSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'設定'**
+  String get appSettings;
+
+  /// No description provided for @photoSaveSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'照片保存'**
+  String get photoSaveSettings;
+
+  /// No description provided for @photoAlwaysCompress.
+  ///
+  /// In zh, this message translates to:
+  /// **'一律預設壓縮'**
+  String get photoAlwaysCompress;
+
+  /// No description provided for @photoDefaultHelp.
+  ///
+  /// In zh, this message translates to:
+  /// **'關閉時優先保存原始檔；放不下剩餘額度時，使用預設壓縮檔位。匯入時仍可逐張調整。'**
+  String get photoDefaultHelp;
+
+  /// No description provided for @photoDefaultPreset.
+  ///
+  /// In zh, this message translates to:
+  /// **'預設壓縮檔位'**
+  String get photoDefaultPreset;
+
+  /// No description provided for @photoRemoveGps.
+  ///
+  /// In zh, this message translates to:
+  /// **'壓縮時移除照片定位'**
+  String get photoRemoveGps;
+
+  /// No description provided for @photoGpsRemovalHelp.
+  ///
+  /// In zh, this message translates to:
+  /// **'僅移除壓縮檔內的 GPS；拍攝座標仍保存於資料庫供地點建議。移除後即使較大也不退回原檔，仍須符合每篇額度。'**
+  String get photoGpsRemovalHelp;
+
+  /// No description provided for @photoSettingsScope.
+  ///
+  /// In zh, this message translates to:
+  /// **'設定只影響之後的匯入，不修改既有附件。原始檔模式完整保留原始資料，包括定位資訊。'**
+  String get photoSettingsScope;
+
+  /// No description provided for @photoSettingsError.
+  ///
+  /// In zh, this message translates to:
+  /// **'無法讀取或保存照片設定，請重試。'**
+  String get photoSettingsError;
+
+  /// No description provided for @photoSettingsRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重試'**
+  String get photoSettingsRetry;
+
+  /// No description provided for @photoGpsRemovalNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'壓縮檔將移除 GPS；原始檔模式仍保留定位。'**
+  String get photoGpsRemovalNotice;
+
+  /// No description provided for @attachmentFileProgress.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在處理：{name}\n已處理 {done}／{total} 件，剩餘 {remaining} 件'**
+  String attachmentFileProgress(
+    String name,
+    int done,
+    int total,
+    int remaining,
+  );
+
+  /// No description provided for @photoPreviewUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'暫時無法顯示照片預覽，仍可選擇保存附件或取消。'**
+  String get photoPreviewUnavailable;
 }
 
 class _AppLocalizationsDelegate

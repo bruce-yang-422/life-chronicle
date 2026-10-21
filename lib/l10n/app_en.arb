@@ -189,6 +189,12 @@
   "attachmentImport": "Import attachments",
   "attachmentError": "Import failed. No files in this batch were saved. Originals are retained. Please retry.",
   "attachmentNoSpace": "Not enough space. No attachments were imported",
+  "attachmentVideoUnsupported": "Videos are not supported",
+  "attachmentStaticImageOnly": "{name}: Only the still image will be saved. The video portion will be excluded.",
+  "attachmentTypeUnverified": "Media tracks could not be verified. Check the file integrity or choose another file",
+  "attachmentExcludedFile": "Excluded: {name} ({reason})",
+  "attachmentRejectedImport": "File type validation failed. The batch was not saved. {reason}",
+  "attachmentQuotaExceeded": "Attachments are limited to 25 MB per entry. The selection exceeds this by {excess} MB. The batch was not saved. Select fewer attachments and try again; existing attachments and source files are preserved.",
   "attachmentCancel": "Cancel import",
   "attachmentProgress": "{done} of {total} bytes processed",
   "attachmentUnavailable": "Could not open the attachment. Check the file or choose a supported app",
@@ -679,5 +685,103 @@
   "editorSectionHint": "For example: The day we first met (optional)",
   "editorDragSection": "Drag to reorder sections",
   "editorDragSectionNumber": "Drag section {number} to reorder",
-  "@editorDragSectionNumber": {"placeholders": {"number": {"type": "int"}}}
+  "@editorDragSectionNumber": {"placeholders": {"number": {"type": "int"}}},
+  "attachmentQuotaPreview": "Used {used} MB / 25 MB\nTo add {pending} MB\nRemaining after saving {remaining} MB",
+  "@attachmentQuotaPreview": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "pending": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentSingleOverLimit": "This file exceeds the 25 MB per-entry limit. Reduce its size before adding it.",
+  "attachmentFileDescription": "{type} · {bytes} B ({mb} MB)",
+  "@attachmentFileDescription": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      },
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "photoHigh": "High · 4096 px",
+  "photoStandard": "Standard · 3072 px",
+  "photoCompact": "Compact · 2048 px",
+  "photoOriginal": "Original",
+  "photoCompressed": "Compressed",
+  "photoCompare": "Compare original and compressed",
+  "photoCompressAll": "Compress all photos",
+  "photoUseCompact": "Use compact preset",
+  "photoAutomaticCompression": "The original does not fit the remaining quota; the default compression preset was selected.",
+  "photoOriginalSmaller": "The original is smaller; keep the original.",
+  "photoLossless": "Lossless",
+  "photoCompressionError": "This photo could not be processed. Choose the original, another photo, or cancel.",
+  "photoDimensions": "{width} × {height} px",
+  "photoCompressionResult": "Compressed: {width} × {height} px · {mb} MB · Quality {quality}",
+  "@photoDimensions": {
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      }
+    }
+  },
+  "@photoCompressionResult": {
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "mb": {
+        "type": "String"
+      },
+      "quality": {
+        "type": "String"
+      }
+    }
+  },
+  "appSettings": "Settings",
+  "photoSaveSettings": "Photo saving",
+  "photoAlwaysCompress": "Always default to compression",
+  "photoDefaultHelp": "When off, prefer originals and use the default compression preset if they do not fit. You can change each photo during import.",
+  "photoDefaultPreset": "Default compression preset",
+  "photoRemoveGps": "Remove location when compressing",
+  "photoGpsRemovalHelp": "Remove GPS from compressed files only. Capture coordinates remain in the database for place suggestions. A larger result is kept to preserve this choice, subject to the entry quota.",
+  "photoSettingsScope": "These settings affect future imports only. Existing attachments stay intact. Original mode preserves all original data, including location.",
+  "photoSettingsError": "Could not load or save photo settings. Please retry.",
+  "photoSettingsRetry": "Retry",
+  "photoGpsRemovalNotice": "GPS will be removed from compressed files; original mode retains location.",
+  "attachmentFileProgress": "Processing: {name}\nProcessed {done} / {total}; {remaining} remaining",
+  "@attachmentFileProgress": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "photoPreviewUnavailable": "Photo preview is unavailable. You can still save the attachment or cancel."
 }

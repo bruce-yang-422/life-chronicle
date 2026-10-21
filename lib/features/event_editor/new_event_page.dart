@@ -5,6 +5,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/attachments/attachment_quota.dart';
 import '../../core/editor/event_draft.dart';
 import '../../core/time/time_format.dart';
 import '../../core/time/time_value.dart';
@@ -170,12 +171,7 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
   }
 
   List<AttachmentSource> get _sources => [
-    for (final value in _draft.attachments)
-      AttachmentSource(
-        value['path']!,
-        value['name']!,
-        referenceId: value['referenceId'],
-      ),
+    for (final value in _draft.attachments) AttachmentSource.fromDraft(value),
   ];
   Future<void> _addAttachments() async {
     if (_store == null) return;
@@ -183,24 +179,35 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
     try {
       final repository = await ref.read(attachmentRepositoryProvider.future);
       if (!mounted) return;
-      final plan = await pickImportPlan(context, repository, forDraft: true);
-      if (plan == null || !mounted) return;
-      final token = ImportCancellation();
-      final retained = await withImportProgress(
+      final plan = await pickImportPlan(
         context,
-        token,
-        (progress) =>
-            repository.retainForDraft(plan, token, onProgress: progress),
+        repository,
+        forDraft: true,
+        eventId: widget.eventId,
+        pendingSources: _sources,
       );
-      _draft.attachments.addAll(
-        retained.map(
-          (file) => {
-            'path': file.path,
-            'name': file.name,
-            'referenceId': file.referenceId!,
-          },
-        ),
-      );
+      if (plan == null) return;
+      if (!mounted) {
+        await plan.release?.call();
+        return;
+      }
+      final token = ImportCancellation();
+      late final List<AttachmentSource> retained;
+      try {
+        retained = await withAttachmentProgress(
+          context,
+          token,
+          (progress, files) => repository.retainForDraft(
+            plan,
+            token,
+            onProgress: progress,
+            onFileProgress: files,
+          ),
+        );
+      } finally {
+        await plan.release?.call();
+      }
+      _draft.attachments.addAll(retained.map((file) => file.toDraft()));
       await _store!.save(_key, _draft);
       if (mounted) setState(() {});
       final located = plan.files
@@ -300,17 +307,25 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
         final media = await ref.read(attachmentRepositoryProvider.future);
         if (!mounted) return;
         final token = ImportCancellation();
-        id = await withImportProgress(context, token, (progress) async {
+        id = await withAttachmentProgress(context, token, (
+          progress,
+          files,
+        ) async {
           final plan = await media.prepare(
             sources,
             cancellation: token,
             onProgress: progress,
+            onFileProgress: files,
           );
+          if (plan.rejected.isNotEmpty) {
+            throw ImportMediaException(plan.rejected.first.reason);
+          }
           return media.importBatch(
             plan,
             saveEvent: () => repository.save(_draft),
             cancellation: token,
             onProgress: progress,
+            onFileProgress: files,
           );
         });
       }
@@ -339,7 +354,9 @@ class _NewEventPageState extends ConsumerState<NewEventPage> {
       if (mounted) {
         if (error is ImportCancelled ||
             error is ImportSpaceException ||
-            error is ImportIntegrityException) {
+            error is ImportIntegrityException ||
+            error is ImportMediaException ||
+            error is AttachmentQuotaExceeded) {
           showImportError(context, error);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

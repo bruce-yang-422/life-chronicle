@@ -465,6 +465,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get attachmentNoSpace => '可用空間不足，未匯入任何附件';
 
   @override
+  String get attachmentVideoUnsupported => '影片不支援';
+
+  @override
+  String attachmentStaticImageOnly(String name) {
+    return '$name：僅保存動態照片的靜態圖像，不保存影片部分。';
+  }
+
+  @override
+  String get attachmentTypeUnverified => '無法確認媒體軌道，請確認檔案完整性或改用其他檔案';
+
+  @override
+  String attachmentExcludedFile(String name, String reason) {
+    return '已排除：$name（$reason）';
+  }
+
+  @override
+  String attachmentRejectedImport(String reason) {
+    return '檔案未通過類型檢查，整批未保存。$reason';
+  }
+
+  @override
+  String attachmentQuotaExceeded(String excess) {
+    return '每篇附件上限為 25 MB，目前超出 $excess MB。整批未保存，請減少附件後重試；既有附件與原檔保留。';
+  }
+
+  @override
   String get attachmentCancel => '取消匯入';
 
   @override
@@ -1355,4 +1381,115 @@ class AppLocalizationsZh extends AppLocalizations {
   String editorDragSectionNumber(int number) {
     return '拖曳第 $number 段以調整順序';
   }
+
+  @override
+  String attachmentQuotaPreview(String used, String pending, String remaining) {
+    return '已用 $used MB／25 MB\n待加入 $pending MB\n保存後剩餘 $remaining MB';
+  }
+
+  @override
+  String get attachmentSingleOverLimit => '單檔超過每篇 25 MB 上限，無法加入。請縮小檔案後再加入。';
+
+  @override
+  String attachmentFileDescription(String type, int bytes, String mb) {
+    return '$type · $bytes B ($mb MB)';
+  }
+
+  @override
+  String get photoHigh => '高畫質 · 4096 px';
+
+  @override
+  String get photoStandard => '標準 · 3072 px';
+
+  @override
+  String get photoCompact => '精簡 · 2048 px';
+
+  @override
+  String get photoOriginal => '原始檔';
+
+  @override
+  String get photoCompressed => '壓縮後';
+
+  @override
+  String get photoCompare => '比較原始與壓縮照片';
+
+  @override
+  String get photoCompressAll => '照片全部改為壓縮';
+
+  @override
+  String get photoUseCompact => '改用精簡檔位';
+
+  @override
+  String get photoAutomaticCompression => '原始檔放不下剩餘額度，已依預設檔位壓縮。';
+
+  @override
+  String get photoOriginalSmaller => '原檔已較小，保留原始檔。';
+
+  @override
+  String get photoLossless => '無損';
+
+  @override
+  String get photoCompressionError => '無法處理這張照片。可選原始檔、其他照片或取消匯入。';
+
+  @override
+  String photoDimensions(int width, int height) {
+    return '$width × $height px';
+  }
+
+  @override
+  String photoCompressionResult(
+    int width,
+    int height,
+    String mb,
+    String quality,
+  ) {
+    return '壓縮結果：$width × $height px · $mb MB · 品質 $quality';
+  }
+
+  @override
+  String get appSettings => '設定';
+
+  @override
+  String get photoSaveSettings => '照片保存';
+
+  @override
+  String get photoAlwaysCompress => '一律預設壓縮';
+
+  @override
+  String get photoDefaultHelp => '關閉時優先保存原始檔；放不下剩餘額度時，使用預設壓縮檔位。匯入時仍可逐張調整。';
+
+  @override
+  String get photoDefaultPreset => '預設壓縮檔位';
+
+  @override
+  String get photoRemoveGps => '壓縮時移除照片定位';
+
+  @override
+  String get photoGpsRemovalHelp =>
+      '僅移除壓縮檔內的 GPS；拍攝座標仍保存於資料庫供地點建議。移除後即使較大也不退回原檔，仍須符合每篇額度。';
+
+  @override
+  String get photoSettingsScope => '設定只影響之後的匯入，不修改既有附件。原始檔模式完整保留原始資料，包括定位資訊。';
+
+  @override
+  String get photoSettingsError => '無法讀取或保存照片設定，請重試。';
+
+  @override
+  String get photoSettingsRetry => '重試';
+
+  @override
+  String get photoGpsRemovalNotice => '壓縮檔將移除 GPS；原始檔模式仍保留定位。';
+
+  @override
+  String attachmentFileProgress(
+    String name,
+    int done,
+    int total,
+    int remaining,
+  ) {
+    return '正在處理：$name\n已處理 $done／$total 件，剩餘 $remaining 件';
+  }
+
+  @override
+  String get photoPreviewUnavailable => '暫時無法顯示照片預覽，仍可選擇保存附件或取消。';
 }

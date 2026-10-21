@@ -28,6 +28,7 @@ import 'restore_page.dart';
 import 'export_scope_dialog.dart';
 import '../security/security_page.dart';
 import '../security/security_dialogs.dart';
+import '../settings/photo_settings.dart';
 import '../settings/time_display_settings.dart';
 import '../../core/time/timestamp_display.dart';
 
@@ -346,13 +347,11 @@ class _BackupPageState extends ConsumerState<BackupPage> {
           IosGroup(
             children: [
               ListTile(
-                title: Text(l.displaySettings),
+                title: Text(l.appSettings),
                 leading: const Icon(Icons.settings_outlined),
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => const TimeDisplaySettingsPage(),
-                  ),
+                  MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
                 ),
               ),
               ListTile(

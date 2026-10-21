@@ -480,6 +480,33 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not enough space. No attachments were imported';
 
   @override
+  String get attachmentVideoUnsupported => 'Videos are not supported';
+
+  @override
+  String attachmentStaticImageOnly(String name) {
+    return '$name: Only the still image will be saved. The video portion will be excluded.';
+  }
+
+  @override
+  String get attachmentTypeUnverified =>
+      'Media tracks could not be verified. Check the file integrity or choose another file';
+
+  @override
+  String attachmentExcludedFile(String name, String reason) {
+    return 'Excluded: $name ($reason)';
+  }
+
+  @override
+  String attachmentRejectedImport(String reason) {
+    return 'File type validation failed. The batch was not saved. $reason';
+  }
+
+  @override
+  String attachmentQuotaExceeded(String excess) {
+    return 'Attachments are limited to 25 MB per entry. The selection exceeds this by $excess MB. The batch was not saved. Select fewer attachments and try again; existing attachments and source files are preserved.';
+  }
+
+  @override
   String get attachmentCancel => 'Cancel import';
 
   @override
@@ -1429,4 +1456,124 @@ class AppLocalizationsEn extends AppLocalizations {
   String editorDragSectionNumber(int number) {
     return 'Drag section $number to reorder';
   }
+
+  @override
+  String attachmentQuotaPreview(String used, String pending, String remaining) {
+    return 'Used $used MB / 25 MB\nTo add $pending MB\nRemaining after saving $remaining MB';
+  }
+
+  @override
+  String get attachmentSingleOverLimit =>
+      'This file exceeds the 25 MB per-entry limit. Reduce its size before adding it.';
+
+  @override
+  String attachmentFileDescription(String type, int bytes, String mb) {
+    return '$type · $bytes B ($mb MB)';
+  }
+
+  @override
+  String get photoHigh => 'High · 4096 px';
+
+  @override
+  String get photoStandard => 'Standard · 3072 px';
+
+  @override
+  String get photoCompact => 'Compact · 2048 px';
+
+  @override
+  String get photoOriginal => 'Original';
+
+  @override
+  String get photoCompressed => 'Compressed';
+
+  @override
+  String get photoCompare => 'Compare original and compressed';
+
+  @override
+  String get photoCompressAll => 'Compress all photos';
+
+  @override
+  String get photoUseCompact => 'Use compact preset';
+
+  @override
+  String get photoAutomaticCompression =>
+      'The original does not fit the remaining quota; the default compression preset was selected.';
+
+  @override
+  String get photoOriginalSmaller =>
+      'The original is smaller; keep the original.';
+
+  @override
+  String get photoLossless => 'Lossless';
+
+  @override
+  String get photoCompressionError =>
+      'This photo could not be processed. Choose the original, another photo, or cancel.';
+
+  @override
+  String photoDimensions(int width, int height) {
+    return '$width × $height px';
+  }
+
+  @override
+  String photoCompressionResult(
+    int width,
+    int height,
+    String mb,
+    String quality,
+  ) {
+    return 'Compressed: $width × $height px · $mb MB · Quality $quality';
+  }
+
+  @override
+  String get appSettings => 'Settings';
+
+  @override
+  String get photoSaveSettings => 'Photo saving';
+
+  @override
+  String get photoAlwaysCompress => 'Always default to compression';
+
+  @override
+  String get photoDefaultHelp =>
+      'When off, prefer originals and use the default compression preset if they do not fit. You can change each photo during import.';
+
+  @override
+  String get photoDefaultPreset => 'Default compression preset';
+
+  @override
+  String get photoRemoveGps => 'Remove location when compressing';
+
+  @override
+  String get photoGpsRemovalHelp =>
+      'Remove GPS from compressed files only. Capture coordinates remain in the database for place suggestions. A larger result is kept to preserve this choice, subject to the entry quota.';
+
+  @override
+  String get photoSettingsScope =>
+      'These settings affect future imports only. Existing attachments stay intact. Original mode preserves all original data, including location.';
+
+  @override
+  String get photoSettingsError =>
+      'Could not load or save photo settings. Please retry.';
+
+  @override
+  String get photoSettingsRetry => 'Retry';
+
+  @override
+  String get photoGpsRemovalNotice =>
+      'GPS will be removed from compressed files; original mode retains location.';
+
+  @override
+  String attachmentFileProgress(
+    String name,
+    int done,
+    int total,
+    int remaining,
+  ) {
+    return 'Processing: $name\nProcessed $done / $total; $remaining remaining';
+  }
+
+  @override
+  String get photoPreviewUnavailable =>
+      'Photo preview is unavailable. You can still save the attachment or cancel.';
 }
